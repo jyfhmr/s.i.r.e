@@ -1,0 +1,4 @@
+export const ExceptionCodes = {
+  TOKEN_EXPIRED: "TOKEN_EXPIRED",
+  USER_DEACTIVATED: "USER_DEACTIVATED",
+};
