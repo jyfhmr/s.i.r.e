@@ -5,6 +5,7 @@
 
 import { authFetch } from "./auth";
 import { PUBLIC_SEARCH_ROUTES } from "@shared/core/public/search/routes";
+import { CONTACT_ROUTES } from "@shared/core/public/contact/routes";
 import { ACCESS_REQUEST_ROUTES } from "@shared/core/auth/access-requests/routes";
 import { PATIENT_ROUTES } from "@shared/core/medical/patients/routes";
 import { ALERT_ROUTES } from "@shared/core/citizen/alerts/routes";
@@ -28,6 +29,7 @@ import type {
   ICreateAlertDto,
   IWatchListItem,
 } from "@shared/core/citizen/alerts/interfaces";
+import type { ICreateContactDto } from "@shared/core/public/contact/interfaces";
 import type {
   IMedicalCenter,
   ICreateMedicalCenterDto,
@@ -169,6 +171,43 @@ export async function createMedicalAccessRequest(
     throw {
       message:
         "No se pudo enviar la solicitud. Por favor verifica tu conexión a internet.",
+      statusCode: 0,
+    } as ApiError;
+  }
+}
+
+// ==================== CONTACTO (PÚBLICO) ====================
+
+/**
+ * Envía un mensaje desde el formulario de contacto
+ * Endpoint: POST /api/contact
+ * @param dto - Nombre, correo y mensaje del usuario
+ * @throws {ApiError} Si hay error de red o validación
+ */
+export async function sendContactMessage(
+  dto: ICreateContactDto,
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const url = `${API_BASE_URL}/${CONTACT_ROUTES.BASE}`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dto),
+    });
+
+    return handleResponse<{ success: boolean; message: string }>(response);
+  } catch (error) {
+    // Si es un ApiError, lo propagamos
+    if ((error as ApiError).message) {
+      throw error;
+    }
+
+    // Error de red u otro error desconocido
+    throw {
+      message:
+        "No se pudo enviar tu mensaje. Por favor verifica tu conexión a internet.",
       statusCode: 0,
     } as ApiError;
   }

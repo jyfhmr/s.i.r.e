@@ -21,12 +21,19 @@ export interface MedicalAccessApprovedEmailContext {
   medicalCenter: string;
 }
 
+export interface ContactEmailContext {
+  name: string;
+  email: string;
+  message: string;
+}
+
 // 2. Creamos una Unión Discriminada.
 // Esto ata un nombre de plantilla específico con su contexto específico.
 export type EmailTemplatePayload =
   | { template: 'patient-alert'; context: PatientAlertEmailContext }
   | { template: 'password-reset'; context: PasswordResetEmailContext }
   | { template: 'medical-access-approved'; context: MedicalAccessApprovedEmailContext }
+  | { template: 'contact'; context: ContactEmailContext }
   | { template?: never; context?: never };
 
 // 3. El DTO principal ahora es la intersección de la base y el payload de la plantilla

@@ -5,12 +5,14 @@ import { IEmailService, SendEmailDto } from './interfaces';
 import PatientAlertEmail from './templates/PatientAlertEmail';
 import PasswordResetEmail from './templates/PasswordResetEmail';
 import MedicalAccessApprovedEmail from './templates/MedicalAccessApprovedEmail';
+import ContactEmail from './templates/ContactEmail';
 
 // Diccionario de Plantillas (Patrón Strategy)
 const TemplateRegistry: Record<string, (context: any) => Promise<string>> = {
   'patient-alert': (ctx) => render(PatientAlertEmail(ctx)),
   'password-reset': (ctx) => render(PasswordResetEmail(ctx)),
   'medical-access-approved': (ctx) => render(MedicalAccessApprovedEmail(ctx)),
+  contact: (ctx) => render(ContactEmail(ctx)),
 };
 
 @Injectable()
@@ -33,7 +35,7 @@ export class ResendEmailService implements IEmailService {
       }
 
       const { error } = await this.resend.emails.send({
-        from: 'Acme <onboarding@resend.dev>', // Recuerda cambiarlo en prod
+        from: process.env.RESEND_FROM_EMAIL || 'Acme <onboarding@resend.dev>',
         to: data.to,
         subject: data.subject,
         html: finalHtml,

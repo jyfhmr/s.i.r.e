@@ -11,6 +11,7 @@ import { ProfilesModule } from './modules/config/profiles/profiles.module';
 import { MedicalCentersModule } from './modules/config/medical-centers/medical-centers.module';
 import { PatientsModule } from './modules/medical/patients/patients.module';
 import { SearchModule } from './modules/public/search/search.module';
+import { ContactModule } from './modules/public/contact/contact.module';
 import { AlertsModule } from './modules/citizen/alerts/alerts.module';
 import { AccessRequestsModule } from './modules/auth/access-requests/access-requests.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -41,6 +42,9 @@ import * as Joi from 'joi';
 
         // Credenciales Resend
         RESEND_API_KEY: Joi.string().required(),
+        RESEND_FROM_EMAIL: Joi.string().default('Acme <onboarding@resend.dev>'),
+        // Correo donde se reciben los mensajes del formulario de contacto
+        CONTACT_EMAIL: Joi.string().email().optional().allow(''),
 
         // Secret de Autenticación
         JWT_SECRET: Joi.string().required(),
@@ -67,6 +71,7 @@ import * as Joi from 'joi';
     MedicalCentersModule,
     PatientsModule,
     SearchModule,
+    ContactModule,
     AlertsModule,
     AccessRequestsModule,
     SocketModule,

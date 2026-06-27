@@ -66,6 +66,10 @@ import Layout from '../layouts/Layout.astro';
         <div id="success-alert" class="hidden bg-success-light border border-success-border text-success-text rounded-xl p-4 text-sm font-semibold animate-fade-in" role="alert">
           ✓ ¡Gracias! Tu mensaje ha sido enviado correctamente. Responderemos a la brevedad.
         </div>
+
+        <div id="error-alert" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm font-semibold animate-fade-in" role="alert">
+          <span id="error-message">Ocurrió un error al enviar tu mensaje. Inténtalo de nuevo.</span>
+        </div>
       </section>
     </div>
 
@@ -83,19 +87,61 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
-  const form = document.getElementById('contact-form') as HTMLFormElement;
-  const alert = document.getElementById('success-alert');
-  if (form && alert) {
-    form.addEventListener('submit', (e) => {
+  import { sendContactMessage, type ApiError } from '../lib/api';
+
+  const form = document.getElementById('contact-form') as HTMLFormElement | null;
+  const successAlert = document.getElementById('success-alert');
+  const errorAlert = document.getElementById('error-alert');
+  const errorMessage = document.getElementById('error-message');
+  const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+
+  const nameInput = document.getElementById('name') as HTMLInputElement | null;
+  const emailInput = document.getElementById('email') as HTMLInputElement | null;
+  const messageInput = document.getElementById('message') as HTMLTextAreaElement | null;
+
+  const DEFAULT_BTN_TEXT = submitBtn?.textContent ?? 'Enviar Solicitud';
+
+  if (form && submitBtn) {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      // Mostrar alerta de éxito
-      alert.classList.remove('hidden');
-      form.reset();
-      
-      // Ocultar la alerta tras unos segundos
-      setTimeout(() => {
-        alert.classList.add('hidden');
-      }, 5000);
+
+      // Ocultar alertas previas
+      successAlert?.classList.add('hidden');
+      errorAlert?.classList.add('hidden');
+
+      const payload = {
+        name: nameInput?.value.trim() ?? '',
+        email: emailInput?.value.trim() ?? '',
+        message: messageInput?.value.trim() ?? '',
+      };
+
+      // Estado de carga
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+      submitBtn.textContent = 'Enviando…';
+
+      try {
+        await sendContactMessage(payload);
+
+        successAlert?.classList.remove('hidden');
+        form.reset();
+
+        setTimeout(() => {
+          successAlert?.classList.add('hidden');
+        }, 6000);
+      } catch (err) {
+        const apiError = err as ApiError;
+        if (errorMessage) {
+          errorMessage.textContent =
+            apiError?.message ||
+            'Ocurrió un error al enviar tu mensaje. Inténtalo de nuevo.';
+        }
+        errorAlert?.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+        submitBtn.textContent = DEFAULT_BTN_TEXT;
+      }
     });
   }
 </script>
