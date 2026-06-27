@@ -1,0 +1,60 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="404 Página No Encontrada - S.I.R.E.">
+  <div class="max-w-md mx-auto my-12 md:my-20 text-center space-y-8 animate-fade-in font-sans">
+    
+    <!-- Ilustración visual del error 404 cívico y suave -->
+    <div class="space-y-3">
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-vzla-blue/5 text-vzla-blue border-2 border-vzla-blue/15 animate-pulse text-3xl">
+        🔍
+      </div>
+      <h1 class="font-display font-bold text-6xl md:text-7xl text-text-dark/20 tracking-tighter m-0">404</h1>
+      <h2 class="font-display font-bold text-xl md:text-2xl text-text-dark tracking-tight mt-1">Ruta No Localizada</h2>
+    </div>
+
+    <!-- Mensaje explicativo y de asistencia cívica -->
+    <div class="space-y-4 px-4">
+      <p class="text-sm md:text-base text-text-dark/65 leading-relaxed max-w-sm mx-auto">
+        La página que intentas consultar no existe o fue reubicada temporalmente como parte del plan de contingencia y seguridad del sistema.
+      </p>
+      <p class="text-xs text-text-dark/50">
+        Si eres familiar, puedes regresar a la pantalla principal para buscar a tu pariente por su cédula de identidad.
+      </p>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="flex flex-col gap-3 max-w-xs mx-auto pt-2">
+      <a 
+        href="/" 
+        class="w-full h-11 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-lg flex items-center justify-center no-underline transition-colors shadow-xs hover:shadow"
+      >
+        Volver a la Página de Búsqueda
+      </a>
+      <a 
+        href="/contact" 
+        class="w-full h-11 bg-white hover:bg-bg-light border border-border-subtle hover:border-text-dark/20 text-text-dark font-display font-semibold text-sm rounded-lg flex items-center justify-center no-underline transition-all shadow-3xs"
+      >
+        Contactar Asistencia / Soporte
+      </a>
+    </div>
+
+  </div>
+</Layout>
+
+<style>
+  .animate-fade-in {
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

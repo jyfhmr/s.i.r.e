@@ -1,0 +1,175 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Iniciar Sesión - S.I.R.E.">
+  <div class="max-w-md mx-auto my-8 md:my-16 space-y-6 animate-fade-in font-sans">
+    <div class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
+      
+      <!-- Título -->
+      <div class="text-center space-y-1">
+        <h1 class="font-display font-bold text-2xl md:text-3xl text-text-dark">Iniciar Sesión</h1>
+        <p class="text-xs md:text-sm text-text-dark/60">
+          Ingresa tus credenciales para acceder a la plataforma.
+        </p>
+      </div>
+
+      <!-- Formulario de Acceso Unificado -->
+      <form id="form-user-login" class="space-y-4">
+        <div class="space-y-1.5">
+          <label for="login-email" class="block text-sm font-semibold text-text-dark/70">Correo electrónico</label>
+          <input 
+            type="email" 
+            id="login-email" 
+            required 
+            class="w-full h-11 px-3 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+            placeholder="correo@ejemplo.com"
+          />
+        </div>
+
+        <div class="space-y-1.5">
+          <label for="login-password" class="block text-sm font-semibold text-text-dark/70">Contraseña</label>
+          <input 
+            type="password" 
+            id="login-password" 
+            required 
+            class="w-full h-11 px-3 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+            placeholder="••••••••"
+          />
+        </div>
+
+        <!-- Alerta de Error -->
+        <div id="login-error" class="hidden bg-error-light border border-error-border text-error-text text-xs font-semibold rounded-lg p-3" role="alert">
+          ⚠️ Credenciales incorrectas o usuario no registrado.
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full h-11 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-lg cursor-pointer transition-colors shadow-xs"
+        >
+          Ingresar al Sistema
+        </button>
+      </form>
+
+      <!-- Divisor visual -->
+      <div class="flex items-center gap-3 text-xs text-text-dark/30 py-1">
+        <span class="flex-grow border-t border-border-subtle"></span>
+        <span class="shrink-0 font-semibold uppercase">O</span>
+        <span class="flex-grow border-t border-border-subtle"></span>
+      </div>
+
+      <!-- Botón de Inicio de Sesión con Google (better-auth mockup) -->
+      <button 
+        id="btn-google-login"
+        type="button"
+        class="w-full h-11 bg-white hover:bg-bg-light border border-border-subtle hover:border-text-dark/20 text-text-dark font-display font-semibold text-sm rounded-lg cursor-pointer transition-all flex items-center justify-center gap-2.5 shadow-3xs"
+      >
+        <!-- Icono oficial de Google -->
+        <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        <span>Continuar con Google</span>
+      </button>
+
+      <!-- Alerta informativa de better-auth -->
+      <div id="google-auth-info" class="hidden bg-info-light border border-info-border text-info-text text-3xs rounded-xl p-3 leading-normal animate-fade-in" role="alert">
+        💡 <strong>Demostración de better-auth:</strong> En producción, este botón iniciará el flujo de autenticación federada con Google OAuth y sincronizará la cuenta en la base de datos SQL.
+      </div>
+    </div>
+
+    <!-- Enlace de registro rápido -->
+    <div class="text-center text-xs md:text-sm text-text-dark/60">
+      ¿No tienes una cuenta de alertas? 
+      <a href="/register" class="text-vzla-blue hover:underline font-semibold ml-1">Regístrate aquí</a>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  if (typeof window !== 'undefined') {
+    const loginForm = document.getElementById('form-user-login') as HTMLFormElement;
+    const loginError = document.getElementById('login-error');
+    const googleBtn = document.getElementById('btn-google-login');
+    const googleInfo = document.getElementById('google-auth-info');
+
+    // Alerta de Google
+    if (googleBtn && googleInfo) {
+      googleBtn.addEventListener('click', () => {
+        googleInfo.classList.remove('hidden');
+        setTimeout(() => {
+          googleInfo.classList.add('hidden');
+        }, 6000);
+      });
+    }
+
+    // Procesar Inicio de Sesión Secundario / Unificado
+    if (loginForm && loginError) {
+      loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const email = (document.getElementById('login-email') as HTMLInputElement).value.trim().toLowerCase();
+        const password = (document.getElementById('login-password') as HTMLInputElement).value;
+
+        // 1. Intentar validar como Administrador del sistema
+        if (email === 'admin@sire.org' && password === 'SireControl2026!') {
+          sessionStorage.setItem('sire_admin_logged_in', 'true');
+          sessionStorage.setItem('sire_medic_name', 'Administrador');
+          loginError.classList.add('hidden');
+          window.location.href = '/sire-admin-portal';
+          return;
+        }
+
+        // 2. Intentar validar como Familiar en localStorage
+        const familiarUsers = JSON.parse(localStorage.getItem('sire_familiar_users') || '[]');
+        const user = familiarUsers.find((u: any) => u.email.toLowerCase() === email && u.password === password);
+
+        if (user) {
+          sessionStorage.setItem('sire_user_logged_in', 'true');
+          sessionStorage.setItem('sire_user_name', user.name);
+          loginError.classList.add('hidden');
+          window.location.href = '/';
+          return;
+        }
+
+        // 3. Intentar validar como Personal Médico en localStorage (o los por defecto)
+        const medicalUsers = JSON.parse(localStorage.getItem('sire_medical_users') || '[]');
+        const defaultMedics = [
+          { name: 'Dra. Gabriela Rivas', email: 'gabriela.rivas@huc.org', hospital: 'Hospital Univ. de Caracas (HUC)', credentials: 'MPPS-94821' },
+          { name: 'Dr. Alejandro Marín', email: 'a.marin@centralmaracay.gob.ve', hospital: 'Hospital Central de Maracay', credentials: 'MPPS-82910' }
+        ];
+        const activeMedics = medicalUsers.length > 0 ? medicalUsers : defaultMedics;
+        const medic = activeMedics.find((m: any) => m.email.toLowerCase() === email && m.credentials === password);
+
+        if (medic) {
+          sessionStorage.setItem('sire_medic_logged_in', 'true');
+          sessionStorage.setItem('sire_medic_name', medic.name);
+          loginError.classList.add('hidden');
+          window.location.href = '/sire-admin-portal';
+          return;
+        }
+
+        // Si ninguno coincide, arrojar error
+        loginError.classList.remove('hidden');
+      });
+    }
+  }
+</script>
+
+<style>
+  .animate-fade-in {
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

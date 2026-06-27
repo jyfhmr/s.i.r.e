@@ -1,0 +1,146 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	title?: string;
+}
+
+const { title = "S.I.R.E. - Sistema de Información y Registro de Emergencias" } = Astro.props;
+const pathname = Astro.url.pathname;
+const isBuscarActive = pathname === '/' || pathname === '/index.html';
+const isInfoActive = pathname.startsWith('/info');
+const isContactoActive = pathname.startsWith('/contact');
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		
+		<!-- Optimización de carga de fuentes de Google Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link 
+			href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" 
+			rel="stylesheet" 
+		/>
+		
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body class="text-text-dark flex flex-col min-h-screen selection:bg-vzla-blue/10 selection:text-vzla-blue">
+		<!-- Cabecera simple y accesible -->
+		<header class="border-b border-border-subtle bg-white/70 backdrop-blur-md sticky top-0 z-50">
+			<div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+				<!-- Logo de solo texto -->
+				<a href="/" class="flex items-center gap-2 group no-underline text-inherit">
+					<span class="font-display font-bold text-xl md:text-2xl tracking-tight text-vzla-blue hover:text-vzla-blue-hover transition-colors">
+						S.I.R.E.
+					</span>
+				</a>
+				
+				<!-- Navegación depurada -->
+				<nav class="h-16 flex items-center gap-4 md:gap-6 font-display font-semibold text-sm md:text-base">
+					<a 
+						href="/" 
+						class={`h-16 flex items-center text-text-dark/70 hover:text-vzla-blue border-b-2 no-underline transition-all ${isBuscarActive ? 'border-vzla-blue text-vzla-blue' : 'border-transparent hover:border-vzla-blue/30'}`}
+					>
+						Buscar
+					</a>
+					<a 
+						href="/info" 
+						class={`h-16 flex items-center text-text-dark/70 hover:text-vzla-blue border-b-2 no-underline transition-all ${isInfoActive ? 'border-vzla-blue text-vzla-blue' : 'border-transparent hover:border-vzla-blue/30'}`}
+					>
+						Información
+					</a>
+					<a 
+						href="/contact" 
+						class={`h-16 flex items-center text-text-dark/70 hover:text-vzla-blue border-b-2 no-underline transition-all ${isContactoActive ? 'border-vzla-blue text-vzla-blue' : 'border-transparent hover:border-vzla-blue/30'}`}
+					>
+						Contacto
+					</a>
+					
+					<!-- Enlaces públicos de sesión (se ocultan si está logueado) -->
+					<a href="/login" id="nav-login-link" class="px-4 py-2 border border-vzla-blue/20 hover:border-vzla-blue/40 text-vzla-blue bg-vzla-blue/5 hover:bg-vzla-blue/10 rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs">
+						Iniciar Sesión
+					</a>
+					<a href="/register" id="nav-register-btn" class="px-4 py-2 bg-vzla-blue hover:bg-vzla-blue-hover text-white rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs">
+						Registrarse
+					</a>
+
+					<!-- Contenedor dinámico para usuario logueado -->
+					<div id="nav-user-container" class="hidden flex items-center gap-3 md:gap-4 font-sans text-xs md:text-sm">
+						<span id="nav-user-greeting" class="text-text-dark/80 font-bold"></span>
+						<button 
+							id="nav-logout-btn" 
+							class="text-xs text-rose-600 hover:underline cursor-pointer border border-rose-600/20 bg-rose-600/5 px-2.5 py-1 rounded-lg font-semibold"
+						>
+							Salir
+						</button>
+					</div>
+				</nav>
+			</div>
+		</header>
+
+		<!-- Contenido principal -->
+		<main class="flex-grow max-w-4xl w-full mx-auto px-4 py-8 md:py-12">
+			<slot />
+		</main>
+
+		<!-- Pie de página con información de crisis -->
+		<footer class="border-t border-border-subtle bg-white/40 py-8 text-sm text-text-dark/60">
+			<div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+				<div>
+					<p class="font-semibold text-vzla-blue m-0">S.I.R.E. (Sistema de Triage)</p>
+					<p class="text-xs mt-1 m-0">Inspirado en iniciativas ciudadanas de apoyo humanitario en Venezuela.</p>
+				</div>
+				<div class="text-xs text-right">
+					<p class="m-0">Emergencia nacional: <strong>911 / 171</strong></p>
+					<p class="mt-1 m-0">Plataforma abierta de localización.</p>
+				</div>
+			</div>
+		</footer>
+
+		<!-- Script de control dinámico del Menú Público -->
+		<script>
+			if (typeof window !== 'undefined') {
+				const loginLink = document.getElementById('nav-login-link');
+				const registerBtn = document.getElementById('nav-register-btn');
+				const userContainer = document.getElementById('nav-user-container');
+				const userGreeting = document.getElementById('nav-user-greeting');
+				const logoutBtn = document.getElementById('nav-logout-btn');
+
+				const userLogged = sessionStorage.getItem('sire_user_logged_in') === 'true';
+				const medicLogged = sessionStorage.getItem('sire_medic_logged_in') === 'true';
+				const userName = sessionStorage.getItem('sire_user_name') || sessionStorage.getItem('sire_medic_name');
+
+				if ((userLogged || medicLogged) && userName) {
+					// Ocultar botones de acceso
+					if (loginLink) loginLink.classList.add('hidden');
+					if (registerBtn) registerBtn.classList.add('hidden');
+					
+					// Mostrar saludo y botón de logout
+					if (userContainer && userGreeting) {
+						userGreeting.innerText = `Hola, ${userName}`;
+						userContainer.classList.remove('hidden');
+					}
+				}
+
+				if (logoutBtn) {
+					logoutBtn.addEventListener('click', () => {
+						// Limpiar toda la sesión
+						sessionStorage.removeItem('sire_user_logged_in');
+						sessionStorage.removeItem('sire_user_name');
+						sessionStorage.removeItem('sire_medic_logged_in');
+						sessionStorage.removeItem('sire_medic_name');
+						window.location.href = '/';
+					});
+				}
+			}
+		</script>
+	</body>
+</html>
+
