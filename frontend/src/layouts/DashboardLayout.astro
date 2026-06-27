@@ -162,7 +162,7 @@ const { title = "Dashboard - S.I.R.E." } = Astro.props;
 
 		<!-- Guard de cliente + Menú dinámico -->
 		<script>
-			import { requireAuth, getMenu, logout, canAccessRoute, getFirstRoute, type MenuItem } from '../lib/auth';
+			import { requireAuth, getMenu, logout, canAccessRoute, getFirstRoute, normalizePath, type MenuItem } from '../lib/auth';
 
 			// ==================== GUARD DE CLIENTE ====================
 			// Se ejecuta ANTES de renderizar contenido
@@ -170,6 +170,40 @@ const { title = "Dashboard - S.I.R.E." } = Astro.props;
 
 			// ==================== OBTENER MENÚ DINÁMICO ====================
 			let userMenu: MenuItem[] = [];
+
+			// Redirige de forma segura: evita el bucle infinito de no
+			// navegar si el destino normalizado es la página actual.
+			// (En producción el hosting puede agregar "/" final y provocar
+			// que current y destino "parezcan" distintos.)
+			function safeRedirect(targetRoute: string, currentPath: string): boolean {
+				if (normalizePath(targetRoute) === normalizePath(currentPath)) {
+					// Ya estamos donde queríamos ir → no redirigir (rompe el bucle)
+					return false;
+				}
+				window.location.replace(targetRoute);
+				return true;
+			}
+
+			// Muestra un estado de error en el sidebar SIN cerrar sesión,
+			// con opción de reintentar. Evita expulsar al usuario a /login
+			// por un fallo transitorio de red al pedir el menú.
+			function showMenuError() {
+				const errorHTML = `
+					<div class="px-3 py-6 text-center space-y-3">
+						<p class="text-sm text-text-dark/70 font-display font-semibold">No se pudo cargar el menú.</p>
+						<button id="retry-menu-btn" class="h-9 px-4 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-xs rounded-lg transition-all">
+							Reintentar
+						</button>
+					</div>
+				`;
+				const navDesktop = document.getElementById('sidebar-nav');
+				const navMobile = document.getElementById('mobile-sidebar-nav');
+				if (navDesktop) navDesktop.innerHTML = errorHTML;
+				if (navMobile) navMobile.innerHTML = errorHTML;
+				document.querySelectorAll('#retry-menu-btn').forEach((btn) => {
+					btn.addEventListener('click', () => loadMenu());
+				});
+			}
 
 			async function loadMenu() {
 				try {
@@ -180,14 +214,15 @@ const { title = "Dashboard - S.I.R.E." } = Astro.props;
 					console.log('🎯 Menú obtenido del backend:', userMenu);
 					console.log('📊 Perfil ID:', session.profileId);
 
-					// Validar si el usuario puede acceder a la ruta actual
-					const currentPath = window.location.pathname;
+					// Validar si el usuario puede acceder a la ruta actual.
+					// Normalizamos para que "/x" y "/x/" se traten igual y así
+					// evitar bucles de redirección por la barra final en producción.
+					const currentPath = normalizePath(window.location.pathname);
 					
 					// Si estamos en /dashboard (raíz), redirigir a la primera ruta válida
-					if (currentPath === '/dashboard' || currentPath === '/dashboard/') {
+					if (currentPath === '/dashboard') {
 						const firstRoute = getFirstRoute(userMenu);
-						if (firstRoute) {
-							window.location.replace(firstRoute);
+						if (firstRoute && safeRedirect(firstRoute, currentPath)) {
 							return;
 						}
 					}
@@ -200,21 +235,26 @@ const { title = "Dashboard - S.I.R.E." } = Astro.props;
 
 						// No tiene acceso a esta ruta → redirigir a su primera ruta válida
 						const firstRoute = getFirstRoute(userMenu);
-						if (firstRoute) {
+						if (firstRoute && normalizePath(firstRoute) !== currentPath) {
 							window.location.replace(firstRoute);
 							return;
-						} else {
+						} else if (!firstRoute) {
 							// No tiene ninguna ruta válida → logout
 							logout();
 							return;
 						}
+						// Si firstRoute === currentPath (ya estamos en la ruta destino),
+						// no redirigimos: continuamos y renderizamos el menú (rompe el bucle).
 					}
 
 					// Renderizar menú en sidebar
 					renderMenu(userMenu);
 				} catch (error) {
+					// Error transitorio (red/servidor) al pedir el menú:
+					// NO cerramos sesión automáticamente para no expulsar al
+					// usuario a /login. Mostramos un estado con "Reintentar".
 					console.error('Error al cargar el menú:', error);
-					logout(); // Si falla, cerrar sesión
+					showMenuError();
 				}
 			}
 

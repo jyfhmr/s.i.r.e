@@ -252,6 +252,25 @@ export function requireAuth(): AuthSession {
 }
 
 /**
+ * Normaliza una ruta para compararla de forma consistente.
+ * Elimina la barra final (excepto en la raíz "/") y query/hash, para que
+ * "/dashboard/medical/patients" y "/dashboard/medical/patients/"
+ * se traten como la MISMA ruta.
+ *
+ * Esto evita bucles de redirección en producción, donde el hosting
+ * suele agregar una barra final que no coincide con las rutas
+ * guardadas en la base de datos (sin barra).
+ */
+export function normalizePath(path: string): string {
+  if (!path) return path;
+  const clean = path.split("?")[0].split("#")[0];
+  if (clean.length > 1 && clean.endsWith("/")) {
+    return clean.replace(/\/+$/, "");
+  }
+  return clean;
+}
+
+/**
  * Extrae todas las rutas permitidas del menú (planas)
  * Para validar si el usuario tiene acceso a cierta ruta
  */
@@ -259,10 +278,10 @@ export function getAllowedRoutes(menu: MenuItem[]): Set<string> {
   const routes = new Set<string>();
 
   menu.forEach((item) => {
-    if (item.route) routes.add(item.route);
+    if (item.route) routes.add(normalizePath(item.route));
     if (item.children) {
       item.children.forEach((child) => {
-        if (child.route) routes.add(child.route);
+        if (child.route) routes.add(normalizePath(child.route));
       });
     }
   });
@@ -276,7 +295,7 @@ export function getAllowedRoutes(menu: MenuItem[]): Set<string> {
  */
 export function canAccessRoute(menu: MenuItem[], targetRoute: string): boolean {
   const allowedRoutes = getAllowedRoutes(menu);
-  return allowedRoutes.has(targetRoute);
+  return allowedRoutes.has(normalizePath(targetRoute));
 }
 
 /**
