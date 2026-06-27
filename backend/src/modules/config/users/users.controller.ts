@@ -30,7 +30,6 @@ import { UserListService } from './services/user-list.service';
 import { UserFindByUsernameService } from './services/user-find-by-username.service';
 import { UserFindByEmailService } from './services/user-find-by-email.service';
 import { USER_ROUTES } from '@shared/core/config/user/routes';
-import { UserExportService } from './services/user-export.service';
 import { RequirePage } from '@/decorators/require-page.decorator';
 import { PermissionsGuard } from '@/guards/permissions.guard';
 import { Public } from '@/decorators/isPublic.decorator';
@@ -48,16 +47,7 @@ export class UsersController {
     private readonly findOneService: UserFindOneService,
     private readonly listService: UserListService,
     private readonly findByEmailService: UserFindByEmailService,
-    private readonly exportService: UserExportService,
   ) {}
-
-  @RequirePage(SUB_PAGES.USERS) // <-- Actualizado
-  @Get(USER_ROUTES.EXPORT)
-  async exportData(@Query() query: any, @Res() res: Response): Promise<void> {
-    query.export = true;
-    const { data } = await this.findAllService.execute(query);
-    await this.exportService.execute(data, res);
-  }
 
   @RequirePage(SUB_PAGES.USERS) // <-- Actualizado
   @HttpCode(200)

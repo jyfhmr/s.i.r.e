@@ -17,7 +17,6 @@ import { UserFindOneService } from './services/user-find-one.service';
 import { UserListService } from './services/user-list.service';
 import { UserFindByUsernameService } from './services/user-find-by-username.service';
 import { UserFindByEmailService } from './services/user-find-by-email.service';
-import { UserExportService } from './services/user-export.service';
 
 @Global()
 @Module({
@@ -38,7 +37,6 @@ import { UserExportService } from './services/user-export.service';
     UserListService,
     UserFindByUsernameService,
     UserFindByEmailService,
-    UserExportService,
   ],
   exports: [
     UserFindByUsernameService,

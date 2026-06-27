@@ -22,7 +22,6 @@ import { ProfileChangeStatusUseCase } from './use-cases/profile-change-status.us
 import { ProfileFindAllService } from './services/profile-find-all.service';
 import { ProfileFindOneService } from './services/profile-find-one.service';
 import { ProfileGetAssignableService } from './services/profile-get-assignable.service';
-import { ProfileExportHelper } from './helpers/profile-export.helper';
 import { PROFILE_ROUTES } from '@shared/core/config/profiles/routes';
 import { ProfileListService } from './services/profile-list.service';
 import { RequirePage } from '@/decorators/require-page.decorator';
@@ -43,18 +42,8 @@ export class ProfilesController {
     private readonly findOneService: ProfileFindOneService,
     private readonly listService: ProfileListService,
     private readonly getAssignableService: ProfileGetAssignableService,
-    private readonly exportHelper: ProfileExportHelper,
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // <-- Inyectamos el caché
   ) {}
-
-  @Public()
-  @Get(PROFILE_ROUTES.EXPORT)
-  @RequirePage(SUB_PAGES.PROFILES)
-  async exportData(@Query() query: any, @Res() res: Response): Promise<void> {
-    query.export = 1;
-    const data = await this.findAllService.execute(query);
-    await this.exportHelper.execute(data.data, res);
-  }
 
   @Post(PROFILE_ROUTES.CREATE)
   @RequirePage(SUB_PAGES.PROFILES)

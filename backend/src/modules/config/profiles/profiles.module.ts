@@ -18,9 +18,6 @@ import { ProfileFindOneService } from './services/profile-find-one.service';
 import { ProfileListService } from './services/profile-list.service';
 import { ProfileGetAssignableService } from './services/profile-get-assignable.service';
 
-// Helpers
-import { ProfileExportHelper } from './helpers/profile-export.helper';
-
 @Module({
   imports: [TypeOrmModule.forFeature([Profile, ProfilePages]), UsersModule],
   controllers: [ProfilesController],
@@ -35,8 +32,6 @@ import { ProfileExportHelper } from './helpers/profile-export.helper';
     ProfileFindOneService,
     ProfileListService,
     ProfileGetAssignableService,
-    // Helpers
-    ProfileExportHelper,
   ],
   exports: [
     ProfileFindOneService, // Por si otros módulos necesitan consultar perfiles
