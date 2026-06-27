@@ -43,44 +43,61 @@ const isContactoActive = pathname.startsWith('/contact');
 				</a>
 				
 				<!-- Navegación depurada -->
-				<nav class="h-16 flex items-center gap-4 md:gap-6 font-display font-semibold text-sm md:text-base">
-					<a 
-						href="/" 
-						class={`h-16 flex items-center text-text-dark/70 hover:text-vzla-blue border-b-2 no-underline transition-all ${isBuscarActive ? 'border-vzla-blue text-vzla-blue' : 'border-transparent hover:border-vzla-blue/30'}`}
-					>
-						Buscar
-					</a>
-					<a 
-						href="/info" 
-						class={`h-16 flex items-center text-text-dark/70 hover:text-vzla-blue border-b-2 no-underline transition-all ${isInfoActive ? 'border-vzla-blue text-vzla-blue' : 'border-transparent hover:border-vzla-blue/30'}`}
-					>
-						Información
-					</a>
-					<a 
-						href="/contact" 
-						class={`h-16 flex items-center text-text-dark/70 hover:text-vzla-blue border-b-2 no-underline transition-all ${isContactoActive ? 'border-vzla-blue text-vzla-blue' : 'border-transparent hover:border-vzla-blue/30'}`}
-					>
-						Contacto
-					</a>
+				<nav class="h-16 flex items-center gap-2 sm:gap-3 md:gap-6 font-display font-semibold text-sm md:text-base">
+					<!-- Links de página (se colapsan en móvil para no desbordar) -->
+					<div class="hidden md:flex items-center gap-4 md:gap-6 h-16">
+						<a 
+							href="/" 
+							class={`h-16 flex items-center text-text-dark/70 hover:text-vzla-blue border-b-2 no-underline transition-all ${isBuscarActive ? 'border-vzla-blue text-vzla-blue' : 'border-transparent hover:border-vzla-blue/30'}`}
+						>
+							Buscar
+						</a>
+						<a 
+							href="/info" 
+							class={`h-16 flex items-center text-text-dark/70 hover:text-vzla-blue border-b-2 no-underline transition-all ${isInfoActive ? 'border-vzla-blue text-vzla-blue' : 'border-transparent hover:border-vzla-blue/30'}`}
+						>
+							Información
+						</a>
+						<a 
+							href="/contact" 
+							class={`h-16 flex items-center text-text-dark/70 hover:text-vzla-blue border-b-2 no-underline transition-all ${isContactoActive ? 'border-vzla-blue text-vzla-blue' : 'border-transparent hover:border-vzla-blue/30'}`}
+						>
+							Contacto
+						</a>
+					</div>
 					
 					<!-- Enlaces públicos de sesión (se ocultan si está logueado) -->
-					<a href="/login" id="nav-login-link" class="px-4 py-2 border border-vzla-blue/20 hover:border-vzla-blue/40 text-vzla-blue bg-vzla-blue/5 hover:bg-vzla-blue/10 rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs">
+					<a href="/login" id="nav-login-link" class="px-3 sm:px-4 py-2 border border-vzla-blue/20 hover:border-vzla-blue/40 text-vzla-blue bg-vzla-blue/5 hover:bg-vzla-blue/10 rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs whitespace-nowrap">
 						Iniciar Sesión
 					</a>
-					<a href="/register" id="nav-register-btn" class="px-4 py-2 bg-vzla-blue hover:bg-vzla-blue-hover text-white rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs">
+					<a href="/register" id="nav-register-btn" class="px-3 sm:px-4 py-2 bg-vzla-blue hover:bg-vzla-blue-hover text-white rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs whitespace-nowrap">
 						Registrarse
 					</a>
 
+
 					<!-- Contenedor dinámico para usuario logueado -->
-					<div id="nav-user-container" class="hidden flex items-center gap-3 md:gap-4 font-sans text-xs md:text-sm">
-						<span id="nav-user-greeting" class="text-text-dark/80 font-bold"></span>
+					<div id="nav-user-container" class="hidden flex items-center gap-2 sm:gap-3 md:gap-4 font-sans text-xs md:text-sm">
+						<span id="nav-user-greeting" class="hidden sm:inline text-text-dark/80 font-bold"></span>
+						<a 
+							href="/dashboard" 
+							class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-vzla-blue hover:bg-vzla-blue-hover text-white rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs whitespace-nowrap"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<rect x="3" y="3" width="7" height="7"></rect>
+								<rect x="14" y="3" width="7" height="7"></rect>
+								<rect x="14" y="14" width="7" height="7"></rect>
+								<rect x="3" y="14" width="7" height="7"></rect>
+							</svg>
+							Ir a mi Panel
+						</a>
 						<button 
 							id="nav-logout-btn" 
-							class="text-xs text-rose-600 hover:underline cursor-pointer border border-rose-600/20 bg-rose-600/5 px-2.5 py-1 rounded-lg font-semibold"
+							class="text-xs text-rose-600 hover:underline cursor-pointer border border-rose-600/20 bg-rose-600/5 px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap"
 						>
 							Salir
 						</button>
 					</div>
+
 				</nav>
 			</div>
 		</header>

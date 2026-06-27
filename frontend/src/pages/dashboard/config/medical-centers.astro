@@ -307,7 +307,15 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 		editingId = null;
 		(document.getElementById('form-error') as HTMLElement).classList.add('hidden');
 		(document.getElementById('form-success') as HTMLElement).classList.add('hidden');
+
+		// Restaurar el botón de submit a su estado original
+		const submitBtn = document.getElementById('modal-submit') as HTMLButtonElement;
+		if (submitBtn) {
+			submitBtn.disabled = false;
+			submitBtn.textContent = 'Guardar Centro';
+		}
 	}
+
 
 	btnNewCenter.addEventListener('click', () => openModal());
 	modalClose.addEventListener('click', closeModal);

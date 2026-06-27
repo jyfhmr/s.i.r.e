@@ -20,7 +20,7 @@ import { ROLES } from '@shared/common';
 
 @Controller(ALERT_ROUTES.BASE)
 @UseGuards(RolesGuard)
-@Roles(ROLES.USUARIO_COMUN, ROLES.MEDICO) // Ciudadanos y médicos pueden configurar alertas
+@Roles(ROLES.USUARIO_COMUN, ROLES.MEDICO, ROLES.DIOS) // Ciudadanos, médicos y DIOS pueden configurar alertas
 export class AlertsController {
   constructor(
     private readonly createUseCase: AlertCreateUseCase,

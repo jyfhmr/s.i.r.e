@@ -10,6 +10,7 @@ const API_BASE_URL =
 const STORAGE_KEYS = {
   TOKEN: "sire_auth_token",
   PROFILE_ID: "sire_profile_id",
+  PROFILE_NAME: "sire_profile_name",
   USER_NAME: "sire_user_name",
   USER_ID: "sire_user_id",
 } as const;
@@ -21,6 +22,7 @@ export interface LoginResponse {
   name: string;
   username: string;
   profileId: number;
+  profileName?: string;
   userId: number;
 }
 
@@ -45,6 +47,7 @@ export interface MenuItem {
 export interface AuthSession {
   token: string;
   profileId: number;
+  profileName: string;
   name: string;
   userId: number;
 }
@@ -55,6 +58,7 @@ export function saveSession(data: LoginResponse): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEYS.TOKEN, data.access_token);
   localStorage.setItem(STORAGE_KEYS.PROFILE_ID, String(data.profileId));
+  localStorage.setItem(STORAGE_KEYS.PROFILE_NAME, data.profileName || "");
   localStorage.setItem(STORAGE_KEYS.USER_NAME, data.name);
   localStorage.setItem(STORAGE_KEYS.USER_ID, String(data.userId));
 }
@@ -64,6 +68,7 @@ export function getSession(): AuthSession | null {
 
   const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
   const profileId = localStorage.getItem(STORAGE_KEYS.PROFILE_ID);
+  const profileName = localStorage.getItem(STORAGE_KEYS.PROFILE_NAME);
   const name = localStorage.getItem(STORAGE_KEYS.USER_NAME);
   const userId = localStorage.getItem(STORAGE_KEYS.USER_ID);
 
@@ -72,6 +77,7 @@ export function getSession(): AuthSession | null {
   return {
     token,
     profileId: parseInt(profileId, 10),
+    profileName: profileName || "",
     name,
     userId: parseInt(userId, 10),
   };
@@ -81,6 +87,7 @@ export function clearSession(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(STORAGE_KEYS.TOKEN);
   localStorage.removeItem(STORAGE_KEYS.PROFILE_ID);
+  localStorage.removeItem(STORAGE_KEYS.PROFILE_NAME);
   localStorage.removeItem(STORAGE_KEYS.USER_NAME);
   localStorage.removeItem(STORAGE_KEYS.USER_ID);
 
@@ -166,7 +173,18 @@ export async function authFetch<T>(
     };
   }
 
-  return response.json();
+  // Manejo de respuestas vacías (204 No Content, o body vacío en 200)
+  // Evita el error: "Failed to execute 'json' on 'Response': Unexpected end of JSON input"
+  if (response.status === 204) {
+    return null as unknown as T;
+  }
+
+  const text = await response.text();
+  if (!text) {
+    return null as unknown as T;
+  }
+
+  return JSON.parse(text) as T;
 }
 
 // ==================== LOGIN ====================

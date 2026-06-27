@@ -25,6 +25,14 @@ export default class UserSeeder implements Seeder {
       description: 'Personal de salud',
     });
 
+    const ciudadanoProfile = await profileRepository.save({
+      name: 'USUARIO COMÚN',
+      description: 'Ciudadano que vigila cédulas mediante alertas',
+    });
+
+    // ===== Un usuario de cada tipo para pruebas (contraseña: 123456) =====
+
+    // 1) DIOS (super administrador)
     await userRepository.insert({
       name: 'José Hernández',
       email: 'jyfhmr@gmail.com',
@@ -34,6 +42,7 @@ export default class UserSeeder implements Seeder {
       dni: '29555543',
     });
 
+    // 2) MÉDICO (personal de salud)
     await userRepository.insert({
       name: 'Usuario Personal',
       email: 'doctor@sire.com',
@@ -41,6 +50,16 @@ export default class UserSeeder implements Seeder {
       profile: medicoProfile,
       fullName: 'Gregory House',
       dni: '11111111',
+    });
+
+    // 3) USUARIO COMÚN (ciudadano)
+    await userRepository.insert({
+      name: 'Ciudadano Prueba',
+      email: 'ciudadano@sire.com',
+      password: hashedPassword,
+      profile: ciudadanoProfile,
+      fullName: 'María Pérez',
+      dni: '22222222',
     });
   }
 }

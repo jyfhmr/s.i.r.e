@@ -63,7 +63,7 @@ export default function MedicalAccessApprovedEmail({
             asignada.
           </Text>
 
-          <Button href="${process.env.URL_FRONTEND}/login" style={button}>
+          <Button href={`${process.env.URL_FRONTEND}/login`} style={button}>
             Iniciar Sesión
           </Button>
 

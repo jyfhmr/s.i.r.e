@@ -52,17 +52,21 @@ const { title = "Dashboard - S.I.R.E." } = Astro.props;
 
 			<!-- Footer del sidebar -->
 			<div class="border-t border-border-subtle p-4">
-				<div class="flex items-center gap-3">
+				<a href="/dashboard/profile" class="flex items-center gap-3 rounded-xl p-2 -m-2 hover:bg-bg-light transition-colors no-underline group">
 					<div class="w-10 h-10 rounded-full bg-vzla-blue/10 flex items-center justify-center text-vzla-blue font-display font-bold text-sm">
 						<span id="sidebar-user-initial">U</span>
 					</div>
 					<div class="flex-1 min-w-0">
 						<p id="sidebar-user-name" class="font-display font-semibold text-sm text-text-dark truncate">Usuario</p>
-						<p class="text-xs text-text-dark/50">Panel de Control</p>
+						<p id="sidebar-user-role" class="text-xs text-text-dark/50 truncate group-hover:text-vzla-blue transition-colors">Panel de Control</p>
 					</div>
-				</div>
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-text-dark/30 group-hover:text-vzla-blue transition-colors shrink-0">
+						<polyline points="9 18 15 12 9 6"></polyline>
+					</svg>
+				</a>
 			</div>
 		</aside>
+
 
 		<!-- Contenido principal -->
 		<div class="flex-1 flex flex-col min-w-0 lg:ml-64">
@@ -138,17 +142,21 @@ const { title = "Dashboard - S.I.R.E." } = Astro.props;
 
 				<!-- Footer del sidebar -->
 				<div class="border-t border-border-subtle p-4">
-					<div class="flex items-center gap-3">
+					<a href="/dashboard/profile" class="flex items-center gap-3 rounded-xl p-2 -m-2 hover:bg-bg-light transition-colors no-underline group">
 						<div class="w-10 h-10 rounded-full bg-vzla-blue/10 flex items-center justify-center text-vzla-blue font-display font-bold text-sm">
 							<span id="mobile-user-initial">U</span>
 						</div>
 						<div class="flex-1 min-w-0">
 							<p id="mobile-user-name" class="font-display font-semibold text-sm text-text-dark truncate">Usuario</p>
-							<p class="text-xs text-text-dark/50">Panel de Control</p>
+							<p id="mobile-user-role" class="text-xs text-text-dark/50 truncate group-hover:text-vzla-blue transition-colors">Panel de Control</p>
 						</div>
-					</div>
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-text-dark/30 group-hover:text-vzla-blue transition-colors shrink-0">
+							<polyline points="9 18 15 12 9 6"></polyline>
+						</svg>
+					</a>
 				</div>
 			</aside>
+
 		</div>
 		</div> <!-- Cierre del flex container principal -->
 
@@ -184,8 +192,12 @@ const { title = "Dashboard - S.I.R.E." } = Astro.props;
 						}
 					}
 
+					// Rutas siempre accesibles (no provienen del menú dinámico del backend)
+					const ALWAYS_ALLOWED = ['/dashboard/profile'];
+
 					// Si estamos en una ruta específica, verificar acceso
-					if (!canAccessRoute(userMenu, currentPath)) {
+					if (!ALWAYS_ALLOWED.includes(currentPath) && !canAccessRoute(userMenu, currentPath)) {
+
 						// No tiene acceso a esta ruta → redirigir a su primera ruta válida
 						const firstRoute = getFirstRoute(userMenu);
 						if (firstRoute) {
@@ -214,9 +226,28 @@ const { title = "Dashboard - S.I.R.E." } = Astro.props;
 				if (!navDesktop || !navMobile) return;
 
 				const currentPath = window.location.pathname;
-				let menuHTML = '';
+
+				// Enlace ESTÁTICO al Buscador Público (siempre visible, además del menú del backend)
+				const isSearchActive = currentPath === '/';
+				let menuHTML = `
+					<a 
+						href="/"
+						class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-display font-semibold transition-all mb-3 no-underline ${
+							isSearchActive
+								? 'bg-vzla-blue text-white'
+								: 'text-text-dark/70 hover:bg-bg-light hover:text-vzla-blue'
+						}"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+							<circle cx="11" cy="11" r="8"></circle>
+							<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+						</svg>
+						Buscador Público
+					</a>
+				`;
 
 				menu.forEach(item => {
+
 					const isActive = currentPath.startsWith(item.route || '');
 					
 					if (item.children && item.children.length > 0) {
@@ -276,18 +307,24 @@ const { title = "Dashboard - S.I.R.E." } = Astro.props;
 			function updateUserInfo() {
 				const userName = session.name;
 				const userInitial = userName.charAt(0).toUpperCase();
+				const profileName = session.profileName || 'Panel de Control';
 
 				// Desktop sidebar
 				const sidebarUserName = document.getElementById('sidebar-user-name');
 				const sidebarUserInitial = document.getElementById('sidebar-user-initial');
+				const sidebarUserRole = document.getElementById('sidebar-user-role');
 				if (sidebarUserName) sidebarUserName.textContent = userName;
 				if (sidebarUserInitial) sidebarUserInitial.textContent = userInitial;
+				if (sidebarUserRole) sidebarUserRole.textContent = profileName;
 
 				// Mobile sidebar
 				const mobileUserName = document.getElementById('mobile-user-name');
 				const mobileUserInitial = document.getElementById('mobile-user-initial');
+				const mobileUserRole = document.getElementById('mobile-user-role');
 				if (mobileUserName) mobileUserName.textContent = userName;
 				if (mobileUserInitial) mobileUserInitial.textContent = userInitial;
+				if (mobileUserRole) mobileUserRole.textContent = profileName;
+
 
 				// Header
 				const headerUserName = document.getElementById('header-user-name');

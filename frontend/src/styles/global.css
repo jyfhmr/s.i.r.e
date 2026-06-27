@@ -4,20 +4,22 @@
   /* Paleta Azul Empático y Solidario */
   --color-bg-light: #f8fafc;
   --color-text-dark: #0f172a;
-  
+
   /* Escala de Azul de Solidaridad */
-  --color-vzla-blue: #0284c7;       /* Azul cielo / Cerulean - proyecta tranquilidad y empatía */
+  --color-vzla-blue: #0284c7; /* Azul cielo / Cerulean - proyecta tranquilidad y empatía */
   --color-vzla-blue-hover: #0369a1; /* Azul más profundo para interacciones */
   --color-vzla-blue-light: #f0f9ff; /* Celeste de fondo de tarjetas */
-  --color-vzla-blue-border: #bae6fd;/* Borde celeste */
-  
+  --color-vzla-blue-border: #bae6fd; /* Borde celeste */
+
   /* Colores de soporte */
   --color-border-subtle: #e2e8f0;
-  
+
   --color-success-light: #f0fdf4;
   --color-success-text: #166534;
   --color-success-border: #bbf7d0;
-  
+  --color-success-bg: #16a34a; /* Verde sólido para botones de acción (aprobar) */
+  --color-success-bg-hover: #15803d; /* Verde más profundo para hover */
+
   --color-alert-light: #fffbeb;
   --color-alert-text: #92400e;
   --color-alert-border: #fde68a;
@@ -32,7 +34,9 @@
 
   /* Tipografías */
   --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
-  --font-sans: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans:
+    "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
 }
 
 @layer base {

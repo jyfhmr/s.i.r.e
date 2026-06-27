@@ -14,12 +14,24 @@ export class MedicalCenterSearchService {
 
   async execute(query: string): Promise<MedicalCenter[]> {
     try {
+      const term = (query || '').trim();
+
+      // Sin término de búsqueda: devolver los 10 centros más recientes
+      if (!term) {
+        return await this.repository.find({
+          where: { isActive: true },
+          order: { createdAt: 'DESC' },
+          take: 10,
+          select: ['id', 'name', 'state', 'municipality'],
+        });
+      }
+
       // Búsqueda liviana para autocomplete - máximo 10 resultados
       return await this.repository.find({
         where: [
-          { name: ILike(`%${query}%`), isActive: true },
-          { state: ILike(`%${query}%`), isActive: true },
-          { municipality: ILike(`%${query}%`), isActive: true },
+          { name: ILike(`%${term}%`), isActive: true },
+          { state: ILike(`%${term}%`), isActive: true },
+          { municipality: ILike(`%${term}%`), isActive: true },
         ],
         order: { name: 'ASC' },
         take: 10,

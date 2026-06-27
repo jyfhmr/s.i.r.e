@@ -116,15 +116,25 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 					<label for="patient-dni" class="block text-sm font-display font-bold text-text-dark">
 						Cédula de Identidad <span class="text-error-text">*</span>
 					</label>
-					<input 
-						type="text"
-						id="patient-dni"
-						required
-						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
-						placeholder="Ej: 12345678"
-					/>
-					<p class="text-xs text-text-dark/50">Solo números, sin puntos ni guiones</p>
+					<div class="flex gap-2">
+						<input 
+							type="text"
+							id="patient-dni"
+							required
+							class="flex-1 h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+							placeholder="Ej: 12345678"
+						/>
+						<button 
+							type="button"
+							id="btn-lookup-dni"
+							class="h-11 px-4 border border-vzla-blue/30 text-vzla-blue bg-vzla-blue/5 hover:bg-vzla-blue/10 rounded-lg font-display font-semibold text-sm transition-colors whitespace-nowrap"
+						>
+							Buscar
+						</button>
+					</div>
+					<p id="dni-lookup-hint" class="text-xs text-text-dark/50">Ingresa la cédula y pulsa "Buscar" para autocompletar los datos si ya existe.</p>
 				</div>
+
 
 				<!-- Nombre Completo -->
 				<div class="space-y-2">
@@ -158,26 +168,50 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 					</select>
 				</div>
 
-				<!-- Centro Médico (autocomplete) -->
+				<!-- Centro de Salud: combobox con búsqueda (ILike) o escritura manual -->
 				<div class="space-y-2">
 					<label for="medical-center-search" class="block text-sm font-display font-bold text-text-dark">
 						Centro de Salud
 					</label>
-					<div class="relative">
+
+					<!-- Combobox: input de búsqueda + dropdown de resultados -->
+					<div id="medical-center-combobox" class="relative">
 						<input 
 							type="text"
 							id="medical-center-search"
 							autocomplete="off"
 							class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
-							placeholder="Escribe para buscar o escribir manualmente..."
+							placeholder="Escribe el nombre del centro de salud..."
 						/>
-						<div id="medical-center-dropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-border-subtle rounded-lg shadow-lg max-h-48 overflow-y-auto z-10"></div>
+						<ul 
+							id="medical-center-dropdown"
+							class="hidden absolute z-20 mt-1 w-full max-h-60 overflow-y-auto bg-white border border-border-subtle rounded-lg shadow-lg text-sm"
+						></ul>
 					</div>
-					<p class="text-xs text-text-dark/50">Selecciona del catálogo o escribe manualmente</p>
+
+					<!-- Centro seleccionado del catálogo -->
+					<div id="medical-center-selected" class="hidden items-center justify-between gap-2 bg-vzla-blue/5 border border-vzla-blue/20 rounded-lg px-3 py-2.5">
+						<span id="medical-center-selected-name" class="text-sm font-display font-semibold text-text-dark"></span>
+						<button type="button" id="medical-center-clear" class="text-xs text-vzla-blue hover:underline font-display font-semibold whitespace-nowrap">
+							Cambiar
+						</button>
+					</div>
+
+					<!-- Input de escritura manual -->
+					<input 
+						type="text"
+						id="medical-center-manual"
+						autocomplete="off"
+						class="hidden w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+						placeholder="Escribe el nombre del centro o ubicación..."
+					/>
+					<p class="text-xs text-text-dark/50">Escribe para buscar en el catálogo o elige "Escribir manualmente".</p>
 				</div>
 
-				<!-- Manual Location (se muestra si no selecciona del catálogo) -->
+				<!-- ID del centro seleccionado (oculto) -->
 				<input type="hidden" id="selected-center-id" value="" />
+
+
 
 				<!-- Mensajes -->
 				<div id="form-error" class="hidden bg-error-light border border-error-border text-error-text text-sm rounded-lg p-3"></div>
@@ -207,6 +241,8 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 
 <script>
 	import { findAllPatients, searchPatientByDniMedical, upsertPatient, searchMedicalCenters } from '../../../lib/api';
+
+
 	import { getStatusConfig } from '../../../lib/patient-status';
 	import type { IPatient, IUpsertPatientDto } from '@shared/core/medical/patients/interfaces';
 	import type { PatientStatus } from '@shared/common';
@@ -399,21 +435,31 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 			(document.getElementById('patient-name') as HTMLInputElement).value = patient.fullName;
 			(document.getElementById('patient-status') as HTMLSelectElement).value = patient.currentStatus;
 			
-			if (patient.currentMedicalCenter) {
-				(document.getElementById('selected-center-id') as HTMLInputElement).value = String(patient.currentMedicalCenter.id);
-				(document.getElementById('medical-center-search') as HTMLInputElement).value = patient.currentMedicalCenter.name;
-			} else if (patient.manualLocation) {
-				(document.getElementById('medical-center-search') as HTMLInputElement).value = patient.manualLocation;
-			}
+			setCenterValue(
+				patient.currentMedicalCenter?.id,
+				patient.currentMedicalCenter?.name,
+				patient.manualLocation,
+			);
+			setDniHint('Editando un paciente existente.', 'muted');
 		} else {
 			modalTitle.textContent = 'Registrar Nuevo Paciente';
 			patientForm.reset();
 			(document.getElementById('patient-dni') as HTMLInputElement).readOnly = false;
 			(document.getElementById('selected-center-id') as HTMLInputElement).value = '';
+			setCenterValue();
+			setDniHint('Ingresa la cédula y pulsa "Buscar" para autocompletar los datos si ya existe.', 'muted');
 		}
+
+		// Asegurar que el botón de guardar siempre arranque en su estado por defecto
+		const submitBtn = document.getElementById('modal-submit') as HTMLButtonElement;
+		submitBtn.disabled = false;
+		submitBtn.textContent = 'Guardar Paciente';
+		(document.getElementById('form-error') as HTMLElement).classList.add('hidden');
+		(document.getElementById('form-success') as HTMLElement).classList.add('hidden');
 
 		modal.classList.remove('hidden');
 	}
+
 
 	function closeModal() {
 		modal.classList.add('hidden');
@@ -426,54 +472,235 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 	modalClose.addEventListener('click', closeModal);
 	modalCancel.addEventListener('click', closeModal);
 
-	// Autocomplete de centros médicos
+	// ==================== CENTRO DE SALUD (combobox con búsqueda ILike o manual) ====================
 	const centerSearch = document.getElementById('medical-center-search') as HTMLInputElement;
-	const centerDropdown = document.getElementById('medical-center-dropdown') as HTMLElement;
+	const centerDropdown = document.getElementById('medical-center-dropdown') as HTMLUListElement;
+	const centerCombobox = document.getElementById('medical-center-combobox') as HTMLElement;
+	const centerSelected = document.getElementById('medical-center-selected') as HTMLElement;
+	const centerSelectedName = document.getElementById('medical-center-selected-name') as HTMLElement;
+	const centerClearBtn = document.getElementById('medical-center-clear') as HTMLButtonElement;
+	const centerManual = document.getElementById('medical-center-manual') as HTMLInputElement;
 	const selectedCenterId = document.getElementById('selected-center-id') as HTMLInputElement;
+	const MANUAL_OPTION = '__manual__';
 
-	centerSearch.addEventListener('input', () => {
-		clearTimeout(searchTimeout);
-		const query = centerSearch.value.trim();
+	let centerSearchTimeout: number;
 
-		if (query.length < 2) {
-			centerDropdown.classList.add('hidden');
-			return;
-		}
+	// Escapa texto para inyectarlo de forma segura en HTML/atributos
+	function escapeHtml(value: string): string {
+		return (value || '')
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	}
 
-		searchTimeout = window.setTimeout(async () => {
-			try {
-				const centers = await searchMedicalCenters(query);
-				if (centers.length > 0) {
-					centerDropdown.innerHTML = centers.map(c => 
-						`<button type="button" class="center-option w-full text-left px-4 py-2.5 hover:bg-bg-light transition-colors text-sm" data-id="${c.id}" data-name="${c.name}">
-							<span class="font-display font-semibold text-text-dark">${c.name}</span>
-							<span class="text-xs text-text-dark/50 block">${c.state}${c.municipality ? ', ' + c.municipality : ''}</span>
-						</button>`
-					).join('');
+	// Renderiza el dropdown: "Escribir manualmente" como PRIMERA opción + resultados
+	function renderCenterDropdown(centers: IMedicalCenter[]) {
+		const manualItem = `
+			<li>
+				<button type="button" data-center-id="${MANUAL_OPTION}" class="center-option w-full text-left px-4 py-2.5 hover:bg-bg-light transition-colors font-display font-semibold text-vzla-blue border-b border-border-subtle">
+					✏️ Escribir manualmente...
+				</button>
+			</li>
+		`;
 
-					document.querySelectorAll('.center-option').forEach(btn => {
-						btn.addEventListener('click', () => {
-							const id = btn.getAttribute('data-id');
-							const name = btn.getAttribute('data-name');
-							if (id && name) {
-								selectedCenterId.value = id;
-								centerSearch.value = name;
-								centerDropdown.classList.add('hidden');
-							}
-						});
-					});
+		const items = centers
+			.map((c) => {
+				const sub = [c.state, c.municipality].filter(Boolean).join(', ');
+				return `
+				<li>
+					<button type="button" data-center-id="${c.id}" data-center-name="${escapeHtml(c.name)}" class="center-option w-full text-left px-4 py-2.5 hover:bg-bg-light transition-colors">
+						<span class="block font-display font-semibold text-text-dark">${escapeHtml(c.name)}</span>
+						${sub ? `<span class="block text-xs text-text-dark/50">${escapeHtml(sub)}</span>` : ''}
+					</button>
+				</li>
+			`;
+			})
+			.join('');
 
-					centerDropdown.classList.remove('hidden');
-				} else {
-					centerDropdown.classList.add('hidden');
+		const emptyMsg =
+			centers.length === 0
+				? '<li class="px-4 py-2.5 text-text-dark/50">Sin coincidencias en el catálogo.</li>'
+				: '';
+
+		centerDropdown.innerHTML = manualItem + items + emptyMsg;
+		centerDropdown.classList.remove('hidden');
+
+		centerDropdown.querySelectorAll('.center-option').forEach((btn) => {
+			btn.addEventListener('click', (e) => {
+				const el = e.currentTarget as HTMLElement;
+				const id = el.getAttribute('data-center-id');
+				if (id === MANUAL_OPTION) {
+					selectManualEntry();
+				} else if (id) {
+					selectCenter(parseInt(id), el.getAttribute('data-center-name') || '');
 				}
-			} catch (error) {
-				console.error('Error al buscar centros:', error);
-			}
+			});
+		});
+	}
+
+	// Busca centros (con término, o los últimos 10 si está vacío) y abre el dropdown
+	async function fetchCenters(query: string) {
+		try {
+			const centers = await searchMedicalCenters(query);
+			renderCenterDropdown(centers);
+		} catch (error) {
+			console.error('Error al buscar centros:', error);
+			renderCenterDropdown([]);
+		}
+	}
+
+	// Selecciona un centro del catálogo
+	function selectCenter(id: number, name: string) {
+		selectedCenterId.value = String(id);
+		centerSelectedName.textContent = name || 'Centro seleccionado';
+		centerSelected.classList.remove('hidden');
+		centerSelected.classList.add('flex');
+		centerDropdown.classList.add('hidden');
+		centerSearch.classList.add('hidden');
+		centerSearch.value = '';
+		centerManual.classList.add('hidden');
+		centerManual.value = '';
+	}
+
+	// Activa la escritura manual del centro/ubicación
+	function selectManualEntry() {
+		selectedCenterId.value = '';
+		centerDropdown.classList.add('hidden');
+		centerSearch.classList.add('hidden');
+		centerSelected.classList.add('hidden');
+		centerSelected.classList.remove('flex');
+		centerManual.classList.remove('hidden');
+		centerManual.value = centerSearch.value.trim();
+		centerManual.focus();
+	}
+
+	// Resetea el combobox para volver a buscar/elegir
+	function resetCenterPicker() {
+		selectedCenterId.value = '';
+		centerSelected.classList.add('hidden');
+		centerSelected.classList.remove('flex');
+		centerManual.classList.add('hidden');
+		centerManual.value = '';
+		centerSearch.classList.remove('hidden');
+		centerSearch.value = '';
+		centerDropdown.classList.add('hidden');
+		centerDropdown.innerHTML = '';
+	}
+
+	// Búsqueda con debouncing (evita saturar el backend)
+	centerSearch.addEventListener('input', () => {
+		clearTimeout(centerSearchTimeout);
+		const value = centerSearch.value.trim();
+		centerSearchTimeout = window.setTimeout(() => {
+			fetchCenters(value);
 		}, 300);
 	});
 
+	// Al enfocar, mostrar de entrada los últimos 10 centros (o la búsqueda actual)
+	centerSearch.addEventListener('focus', () => {
+		fetchCenters(centerSearch.value.trim());
+	});
+
+	// Botón "Cambiar" del centro seleccionado
+	centerClearBtn.addEventListener('click', () => {
+		resetCenterPicker();
+		centerSearch.focus();
+		fetchCenters('');
+	});
+
+	// Cerrar el dropdown al hacer click fuera del combobox
+	document.addEventListener('click', (e) => {
+		if (centerCombobox && !centerCombobox.contains(e.target as Node)) {
+			centerDropdown.classList.add('hidden');
+		}
+	});
+
+	// Establecer el valor del centro al abrir el modal (catálogo o manual)
+	function setCenterValue(centerId?: number, centerName?: string, manualLocation?: string) {
+		if (centerId) {
+			selectCenter(centerId, centerName || 'Centro seleccionado');
+		} else if (manualLocation) {
+			selectedCenterId.value = '';
+			centerSelected.classList.add('hidden');
+			centerSelected.classList.remove('flex');
+			centerSearch.classList.add('hidden');
+			centerDropdown.classList.add('hidden');
+			centerManual.classList.remove('hidden');
+			centerManual.value = manualLocation;
+		} else {
+			resetCenterPicker();
+		}
+	}
+
+	// Construye la parte del DTO correspondiente al centro de salud
+	function getCenterDto(): { medicalCenterId?: number; manualLocation?: string } {
+		if (selectedCenterId.value) {
+			return { medicalCenterId: parseInt(selectedCenterId.value) };
+		}
+		// Modo manual: el input manual está visible y con texto
+		if (!centerManual.classList.contains('hidden') && centerManual.value.trim()) {
+			return { manualLocation: centerManual.value.trim() };
+		}
+		return {};
+	}
+
+
+	// ==================== AUTOCOMPLETAR POR CÉDULA ====================
+	const dniInput = document.getElementById('patient-dni') as HTMLInputElement;
+	const btnLookupDni = document.getElementById('btn-lookup-dni') as HTMLButtonElement;
+	const dniHint = document.getElementById('dni-lookup-hint') as HTMLElement;
+
+	function setDniHint(message: string, type: 'muted' | 'success' | 'error') {
+		if (!dniHint) return;
+		dniHint.textContent = message;
+		dniHint.className =
+			'text-xs ' +
+			(type === 'success'
+				? 'text-success-text'
+				: type === 'error'
+					? 'text-error-text'
+					: 'text-text-dark/50');
+	}
+
+	async function lookupDni() {
+		const dni = dniInput.value.trim();
+		if (!dni) {
+			setDniHint('Ingresa una cédula para buscar.', 'error');
+			return;
+		}
+		setDniHint('Buscando cédula...', 'muted');
+		try {
+			const patient = await searchPatientByDniMedical(dni);
+			if (patient) {
+				// Ya existe: autocompletar nombres y datos
+				(document.getElementById('patient-name') as HTMLInputElement).value = patient.fullName;
+				(document.getElementById('patient-status') as HTMLSelectElement).value = patient.currentStatus;
+				setCenterValue(
+					patient.currentMedicalCenter?.id,
+					patient.currentMedicalCenter?.name,
+					patient.manualLocation,
+				);
+				modalTitle.textContent = 'Actualizar Paciente';
+				setDniHint('Paciente encontrado: datos autocompletados. Puedes actualizarlos.', 'success');
+			} else {
+				// No existe: el médico debe escribir el nombre manualmente
+				setDniHint('Sin registro previo. Escribe el nombre completo manualmente.', 'muted');
+				(document.getElementById('patient-name') as HTMLInputElement).focus();
+			}
+		} catch (error: any) {
+			setDniHint(error?.message || 'No se pudo buscar la cédula.', 'error');
+		}
+	}
+
+	btnLookupDni.addEventListener('click', lookupDni);
+	dniInput.addEventListener('blur', () => {
+		if (dniInput.value.trim() && !dniInput.readOnly) lookupDni();
+	});
+
 	// Submit del formulario
+
 	patientForm.addEventListener('submit', async (e) => {
 		e.preventDefault();
 
@@ -487,15 +714,13 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 		const dni = (document.getElementById('patient-dni') as HTMLInputElement).value.trim();
 		const fullName = (document.getElementById('patient-name') as HTMLInputElement).value.trim();
 		const status = (document.getElementById('patient-status') as HTMLSelectElement).value as PatientStatus;
-		const centerIdStr = selectedCenterId.value;
-		const manualLocation = centerSearch.value.trim();
-
 		const dto: IUpsertPatientDto = {
 			dni,
 			fullName,
 			status,
-			...(centerIdStr ? { medicalCenterId: parseInt(centerIdStr) } : { manualLocation }),
+			...getCenterDto(),
 		};
+
 
 		try {
 			submitBtn.disabled = true;
@@ -507,10 +732,14 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 			formSuccess.classList.remove('hidden');
 
 			setTimeout(() => {
+				// Restaurar el botón a su estado por defecto tras el guardado exitoso
+				submitBtn.disabled = false;
+				submitBtn.textContent = 'Guardar Paciente';
 				closeModal();
 				loadPatients(); // Recargar lista
 				searchResult.classList.add('hidden'); // Ocultar resultado de búsqueda
 			}, 1500);
+
 		} catch (error: any) {
 			formError.textContent = error.message || 'Error al guardar el paciente';
 			formError.classList.remove('hidden');

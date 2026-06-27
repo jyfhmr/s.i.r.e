@@ -108,10 +108,11 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 					<button 
 						type="submit"
 						id="approve-submit"
-						class="flex-1 h-11 bg-success-bg hover:bg-success-border text-white font-display font-bold text-sm rounded-lg transition-all"
+						class="flex-1 h-11 bg-success-bg hover:bg-success-bg-hover text-white font-display font-bold text-sm rounded-lg transition-all"
 					>
 						Aprobar Acceso
 					</button>
+
 				</div>
 			</form>
 		</div>
@@ -217,11 +218,12 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 						${request.status === AccessRequestStatus.PENDING ? `
 							<div class="flex gap-2 pt-2">
 								<button 
-									class="btn-approve h-9 px-4 bg-success-bg hover:bg-success-border text-white rounded-lg text-sm font-display font-semibold transition-colors"
+									class="btn-approve h-9 px-4 bg-success-bg hover:bg-success-bg-hover text-white rounded-lg text-sm font-display font-semibold transition-colors"
 									data-request='${JSON.stringify(request)}'
 								>
 									✓ Aprobar
 								</button>
+
 								<button 
 									class="btn-reject h-9 px-4 border border-error-border text-error-text hover:bg-error-light rounded-lg text-sm font-display font-semibold transition-colors"
 									data-id="${request.id}"
@@ -309,7 +311,15 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 		approveForm.reset();
 		(document.getElementById('approve-error') as HTMLElement).classList.add('hidden');
 		(document.getElementById('approve-success') as HTMLElement).classList.add('hidden');
+
+		// Restaurar el botón de submit a su estado original
+		const submitBtn = document.getElementById('approve-submit') as HTMLButtonElement;
+		if (submitBtn) {
+			submitBtn.disabled = false;
+			submitBtn.textContent = 'Aprobar Acceso';
+		}
 	}
+
 
 	approveCancel.addEventListener('click', closeApproveModal);
 

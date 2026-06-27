@@ -12,6 +12,7 @@ import { HelpersService } from '@/helpers/helpers.service';
 import { RegisterCitizenUseCase } from './use-cases/register-citizen.use-case';
 import { PasswordRequestResetUseCase } from './use-cases/password-request-reset.use-case';
 import { PasswordResetUseCase } from './use-cases/password-reset.use-case';
+import { PasswordChangeUseCase } from './use-cases/password-change.use-case';
 import { Profile } from '@/modules/config/profiles/entities/profile.entity';
 
 @Module({
@@ -33,8 +34,10 @@ import { Profile } from '@/modules/config/profiles/entities/profile.entity';
     RegisterCitizenUseCase,
     PasswordRequestResetUseCase,
     PasswordResetUseCase,
+    PasswordChangeUseCase,
     {
       provide: APP_GUARD,
+
       useClass: AuthGuard,
     },
   ],

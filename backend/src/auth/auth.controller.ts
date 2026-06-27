@@ -19,6 +19,7 @@ import { RegisterCitizenUseCase } from './use-cases/register-citizen.use-case';
 import { RequestResetDto, ResetPasswordDto } from './dto/password-reset.dto';
 import { PasswordRequestResetUseCase } from './use-cases/password-request-reset.use-case';
 import { PasswordResetUseCase } from './use-cases/password-reset.use-case';
+import { PasswordChangeUseCase } from './use-cases/password-change.use-case';
 
 @Controller('auth')
 export class AuthController {
@@ -27,6 +28,7 @@ export class AuthController {
     private registerCitizenUseCase: RegisterCitizenUseCase,
     private passwordRequestResetUseCase: PasswordRequestResetUseCase,
     private passwordResetUseCase: PasswordResetUseCase,
+    private passwordChangeUseCase: PasswordChangeUseCase,
   ) {}
 
   @Public()
@@ -71,5 +73,13 @@ export class AuthController {
   @Post('password/reset')
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.passwordResetUseCase.execute(dto.userId, dto.token, dto.password);
+  }
+
+  // Cambio de contraseña para usuario autenticado (requiere JWT)
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('password/change')
+  changePassword(@Body() dto: Record<string, any>, @Request() req: any) {
+    return this.passwordChangeUseCase.execute(req.user.sub, dto.currentPassword, dto.newPassword);
   }
 }

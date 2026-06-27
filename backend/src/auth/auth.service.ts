@@ -20,6 +20,7 @@ export class AuthService {
     name: string;
     username: string;
     profileId: number;
+    profileName: string;
     userId: number;
   }> {
     console.log('Iniciando sesión...', username, pass);
@@ -55,6 +56,7 @@ export class AuthService {
       name: user.name,
       username: user.email,
       profileId: user.profile.id,
+      profileName: perfil.name,
       userId: user.id,
     };
   }

@@ -32,8 +32,10 @@ export const PERMISSIONS_BY_ROLE: Record<
       SUB_PAGES.USERS,
       SUB_PAGES.PROFILES,
       SUB_PAGES.PAGES,
+      SUB_PAGES.MY_ALERTS, // DIOS también puede probar el módulo de Alertas
     ],
   },
+
   [ROLES.MEDICO]: {
     isGodMode: false,
     pages: [SUB_PAGES.PATIENTS, SUB_PAGES.MY_ALERTS], // Solo gestiona pacientes

@@ -1,0 +1,162 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Mi Perfil - S.I.R.E.">
+	<div class="max-w-2xl mx-auto">
+		<!-- Encabezado -->
+		<div class="mb-8">
+			<h1 class="font-display font-bold text-2xl md:text-3xl text-text-dark">Mi Perfil</h1>
+			<p class="text-text-dark/60 mt-1">Consulta tu información y gestiona tu seguridad.</p>
+		</div>
+
+		<!-- Tarjeta de información del usuario -->
+		<div class="bg-white border border-border-subtle rounded-2xl p-6 mb-6 shadow-3xs">
+			<div class="flex items-center gap-4">
+				<div class="w-16 h-16 rounded-full bg-vzla-blue/10 flex items-center justify-center text-vzla-blue font-display font-bold text-2xl">
+					<span id="profile-initial">U</span>
+				</div>
+				<div class="min-w-0">
+					<p id="profile-name" class="font-display font-bold text-lg text-text-dark truncate">Usuario</p>
+					<span id="profile-role" class="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-vzla-blue/10 text-vzla-blue text-xs font-display font-semibold">
+						Perfil
+					</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Cambiar contraseña -->
+		<div class="bg-white border border-border-subtle rounded-2xl p-6 shadow-3xs">
+			<div class="flex items-center gap-2 mb-1">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-vzla-blue">
+					<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+					<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+				</svg>
+				<h2 class="font-display font-bold text-lg text-text-dark">Cambiar Contraseña</h2>
+			</div>
+			<p class="text-text-dark/60 text-sm mb-5">Por tu seguridad, necesitas tu contraseña actual.</p>
+
+			<!-- Mensajes -->
+			<div id="pwd-alert" class="hidden mb-4 px-4 py-3 rounded-xl text-sm font-medium"></div>
+
+			<form id="change-password-form" class="space-y-4">
+				<div>
+					<label for="currentPassword" class="block text-sm font-display font-semibold text-text-dark mb-1.5">Contraseña actual</label>
+					<input
+						type="password"
+						id="currentPassword"
+						name="currentPassword"
+						required
+						autocomplete="current-password"
+						class="w-full px-4 py-2.5 rounded-xl border border-border-subtle focus:border-vzla-blue focus:ring-2 focus:ring-vzla-blue/20 outline-none transition-all"
+						placeholder="••••••••"
+					/>
+				</div>
+
+				<div>
+					<label for="newPassword" class="block text-sm font-display font-semibold text-text-dark mb-1.5">Nueva contraseña</label>
+					<input
+						type="password"
+						id="newPassword"
+						name="newPassword"
+						required
+						minlength="6"
+						autocomplete="new-password"
+						class="w-full px-4 py-2.5 rounded-xl border border-border-subtle focus:border-vzla-blue focus:ring-2 focus:ring-vzla-blue/20 outline-none transition-all"
+						placeholder="Mínimo 6 caracteres"
+					/>
+				</div>
+
+				<div>
+					<label for="confirmPassword" class="block text-sm font-display font-semibold text-text-dark mb-1.5">Confirmar nueva contraseña</label>
+					<input
+						type="password"
+						id="confirmPassword"
+						name="confirmPassword"
+						required
+						minlength="6"
+						autocomplete="new-password"
+						class="w-full px-4 py-2.5 rounded-xl border border-border-subtle focus:border-vzla-blue focus:ring-2 focus:ring-vzla-blue/20 outline-none transition-all"
+						placeholder="Repite la nueva contraseña"
+					/>
+				</div>
+
+				<button
+					type="submit"
+					id="change-password-btn"
+					class="w-full h-11 bg-vzla-blue hover:bg-vzla-blue-hover text-white rounded-xl font-display font-bold transition-all shadow-3xs disabled:opacity-60 disabled:cursor-not-allowed"
+				>
+					Actualizar Contraseña
+				</button>
+			</form>
+		</div>
+	</div>
+
+	<script>
+		import { requireAuth, authFetch } from '../../lib/auth';
+
+		const session = requireAuth();
+
+		// Rellenar info del perfil
+		const initialEl = document.getElementById('profile-initial');
+		const nameEl = document.getElementById('profile-name');
+		const roleEl = document.getElementById('profile-role');
+		if (initialEl) initialEl.textContent = (session.name || 'U').charAt(0).toUpperCase();
+		if (nameEl) nameEl.textContent = session.name;
+		if (roleEl) roleEl.textContent = session.profileName || 'Panel de Control';
+
+		// Form de cambio de contraseña
+		const form = document.getElementById('change-password-form') as HTMLFormElement | null;
+		const btn = document.getElementById('change-password-btn') as HTMLButtonElement | null;
+		const alertBox = document.getElementById('pwd-alert');
+
+		function showAlert(message: string, type: 'success' | 'error') {
+			if (!alertBox) return;
+			alertBox.textContent = message;
+			alertBox.className =
+				'mb-4 px-4 py-3 rounded-xl text-sm font-medium ' +
+				(type === 'success'
+					? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+					: 'bg-rose-50 text-rose-700 border border-rose-200');
+			alertBox.classList.remove('hidden');
+		}
+
+		if (form && btn) {
+			form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				if (alertBox) alertBox.classList.add('hidden');
+
+				const currentPassword = (document.getElementById('currentPassword') as HTMLInputElement).value;
+				const newPassword = (document.getElementById('newPassword') as HTMLInputElement).value;
+				const confirmPassword = (document.getElementById('confirmPassword') as HTMLInputElement).value;
+
+				if (newPassword !== confirmPassword) {
+					showAlert('Las contraseñas nuevas no coinciden.', 'error');
+					return;
+				}
+				if (newPassword.length < 6) {
+					showAlert('La nueva contraseña debe tener al menos 6 caracteres.', 'error');
+					return;
+				}
+
+				const originalText = btn.textContent;
+				btn.disabled = true;
+				btn.textContent = 'Actualizando...';
+
+				try {
+					const res = await authFetch<{ message: string }>('auth/password/change', {
+						method: 'POST',
+						body: JSON.stringify({ currentPassword, newPassword }),
+					});
+					showAlert(res?.message || '¡Contraseña actualizada exitosamente!', 'success');
+					form.reset();
+				} catch (err: any) {
+					showAlert(err?.message || 'No se pudo cambiar la contraseña.', 'error');
+				} finally {
+					btn.disabled = false;
+					btn.textContent = originalText;
+				}
+			});
+		}
+	</script>
+</DashboardLayout>

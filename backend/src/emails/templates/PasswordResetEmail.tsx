@@ -8,7 +8,10 @@ import {
   Heading,
   Hr,
   Section,
+  Button,
+  Link,
 } from '@react-email/components';
+
 import * as React from 'react';
 
 interface PasswordResetEmailProps {
@@ -18,6 +21,7 @@ interface PasswordResetEmailProps {
 }
 
 export default function PasswordResetEmail({ name, resetToken, userId }: PasswordResetEmailProps) {
+  const resetUrl = `${process.env.URL_FRONTEND}/reset-password?userId=${userId}&token=${resetToken}`;
   return (
     <Html>
       <Head />
@@ -38,15 +42,32 @@ export default function PasswordResetEmail({ name, resetToken, userId }: Passwor
 
           <Hr style={hr} />
 
+          <Section style={buttonSection}>
+            <Button href={resetUrl} style={button}>
+              Restablecer mi Contraseña
+            </Button>
+          </Section>
+
+          <Text style={text}>
+            Si el botón no funciona, copia y pega este enlace en tu navegador:
+          </Text>
+          <Text style={linkText}>
+            <Link href={resetUrl} style={linkAnchor}>
+              {resetUrl}
+            </Link>
+          </Text>
+
+          <Hr style={hr} />
+
           <Section style={tokenSection}>
-            <Text style={tokenLabel}>Tu código de recuperación es:</Text>
+            <Text style={tokenLabel}>O ingresa tu código de recuperación manualmente:</Text>
             <Text style={tokenText}>{resetToken}</Text>
             <Text style={tokenSubtext}>ID de Usuario: {userId}</Text>
           </Section>
 
           <Hr style={hr} />
 
-          <Text style={text}>Este código expirará en 1 hora por seguridad.</Text>
+          <Text style={text}>Este enlace y código expirarán en 1 hora por seguridad.</Text>
 
           <Text style={footer}>
             Sistema de Información y Registro de Emergencias (S.I.R.E)
@@ -124,6 +145,39 @@ const tokenSubtext = {
   color: '#8898aa',
   fontSize: '12px',
   margin: '12px 0 0 0',
+};
+
+const buttonSection = {
+  textAlign: 'center' as const,
+  padding: '0 48px',
+};
+
+const button = {
+  backgroundColor: '#656ee8',
+  borderRadius: '5px',
+  color: '#fff',
+  fontSize: '16px',
+  fontWeight: 'bold',
+  textDecoration: 'none',
+  textAlign: 'center' as const,
+  display: 'block',
+  width: '260px',
+  margin: '8px auto',
+  padding: '12px',
+};
+
+const linkText = {
+  color: '#525f7f',
+  fontSize: '12px',
+  lineHeight: '18px',
+  padding: '0 48px',
+  margin: '4px 0',
+  wordBreak: 'break-all' as const,
+};
+
+const linkAnchor = {
+  color: '#656ee8',
+  textDecoration: 'underline',
 };
 
 const footer = {
