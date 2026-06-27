@@ -1,0 +1,39 @@
+Este es el .htaccess usado en hostinger para que funcionara
+
+# 1. Apagar listado de carpetas y las "adivinanzas" de Apache
+Options -Indexes -MultiViews
+
+# 2. Archivo por defecto para las carpetas
+DirectoryIndex index.html
+
+# 3. Página de error 404 personalizada
+ErrorDocument 404 /404.html
+
+# 4. CLAVE: evitar que Apache agregue "/" al final de las carpetas.
+#    Con format:"file" existe la carpeta /dashboard Y el archivo /dashboard.html;
+#    sin esto Apache redirige /dashboard -> /dashboard/ y provoca el 403.
+<IfModule mod_dir.c>
+    DirectorySlash Off
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # 5. Forzar HTTPS (protección de datos médicos)
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # 6. Quitar la barra final (excepto la raíz): /dashboard/ -> /dashboard
+    RewriteCond %{REQUEST_URI} !^/$
+    RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+    # 7. Si es un archivo real (css, js, imágenes, .html), sírvelo tal cual
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # 8. Si existe "ruta.html", sírvelo silenciosamente
+    #    /login -> login.html ; /dashboard -> dashboard.html
+    RewriteCond %{REQUEST_FILENAME}.html -f
+    RewriteRule ^(.*)$ $1.html [L]
+</IfModule>
