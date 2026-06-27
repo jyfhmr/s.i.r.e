@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from '@/decorators/isPublic.decorator';
-import { Throttle } from '@nestjs/throttler';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { RegisterCitizenDto } from './dto/register-citizen.dto';
 import { RegisterCitizenUseCase } from './use-cases/register-citizen.use-case';
@@ -47,6 +47,11 @@ export class AuthController {
   }
 
   @Public()
+  // El menú es público, cacheado y se solicita en CADA carga del dashboard.
+  // No debe estar sujeto al rate-limit global: detrás de un proxy (Render/
+  // Cloudflare) el throttler puede compartir el mismo "bucket" entre usuarios
+  // y devolver 429, lo que provocaba que el frontend cerrara sesión (→ /login).
+  @SkipThrottle()
   @UseInterceptors(CacheInterceptor) // Intercepta la petición y devuelve el caché si existe Los perfiles son consultados con frecuencia
   @CacheTTL(600000) // 10 minutos (si estás usando milisegundos en v5)
   @Get('/menu/:id')
