@@ -14,7 +14,6 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as Joi from 'joi';
-import { StatusModule } from './modules/config/status/status.module';
 
 @Module({
   imports: [
@@ -57,7 +56,6 @@ import { StatusModule } from './modules/config/status/status.module';
     ScheduleModule.forRoot(),
     TypeOrmModule.forRoot(dbdatasource),
     UsersModule,
-    StatusModule,
     AuthModule,
     PagesModule,
     ProfilesModule,

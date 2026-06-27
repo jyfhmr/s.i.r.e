@@ -3,7 +3,6 @@ import { DataSource } from 'typeorm';
 import { createDatabase, dropDatabase, runSeeders } from 'typeorm-extension';
 import { dbdatasource } from '../database/data.source';
 import UserSeeder from '@/database/seeds/1716776942560-users.seeder';
-import { StatusSeeder1726770256000 } from '@/database/seeds/1726770256000-status-seeder';
 import { PagesSeeder } from '@/database/seeds/1716777747675-pages.seeder';
 
 async function setupDatabase() {
@@ -37,7 +36,7 @@ async function setupDatabase() {
     console.log('🌱 Ejecutando Seeders y Factories...');
 
     await runSeeders(dataSource, {
-      seeds: [UserSeeder, PagesSeeder, StatusSeeder1726770256000],
+      seeds: [UserSeeder, PagesSeeder],
       factories: [],
     });
 
