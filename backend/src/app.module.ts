@@ -8,6 +8,11 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { UsersModule } from './modules/config/users/users.module';
 import { PagesModule } from './modules/config/pages/pages.module';
 import { ProfilesModule } from './modules/config/profiles/profiles.module';
+import { MedicalCentersModule } from './modules/config/medical-centers/medical-centers.module';
+import { PatientsModule } from './modules/medical/patients/patients.module';
+import { SearchModule } from './modules/public/search/search.module';
+import { AlertsModule } from './modules/citizen/alerts/alerts.module';
+import { AccessRequestsModule } from './modules/auth/access-requests/access-requests.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EmailModule } from './emails/email.module';
 import { ConfigModule } from '@nestjs/config';
@@ -59,6 +64,11 @@ import * as Joi from 'joi';
     AuthModule,
     PagesModule,
     ProfilesModule,
+    MedicalCentersModule,
+    PatientsModule,
+    SearchModule,
+    AlertsModule,
+    AccessRequestsModule,
     SocketModule,
     EmailModule,
   ],

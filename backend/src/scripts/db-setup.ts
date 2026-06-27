@@ -4,6 +4,7 @@ import { createDatabase, dropDatabase, runSeeders } from 'typeorm-extension';
 import { dbdatasource } from '../database/data.source';
 import UserSeeder from '@/database/seeds/1716776942560-users.seeder';
 import { PagesSeeder } from '@/database/seeds/1716777747675-pages.seeder';
+import MedicalCentersSeeder from '@/database/seeds/medical-centers.seeder';
 
 async function setupDatabase() {
   console.log('🚀 Iniciando la configuración de la base de datos...\n');
@@ -36,7 +37,7 @@ async function setupDatabase() {
     console.log('🌱 Ejecutando Seeders y Factories...');
 
     await runSeeders(dataSource, {
-      seeds: [UserSeeder, PagesSeeder],
+      seeds: [UserSeeder, PagesSeeder, MedicalCentersSeeder],
       factories: [],
     });
 

@@ -9,6 +9,10 @@ import { User } from '@/modules/config/users/entities/user.entity';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth.guard';
 import { HelpersService } from '@/helpers/helpers.service';
+import { RegisterCitizenUseCase } from './use-cases/register-citizen.use-case';
+import { PasswordRequestResetUseCase } from './use-cases/password-request-reset.use-case';
+import { PasswordResetUseCase } from './use-cases/password-reset.use-case';
+import { Profile } from '@/modules/config/profiles/entities/profile.entity';
 
 @Module({
   imports: [
@@ -20,12 +24,15 @@ import { HelpersService } from '@/helpers/helpers.service';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '7d' },
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Profile]),
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
     HelpersService,
+    RegisterCitizenUseCase,
+    PasswordRequestResetUseCase,
+    PasswordResetUseCase,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,

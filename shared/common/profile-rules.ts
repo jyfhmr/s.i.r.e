@@ -4,18 +4,16 @@ import { ROLES } from "@shared/common";
 export const MAIN_PAGES = {
   MEDICAL: "Médico",
   CONFIGURATION: "Configuración",
-  FINANCES: "Finanzas",
-  SCHEDULE: "Agenda",
-  ADMINISTRATION: "Administración",
-  TUTORIALS: "Tutoriales",
 } as const;
 
 export const SUB_PAGES = {
   PATIENTS: "Pacientes",
+  MEDICAL_CENTERS: "Centros Médicos",
+  ACCESS_REQUESTS: "Solicitudes de Acceso",
+  MY_ALERTS: "Mis Alertas",
   USERS: "Usuarios",
   PROFILES: "Perfiles",
   PAGES: "Páginas",
-  STATUS: "Estatus",
 } as const;
 
 // Tipos para autocompletado
@@ -28,15 +26,20 @@ export const PERMISSIONS_BY_ROLE: Record<
 > = {
   [ROLES.DIOS]: {
     isGodMode: true,
-    pages: [],
+    pages: [
+      SUB_PAGES.MEDICAL_CENTERS,
+      SUB_PAGES.ACCESS_REQUESTS,
+      SUB_PAGES.USERS,
+      SUB_PAGES.PROFILES,
+      SUB_PAGES.PAGES,
+    ],
   },
   [ROLES.MEDICO]: {
     isGodMode: false,
-    pages: [SUB_PAGES.PATIENTS],
+    pages: [SUB_PAGES.PATIENTS, SUB_PAGES.MY_ALERTS], // Solo gestiona pacientes
   },
-  // 👇 Agrega el rol faltante (asumiendo que se llama ENFERMERO o similar)
   [ROLES.USUARIO_COMUN]: {
     isGodMode: false,
-    pages: [], // Si no tiene acceso a nada por ahora, déjalo vacío
+    pages: [SUB_PAGES.MY_ALERTS], // Solo gestiona sus alertas
   },
 };

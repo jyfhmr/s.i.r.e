@@ -1,7 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { ResendEmailService } from './resend-email.service';
 import { EMAIL_SERVICE_TOKEN } from './interfaces';
-import { EmailController } from './email.controller';
 import { EmailListener } from './email.listener';
 
 @Global()
@@ -13,7 +12,7 @@ import { EmailListener } from './email.listener';
     },
     EmailListener,
   ],
-  controllers: [EmailController],
+  controllers: [],
   exports: [EMAIL_SERVICE_TOKEN],
 })
 export class EmailModule {}

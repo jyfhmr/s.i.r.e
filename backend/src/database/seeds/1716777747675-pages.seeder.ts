@@ -21,31 +21,44 @@ export class PagesSeeder implements Seeder {
 
     // 2. CREAR SUB-PÁGINAS DE CONFIGURACIÓN
     const pagesConfiguration = await pageRepository.save([
+      { name: SUB_PAGES.MEDICAL_CENTERS, route: '/dashboard/config/medical-centers' },
+      { name: SUB_PAGES.ACCESS_REQUESTS, route: '/dashboard/config/access-requests' },
       { name: SUB_PAGES.USERS, route: '/dashboard/config/users' },
       { name: SUB_PAGES.PROFILES, route: '/dashboard/config/profiles' },
       { name: SUB_PAGES.PAGES, route: '/dashboard/config/pages' },
-      { name: SUB_PAGES.STATUS, route: '/dashboard/config/status' },
     ]);
 
-    // 3. CREAR PÁGINAS PADRE Y VINCULAR HIJAS
+    // 3. CREAR SUB-PÁGINAS DE CIUDADANO (para usuarios comunes)
+    const pagesCitizen = await pageRepository.save([
+      { name: SUB_PAGES.MY_ALERTS, route: '/dashboard/citizen/alerts' },
+    ]);
+
+    // 4. CREAR PÁGINAS PADRE Y VINCULAR HIJAS
     const pagesFatherSaved = await pageRepository.save([
       {
         name: MAIN_PAGES.MEDICAL,
         route: '/dashboard/medical',
         order: 1,
         icon: 'MedicineBoxOutlined',
-        pages: pagesMedical, // TypeORM vinculará esto automáticamente si tienes cascades o lo actualizas
+        pages: pagesMedical,
       },
       {
         name: MAIN_PAGES.CONFIGURATION,
         route: '/dashboard/config',
-        order: 6,
+        order: 2,
         icon: 'SettingOutlined',
         pages: pagesConfiguration,
       },
+      {
+        name: 'Ciudadano',
+        route: '/dashboard/citizen',
+        order: 3,
+        icon: 'UserOutlined',
+        pages: pagesCitizen,
+      },
     ]);
 
-    // 4. ASIGNAR PERMISOS A LOS PERFILES EN BASE DE DATOS
+    // 5. ASIGNAR PERMISOS A LOS PERFILES EN BASE DE DATOS
     const profiles = await profileRepository.find();
 
     for (const profile of profiles) {
