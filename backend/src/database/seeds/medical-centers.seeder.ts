@@ -1,6 +1,9 @@
 import { Seeder } from 'typeorm-extension';
 import { DataSource } from 'typeorm';
 import { MedicalCenter } from '@/modules/config/medical-centers/entities/medical-center.entity';
+import { caracasCenters } from './data/caracas.data';
+import { laGuairaCenters } from './data/la-guaira.data';
+import { mirandaCenters } from './data/miranda.data';
 
 export default class MedicalCentersSeeder implements Seeder {
   track = false;
@@ -8,26 +11,10 @@ export default class MedicalCentersSeeder implements Seeder {
   public async run(dataSource: DataSource): Promise<void> {
     const medicalCenterRepository = dataSource.getRepository(MedicalCenter);
 
-    // 3 centros médicos de Los Teques y Miranda como ejemplo
     const centers = [
-      {
-        name: 'Hospital Victorino Santaella',
-        state: 'Miranda',
-        municipality: 'Los Teques',
-        address: 'Av. Intercomunal de Los Teques',
-      },
-      {
-        name: 'Centro de Salud Los Teques',
-        state: 'Miranda',
-        municipality: 'Los Teques',
-        address: 'Calle Principal de Los Teques',
-      },
-      {
-        name: 'Hospital de Carrizal',
-        state: 'Miranda',
-        municipality: 'Carrizal',
-        address: 'Carretera Panamericana, Carrizal',
-      },
+      ...mirandaCenters,
+      ...caracasCenters,
+      ...laGuairaCenters,
     ];
 
     await medicalCenterRepository.save(centers);
