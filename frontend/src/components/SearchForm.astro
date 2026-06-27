@@ -1,0 +1,76 @@
+---
+interface Props {
+  initialValue?: string;
+  error?: string;
+}
+
+const { initialValue = "", error } = Astro.props;
+---
+
+<div class="w-full bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm">
+  <form method="GET" action="" class="space-y-4">
+    <div class="space-y-1">
+      <label 
+        for="search" 
+        class="block font-display font-bold text-lg md:text-xl text-text-dark"
+      >
+        Buscar persona hospitalizada
+      </label>
+      <p class="text-sm md:text-base text-text-dark/60 leading-relaxed font-sans">
+        Escribe la cédula de identidad, DNI o pasaporte de tu familiar para consultar su estado en tiempo real.
+      </p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3 items-stretch mt-4">
+      <div class="relative flex-grow">
+        <!-- Icono de lupa interno (estilo minimalista) -->
+        <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-text-dark/40">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="20" 
+            height="20" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2" 
+            stroke-linecap="round" 
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </span>
+        
+        <input
+          type="text"
+          id="search"
+          name="search"
+          value={initialValue}
+          placeholder="Buscar cédula, pasaporte o documento..."
+          required
+          aria-required="true"
+          aria-invalid={error ? "true" : "false"}
+          class="w-full h-14 pl-12 pr-4 bg-white border border-border-subtle rounded-xl text-lg text-text-dark placeholder-text-dark/40 focus:border-vzla-blue focus:ring-1 focus:ring-vzla-blue/20 focus:outline-none transition-all shadow-2xs"
+        />
+        {error && (
+          <p class="text-sm text-error-text font-semibold mt-1" role="alert">
+            ⚠️ {error}
+          </p>
+        )}
+      </div>
+      
+      <button
+        type="submit"
+        class="h-14 px-8 bg-vzla-blue hover:bg-vzla-blue-hover active:bg-vzla-blue text-white font-display font-bold text-lg rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:shadow transition-all shrink-0"
+      >
+        Buscar Familiar
+      </button>
+    </div>
+  </form>
+
+  <!-- Leyenda informativa -->
+  <div class="mt-5 pt-4 border-t border-border-subtle/60 flex items-center gap-2 text-xs md:text-sm text-text-dark/50 font-sans">
+    <div class="w-5 h-5 rounded-full bg-vzla-blue/5 border border-vzla-blue/10 flex items-center justify-center text-vzla-blue font-bold">i</div>
+    <span>La consulta es totalmente gratuita y abierta al público las 24 horas del día.</span>
+  </div>
+</div>

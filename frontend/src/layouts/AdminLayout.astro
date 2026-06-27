@@ -1,0 +1,92 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	title?: string;
+}
+
+const { title = "S.I.R.E. - Consola Administrativa" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		
+		<!-- SEGURIDAD: Evitar indexación en motores de búsqueda -->
+		<meta name="robots" content="noindex, nofollow" />
+		
+		<!-- Preconexión de fuentes -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link 
+			href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" 
+			rel="stylesheet" 
+		/>
+		
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body class="bg-bg-light text-text-dark flex flex-col min-h-screen selection:bg-vzla-blue/10 selection:text-vzla-blue">
+		
+		<!-- Cabecera de Administración Segura -->
+		<header class="border-b-2 border-vzla-blue bg-white shadow-sm sticky top-0 z-50">
+			<div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+				<!-- Título Institucional / Logotipo Plano -->
+				<div class="flex items-center gap-2.5">
+					<span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+					<span class="font-display font-bold text-lg md:text-xl tracking-tight text-text-dark">
+						SIRE <span class="text-vzla-blue">Control Interno</span>
+					</span>
+				</div>
+				
+				<!-- Botón de Salida Segura (Se activa con JS si hay sesión) -->
+				<button 
+					id="admin-logout-btn" 
+					class="hidden h-9 px-4 bg-error-light hover:bg-error-border/40 text-error-text border border-error-border rounded-xl font-display font-semibold text-xs md:text-sm transition-all cursor-pointer shadow-3xs"
+				>
+					Cerrar Sesión
+				</button>
+			</div>
+		</header>
+
+		<!-- Panel / Contenido Central -->
+		<main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8">
+			<slot />
+		</main>
+
+		<!-- Footer de Control Tecnológico -->
+		<footer class="border-t border-border-subtle bg-white py-6 text-xs text-text-dark/50 font-sans">
+			<div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+				<div>
+					<p class="font-semibold text-text-dark/70 m-0">S.I.R.E. Consola Interna de Seguridad</p>
+					<p class="mt-0.5 m-0">Uso exclusivo para administradores y coordinadores de triage autorizados.</p>
+				</div>
+				<div class="text-right">
+					<p class="m-0">Licencia SIRE Open-Source &bull; Conexión Encriptada SSL</p>
+				</div>
+			</div>
+		</footer>
+
+		<!-- Script de control de salida en cliente -->
+		<script>
+			const logoutBtn = document.getElementById('admin-logout-btn');
+			
+			// Mostrar botón de cierre de sesión si la sesión está activa en sessionStorage
+			if (typeof window !== 'undefined' && logoutBtn) {
+				if (sessionStorage.getItem('sire_admin_logged_in') === 'true') {
+					logoutBtn.classList.remove('hidden');
+				}
+				
+				logoutBtn.addEventListener('click', () => {
+					// Limpiar credencial de la pestaña y recargar
+					sessionStorage.removeItem('sire_admin_logged_in');
+					window.location.reload();
+				});
+			}
+		</script>
+	</body>
+</html>

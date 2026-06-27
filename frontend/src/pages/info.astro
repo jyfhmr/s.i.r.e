@@ -1,0 +1,84 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Sobre la Plataforma - S.I.R.E.">
+  <div class="max-w-2xl mx-auto space-y-8 animate-fade-in">
+    <!-- Título de la sección -->
+    <div class="text-center space-y-2">
+      <h1 class="font-display font-bold text-3xl md:text-4xl text-text-dark">Sobre la plataforma</h1>
+      <p class="font-sans text-base md:text-lg text-text-dark/65">
+        Conoce el origen, funcionamiento y la tecnología detrás de S.I.R.E.
+      </p>
+    </div>
+
+    <!-- Bloque de contenido principal -->
+    <div class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-xl text-vzla-blue flex items-center gap-2">
+          ¿Qué es S.I.R.E.?
+        </h2>
+        <p class="font-sans text-text-dark/75 leading-relaxed">
+          El **Sistema de Información y Registro de Emergencias (S.I.R.E.)** es un proyecto de código abierto e iniciativa cívica creado para optimizar el flujo de información durante contingencias, sismos, desastres climáticos o incidentes de gran escala en Venezuela.
+        </p>
+        <p class="font-sans text-text-dark/75 leading-relaxed">
+          Su meta principal es reemplazar las listas de papel pegadas en las entradas de las salas de emergencias y los estados de difusión informal por un portal digital rápido, accesible y centralizado.
+        </p>
+      </section>
+
+      <section class="space-y-3 pt-4 border-t border-border-subtle/50">
+        <h2 class="font-display font-bold text-xl text-vzla-blue">
+          ¿Cómo funciona el registro de datos?
+        </h2>
+        <p class="font-sans text-text-dark/75 leading-relaxed">
+          El personal médico autorizado (hospitales públicos e institutos de salud privados) registra de forma inmediata el ingreso de cada paciente en la base de datos interna de S.I.R.E. al momento del triage clínico. 
+        </p>
+        <div class="bg-bg-light p-4 rounded-xl border border-border-subtle space-y-2">
+          <p class="text-sm font-semibold text-vzla-blue">El flujo de información sigue tres pasos sencillos:</p>
+          <ul class="list-decimal list-inside text-sm text-text-dark/70 space-y-1.5">
+            <li><strong>Ingreso y Diagnóstico:</strong> Se registra la cédula, el nombre y el diagnóstico clínico preliminar del paciente.</li>
+            <li><strong>Actualización del Estado:</strong> A medida que el paciente evoluciona o es trasladado, el estado se actualiza en el sistema.</li>
+            <li><strong>Consulta Ciudadana:</strong> El familiar busca el número de cédula y obtiene la ubicación y estado del paciente de forma instantánea.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="space-y-3 pt-4 border-t border-border-subtle/50">
+        <h2 class="font-display font-bold text-xl text-vzla-blue">
+          Privacidad y Seguridad
+        </h2>
+        <p class="font-sans text-text-dark/75 leading-relaxed">
+          La privacidad de los pacientes es un derecho fundamental. Por ello, S.I.R.E. no permite listados públicos abiertos de pacientes ni búsquedas por nombres genéricos. La única forma de consultar la información de un paciente es ingresando su **número de cédula o pasaporte exacto**, previniendo la exposición pública innecesaria de datos médicos.
+        </p>
+      </section>
+    </div>
+
+    <!-- Botón de regreso -->
+    <div class="text-center pt-2">
+      <a 
+        href="/" 
+        class="inline-flex items-center gap-2 text-vzla-blue hover:text-vzla-blue-hover font-display font-semibold text-base transition-colors"
+      >
+        <!-- Icono flecha izquierda -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Volver a la página principal
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .animate-fade-in {
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

@@ -1,0 +1,399 @@
+---
+import Layout from '../layouts/Layout.astro';
+import StatsPanel from '../components/StatsPanel.astro';
+import SearchForm from '../components/SearchForm.astro';
+import PatientCard, { type Patient } from '../components/PatientCard.astro';
+
+// Datos estáticos de respaldo
+const mockPatients: Patient[] = [
+  {
+    id: 'V-172345678',
+    name: 'Juan Pérez Castro',
+    age: 72,
+    status: 'ESTABLE',
+    hospital: 'Hospital Universitario de Caracas (HUC)',
+    location: 'Sala de Emergencias Adultos, Cama 12',
+    updatedAt: 'Hace 15 minutos',
+    notes: 'Paciente consciente y orientado. Recibiendo hidratación endovenosa y analgésicos. Fuera de peligro inmediato.'
+  },
+  {
+    id: 'V-17112233',
+    name: 'María Carmen Solís',
+    age: 81,
+    status: 'OBSERVACION',
+    hospital: 'Hospital Central de Maracay',
+    location: 'Sala de Observación / Rayos X (PB)',
+    updatedAt: 'Hace 42 minutos',
+    notes: 'Bajo observación por golpe moderado en la cadera. Se esperan resultados de las placas radiográficas.'
+  },
+  {
+    id: 'V-17998877',
+    name: 'José Luis Mendoza',
+    age: 68,
+    status: 'TRASLADADO',
+    hospital: 'Hospital Universitario de Caracas (HUC)',
+    location: 'Trasladado al Centro Médico Docente La Trinidad',
+    updatedAt: 'Hace 2 horas',
+    notes: 'Paciente estabilizado tras cuadro coronario. Derivado para cateterismo y cuidados intensivos cardiológicos.'
+  },
+  {
+    id: 'V-17445566',
+    name: 'Ana Sofía Ortiz',
+    age: 75,
+    status: 'CRITICO',
+    hospital: 'Hospital Domingo Luciani (El Llanito)',
+    location: 'Unidad de Cuidados Intensivos, Cubículo 3',
+    updatedAt: 'Hace 5 minutos',
+    notes: 'Paciente bajo sedación y soporte de ventilación mecánica. Se solicita la presencia de familiares directos en la recepción médica con urgencia.'
+  }
+];
+---
+
+<Layout title="S.I.R.E. - Consulta de Pacientes en Emergencias">
+  <div class="space-y-12">
+    <!-- Hero / Presentación Simplificada -->
+    <section class="text-center max-w-2xl mx-auto space-y-4">
+      <h1 class="font-display font-bold text-3xl md:text-4xl text-text-dark tracking-tight leading-tight">
+        Localización de Pacientes en Emergencias
+      </h1>
+      <p class="font-sans text-base md:text-lg text-text-dark/70 leading-relaxed max-w-xl mx-auto">
+        Plataforma de consulta abierta para encontrar familiares ingresados en centros médicos y hospitales durante contingencias en Venezuela.
+      </p>
+    </section>
+
+    <!-- Panel de Estadísticas (StatsPanel) -->
+    <section class="max-w-3xl mx-auto">
+      <StatsPanel />
+    </section>
+
+    <!-- Formulario de Búsqueda -->
+    <section class="max-w-3xl mx-auto">
+      <SearchForm />
+    </section>
+
+    <!-- Contenedor dinámico de resultados (Controlado por Cliente) -->
+    <section id="results-section" data-mock-patients={JSON.stringify(mockPatients)} class="max-w-3xl mx-auto hidden">
+      <!-- Mensaje cargando -->
+      <div id="results-loading" class="text-center py-8 text-text-dark/50 font-sans hidden">
+        Buscando en la base de datos...
+      </div>
+
+      <!-- Espacio para la tarjeta de paciente -->
+      <div id="patient-card-holder" class="animate-fade-in">
+        <!-- Renderizado dinámico -->
+      </div>
+
+      <!-- Mensaje de error sin resultados -->
+      <div id="results-not-found" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm text-center space-y-4 hidden">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-error-light text-error-text">
+          ⚠️
+        </div>
+        <h3 class="font-display font-bold text-lg text-text-dark">Búsqueda sin resultados</h3>
+        <p class="font-sans text-sm md:text-base text-text-dark/70 max-w-md mx-auto">
+          El documento ingresado no coincide con pacientes en los reportes clínicos de contingencia recientes.
+        </p>
+        <div class="text-xs md:text-sm text-text-dark/65 max-w-sm mx-auto bg-bg-light p-4 rounded-xl border border-border-subtle text-left">
+          <p class="font-semibold text-vzla-blue mb-1">Recomendaciones de búsqueda:</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>Ingresa únicamente los números (ej. 17234567).</li>
+            <li>El registro de triage se actualiza constantemente por los médicos.</li>
+            <li>Consulte al personal del hospital si el ingreso fue hace pocos minutos.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Área de Pruebas / Demostración -->
+    <section class="max-w-3xl mx-auto pt-8 border-t border-border-subtle/50">
+      <div class="bg-white border border-border-subtle rounded-2xl p-6 shadow-xs">
+        <h3 class="font-display font-bold text-sm text-text-dark mb-1">
+          Cédulas venezolanas de demostración (Desarrollo)
+        </h3>
+        <p class="text-xs text-text-dark/60 mb-4">
+          Haz clic en cualquier cédula de prueba para verificar cómo se visualiza cada estado clínico
+        </p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <a 
+            href="?search=172345678" 
+            class="mock-search-link px-4 py-2.5 bg-bg-light hover:bg-success-light border border-border-subtle hover:border-success-border rounded-xl text-xs md:text-sm font-semibold text-text-dark flex items-center justify-between no-underline transition-all"
+          >
+            <span class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span>V-17.234.567-8</span>
+            </span>
+            <span class="text-xs text-success-text font-medium">Estable</span>
+          </a>
+          
+          <a 
+            href="?search=17112233" 
+            class="mock-search-link px-4 py-2.5 bg-bg-light hover:bg-alert-light border border-border-subtle hover:border-alert-border rounded-xl text-xs md:text-sm font-semibold text-text-dark flex items-center justify-between no-underline transition-all"
+          >
+            <span class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+              <span>V-17.112.233</span>
+            </span>
+            <span class="text-xs text-alert-text font-medium font-display">Observación</span>
+          </a>
+
+          <a 
+            href="?search=17998877" 
+            class="mock-search-link px-4 py-2.5 bg-bg-light hover:bg-vzla-blue-light border border-border-subtle hover:border-vzla-blue-border rounded-xl text-xs md:text-sm font-semibold text-text-dark flex items-center justify-between no-underline transition-all"
+          >
+            <span class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+              <span>V-17.998.877</span>
+            </span>
+            <span class="text-xs text-vzla-blue font-medium">Trasladado</span>
+          </a>
+
+          <a 
+            href="?search=17445566" 
+            class="mock-search-link px-4 py-2.5 bg-bg-light hover:bg-error-light border border-border-subtle hover:border-error-border rounded-xl text-xs md:text-sm font-semibold text-text-dark flex items-center justify-between no-underline transition-all"
+          >
+            <span class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              <span>V-17.445.566</span>
+            </span>
+            <span class="text-xs text-error-text font-medium font-display">Reporte Especial</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<!-- Script de Búsqueda Reactiva en Cliente (Soporta static Astro y localStorage) -->
+<script>
+  import type { Patient } from '../components/PatientCard.astro';
+
+  // Esta función busca al paciente e inyecta la tarjeta dinámicamente
+  function executeSearch() {
+    const params = new URLSearchParams(window.location.search);
+    const searchVal = params.get('search');
+    
+    const resultsSection = document.getElementById('results-section');
+    const cardHolder = document.getElementById('patient-card-holder');
+    const notFoundDiv = document.getElementById('results-not-found');
+    const searchInput = document.getElementById('search') as HTMLInputElement;
+
+    if (!resultsSection || !cardHolder || !notFoundDiv) return;
+
+    if (!searchVal || !searchVal.trim()) {
+      resultsSection.classList.add('hidden');
+      return;
+    }
+
+    // Colocar el valor en el input por comodidad
+    if (searchInput) {
+      searchInput.value = searchVal;
+    }
+
+    resultsSection.classList.remove('hidden');
+    cardHolder.innerHTML = '';
+    notFoundDiv.classList.add('hidden');
+
+    const cleanQuery = searchVal.replace(/[VvEe\-\.]/g, '').trim();
+
+    // 1. Obtener pacientes de prueba desde el atributo HTML
+    const mockPatients: Patient[] = JSON.parse(resultsSection.getAttribute('data-mock-patients') || '[]');
+
+    // 2. Intentar buscar en pacientes dinámicos de localStorage (creados en /admin)
+    const localPatients = JSON.parse(localStorage.getItem('sire_dynamic_patients') || '[]');
+    let foundPatient = localPatients.find((p: any) => {
+      const cleanId = p.id.replace(/[VvEe\-\.]/g, '').trim();
+      return cleanId === cleanQuery;
+    });
+
+    // 3. Si no está en localStorage, buscar en los mock estáticos
+    if (!foundPatient) {
+      foundPatient = mockPatients.find((p) => {
+        const cleanId = p.id.replace(/[VvEe\-\.]/g, '').trim();
+        return cleanId === cleanQuery;
+      });
+    }
+
+    if (foundPatient) {
+      // Configurar datos de la tarjeta según estado
+      const statusConfig: Record<string, { label: string; bg: string; badge: string; desc: string }> = {
+        ESTABLE: {
+          label: "Localizado - Estable",
+          bg: "bg-success-light text-success-text border-success-border",
+          badge: "bg-emerald-500",
+          desc: "La persona se encuentra bien, fuera de peligro. Está recibiendo atención de rutina y descanso."
+        },
+        OBSERVACION: {
+          label: "Localizado - En Observación",
+          bg: "bg-alert-light text-alert-text border-alert-border",
+          badge: "bg-amber-500",
+          desc: "Se encuentra bajo estudios médicos de control o monitoreo preventivo de evolución."
+        },
+        TRASLADADO: {
+          label: "Localizado - Trasladado",
+          bg: "bg-info-light text-info-text border-info-border",
+          badge: "bg-sky-500",
+          desc: "Fue derivado a otro centro médico para estudios o cuidados especializados."
+        },
+        CRITICO: {
+          label: "Localizado - Reporte Especial",
+          bg: "bg-error-light text-error-text border-error-border",
+          badge: "bg-rose-500",
+          desc: "Bajo monitoreo médico intensivo. Se solicita a los familiares contactar urgentemente al personal médico."
+        }
+      };
+
+      const cfg = statusConfig[foundPatient.status] || statusConfig.ESTABLE;
+      const ttsText = `Información de paciente. Nombre: ${foundPatient.name}. Edad: ${foundPatient.age} años. Estado: ${cfg.label}. Centro de salud: ${foundPatient.hospital}. Ubicación: ${foundPatient.location}. Notas: ${foundPatient.notes}. Última actualización: ${foundPatient.updatedAt}.`;
+
+      // Inyectar HTML de la tarjeta (espejo del PatientCard.astro)
+      cardHolder.innerHTML = `
+        <div class="w-full bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-6 font-sans">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border-subtle/50 pb-5">
+            <div>
+              <span class="text-xs font-semibold text-text-dark/45 tracking-wider uppercase">Reporte Médico Oficial</span>
+              <h2 class="font-display font-bold text-2xl md:text-3xl text-text-dark mt-0.5">${foundPatient.name}</h2>
+              <p class="text-sm md:text-base text-text-dark/60 mt-0.5">
+                Cédula/Documento: <strong class="text-text-dark">${foundPatient.id}</strong> &bull; Edad: <strong class="text-text-dark">${foundPatient.age} años</strong>
+              </p>
+            </div>
+            
+            <button
+              id="btn-tts-dyn"
+              class="h-12 px-5 bg-vzla-blue/5 hover:bg-vzla-blue/10 text-vzla-blue font-display font-semibold text-sm rounded-xl flex items-center justify-center gap-2 cursor-pointer border border-vzla-blue/10 hover:border-vzla-blue/20 transition-all self-start md:self-center shadow-3xs"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              <span>Escuchar Reporte</span>
+            </button>
+          </div>
+
+          <div class="border-l-4 p-5 rounded-r-xl flex flex-col gap-1.5 border-l-current ${cfg.bg}">
+            <div class="flex items-center gap-2">
+              <span class="w-3.5 h-3.5 rounded-full ${cfg.badge} block shrink-0"></span>
+              <span class="font-display font-bold text-lg md:text-xl tracking-tight">${cfg.label}</span>
+            </div>
+            <p class="text-sm md:text-base leading-relaxed opacity-90">${cfg.desc}</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-1">
+            <div class="space-y-4">
+              <div class="space-y-1">
+                <h3 class="text-xs font-semibold text-text-dark/45 tracking-wider uppercase">Establecimiento de Salud</h3>
+                <p class="font-display font-bold text-lg text-vzla-blue">${foundPatient.hospital}</p>
+              </div>
+              <div class="space-y-1">
+                <h3 class="text-xs font-semibold text-text-dark/45 tracking-wider uppercase">Ubicación Interna</h3>
+                <p class="text-base text-text-dark font-semibold">${foundPatient.location}</p>
+              </div>
+            </div>
+            <div class="space-y-1">
+              <h3 class="text-xs font-semibold text-text-dark/45 tracking-wider uppercase">Observaciones y Tratamiento</h3>
+              <p class="text-base text-text-dark leading-relaxed bg-bg-light/60 p-4 rounded-xl border border-border-subtle/50">${foundPatient.notes}</p>
+            </div>
+          </div>
+
+          <div class="border-t border-border-subtle/50 pt-5 mt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs md:text-sm text-text-dark/50">
+            <div class="flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              <span>Última actualización: <strong>${foundPatient.updatedAt}</strong></span>
+            </div>
+            <div>
+              <span>Verificado por Personal de Triaje SIRE.</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Activar Text-to-Speech dinámico
+      const ttsBtn = document.getElementById('btn-tts-dyn');
+      if (ttsBtn) {
+        let isSpeaking = false;
+        let utterance: SpeechSynthesisUtterance | null = null;
+        
+        ttsBtn.addEventListener('click', () => {
+          if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            ttsBtn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              <span>Escuchar Reporte</span>
+            `;
+            ttsBtn.classList.remove('bg-vzla-blue/20', 'border-vzla-blue/30');
+            ttsBtn.classList.add('bg-vzla-blue/5', 'text-vzla-blue', 'border-vzla-blue/10');
+            return;
+          }
+
+          window.speechSynthesis.cancel();
+          utterance = new SpeechSynthesisUtterance(ttsText);
+          utterance.lang = 'es-ES';
+          
+          utterance.onstart = () => {
+            isSpeaking = true;
+            ttsBtn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect></svg>
+              <span>Detener Lectura</span>
+            `;
+            ttsBtn.classList.remove('bg-vzla-blue/5', 'text-vzla-blue', 'border-vzla-blue/10');
+            ttsBtn.classList.add('bg-vzla-blue/20', 'border-vzla-blue/30');
+          };
+
+          utterance.onend = () => {
+            isSpeaking = false;
+            ttsBtn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              <span>Escuchar Reporte</span>
+            `;
+            ttsBtn.classList.remove('bg-vzla-blue/20', 'border-vzla-blue/30');
+            ttsBtn.classList.add('bg-vzla-blue/5', 'text-vzla-blue', 'border-vzla-blue/10');
+          };
+
+          window.speechSynthesis.speak(utterance);
+        });
+      }
+    } else {
+      // Ocultar tarjeta e inyectar error
+      notFoundDiv.classList.remove('hidden');
+    }
+  }
+
+  // Ejecutar al cargar la página
+  if (typeof window !== 'undefined') {
+    executeSearch();
+
+    // Interceptar clics en los enlaces de demostración
+    document.querySelectorAll('.mock-search-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const href = (e.currentTarget as HTMLAnchorElement).getAttribute('href');
+        if (!href) return;
+        
+        const url = new URL(href, window.location.origin);
+        const searchVal = url.searchParams.get('search') || '';
+        
+        const searchInput = document.getElementById('search') as HTMLInputElement;
+        if (searchInput) {
+          searchInput.value = searchVal;
+          // Actualizar URL sin recargar
+          window.history.pushState({}, '', `?search=${searchVal}`);
+          // Buscar inmediatamente
+          executeSearch();
+        }
+      });
+    });
+  }
+</script>
+
+<style>
+  .animate-fade-in {
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
