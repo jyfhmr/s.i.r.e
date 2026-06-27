@@ -1,0 +1,366 @@
+---
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Centros Médicos - S.I.R.E.">
+	<div class="space-y-6">
+		<!-- Header -->
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+			<div>
+				<h2 class="font-display font-bold text-2xl md:text-3xl text-text-dark">Centros Médicos</h2>
+				<p class="text-sm text-text-dark/60 mt-1">Gestiona el catálogo de centros de salud</p>
+			</div>
+			<button 
+				id="btn-new-center"
+				class="h-11 px-6 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-xl transition-all shadow-xs"
+			>
+				+ Nuevo Centro
+			</button>
+		</div>
+
+		<!-- Tabla de centros -->
+		<div class="bg-white border border-border-subtle rounded-xl shadow-sm overflow-hidden">
+			<div class="p-4 border-b border-border-subtle">
+				<h3 class="font-display font-bold text-lg text-text-dark">Lista de Centros</h3>
+			</div>
+
+			<!-- Loading -->
+			<div id="centers-loading" class="p-8 text-center">
+				<div class="animate-spin h-8 w-8 border-2 border-vzla-blue border-t-transparent rounded-full mx-auto"></div>
+				<p class="text-sm text-text-dark/60 mt-3">Cargando centros...</p>
+			</div>
+
+			<!-- Tabla -->
+			<div id="centers-table-container" class="hidden overflow-x-auto">
+				<table class="w-full">
+					<thead class="bg-bg-light border-b border-border-subtle">
+						<tr class="text-left text-xs font-display font-bold text-text-dark/70 uppercase tracking-wider">
+							<th class="px-4 py-3">Nombre</th>
+							<th class="px-4 py-3">Estado</th>
+							<th class="px-4 py-3">Municipio</th>
+							<th class="px-4 py-3">Dirección</th>
+							<th class="px-4 py-3">Estado</th>
+							<th class="px-4 py-3 text-right">Acciones</th>
+						</tr>
+					</thead>
+					<tbody id="centers-tbody" class="divide-y divide-border-subtle"></tbody>
+				</table>
+			</div>
+
+			<!-- Paginación -->
+			<div id="centers-pagination" class="hidden border-t border-border-subtle p-4 flex items-center justify-between">
+				<span id="pagination-info" class="text-sm text-text-dark/60"></span>
+				<div class="flex gap-2">
+					<button id="btn-prev" class="h-9 px-4 border border-border-subtle rounded-lg text-sm font-display font-semibold hover:bg-bg-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+						Anterior
+					</button>
+					<button id="btn-next" class="h-9 px-4 border border-border-subtle rounded-lg text-sm font-display font-semibold hover:bg-bg-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+						Siguiente
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal Crear/Editar -->
+	<div id="center-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+		<div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+			<div class="sticky top-0 bg-white border-b border-border-subtle p-6 flex items-center justify-between">
+				<h3 id="modal-title" class="font-display font-bold text-xl text-text-dark">Nuevo Centro Médico</h3>
+				<button id="modal-close" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-bg-light transition-colors">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="18" y1="6" x2="6" y2="18"></line>
+						<line x1="6" y1="6" x2="18" y2="18"></line>
+					</svg>
+				</button>
+			</div>
+
+			<form id="center-form" class="p-6 space-y-5">
+				<input type="hidden" id="center-id" value="" />
+
+				<!-- Nombre -->
+				<div class="space-y-2">
+					<label for="center-name" class="block text-sm font-display font-bold text-text-dark">
+						Nombre del Centro <span class="text-error-text">*</span>
+					</label>
+					<input 
+						type="text"
+						id="center-name"
+						required
+						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+						placeholder="Ej: Hospital Universitario de Caracas"
+					/>
+				</div>
+
+				<!-- Estado -->
+				<div class="space-y-2">
+					<label for="center-state" class="block text-sm font-display font-bold text-text-dark">
+						Estado <span class="text-error-text">*</span>
+					</label>
+					<input 
+						type="text"
+						id="center-state"
+						required
+						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+						placeholder="Ej: Distrito Capital"
+					/>
+				</div>
+
+				<!-- Municipio -->
+				<div class="space-y-2">
+					<label for="center-municipality" class="block text-sm font-display font-bold text-text-dark">
+						Municipio (opcional)
+					</label>
+					<input 
+						type="text"
+						id="center-municipality"
+						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+						placeholder="Ej: Libertador"
+					/>
+				</div>
+
+				<!-- Dirección -->
+				<div class="space-y-2">
+					<label for="center-address" class="block text-sm font-display font-bold text-text-dark">
+						Dirección (opcional)
+					</label>
+					<textarea 
+						id="center-address"
+						rows="3"
+						class="w-full px-4 py-3 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors resize-none"
+						placeholder="Ej: Av. Principal de Los Chaguaramos"
+					></textarea>
+				</div>
+
+				<!-- Mensajes -->
+				<div id="form-error" class="hidden bg-error-light border border-error-border text-error-text text-sm rounded-lg p-3"></div>
+				<div id="form-success" class="hidden bg-success-light border border-success-border text-success-text text-sm rounded-lg p-3"></div>
+
+				<!-- Botones -->
+				<div class="flex gap-3 pt-2">
+					<button 
+						type="button"
+						id="modal-cancel"
+						class="flex-1 h-11 border border-border-subtle rounded-lg text-sm font-display font-semibold hover:bg-bg-light transition-colors"
+					>
+						Cancelar
+					</button>
+					<button 
+						type="submit"
+						id="modal-submit"
+						class="flex-1 h-11 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-lg transition-all"
+					>
+						Guardar Centro
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</DashboardLayout>
+
+<script>
+	import { findAllMedicalCenters, createMedicalCenter, updateMedicalCenter, changeMedicalCenterStatus } from '../../../lib/api';
+	import type { IMedicalCenter, ICreateMedicalCenterDto, IUpdateMedicalCenterDto } from '@shared/core/config/medical-centers/interfaces';
+
+	// ==================== STATE ====================
+	let currentPage = 1;
+	const rowsPerPage = 10;
+	let totalCenters = 0;
+	let centers: IMedicalCenter[] = [];
+	let editingId: number | null = null;
+
+	// ==================== ELEMENTOS ====================
+	const loadingEl = document.getElementById('centers-loading') as HTMLElement;
+	const tableContainer = document.getElementById('centers-table-container') as HTMLElement;
+	const tbody = document.getElementById('centers-tbody') as HTMLTableSectionElement;
+	const paginationEl = document.getElementById('centers-pagination') as HTMLElement;
+	const paginationInfo = document.getElementById('pagination-info') as HTMLElement;
+	const btnPrev = document.getElementById('btn-prev') as HTMLButtonElement;
+	const btnNext = document.getElementById('btn-next') as HTMLButtonElement;
+
+	const modal = document.getElementById('center-modal') as HTMLElement;
+	const modalTitle = document.getElementById('modal-title') as HTMLElement;
+	const modalClose = document.getElementById('modal-close') as HTMLElement;
+	const modalCancel = document.getElementById('modal-cancel') as HTMLElement;
+	const centerForm = document.getElementById('center-form') as HTMLFormElement;
+	const btnNewCenter = document.getElementById('btn-new-center') as HTMLButtonElement;
+
+	// ==================== CARGAR CENTROS ====================
+	async function loadCenters() {
+		try {
+			loadingEl.classList.remove('hidden');
+			tableContainer.classList.add('hidden');
+
+			const response = await findAllMedicalCenters({ page: currentPage, rows: rowsPerPage });
+			centers = response.data;
+			totalCenters = response.total;
+
+			renderTable();
+			updatePagination();
+			loadingEl.classList.add('hidden');
+			tableContainer.classList.remove('hidden');
+			paginationEl.classList.remove('hidden');
+		} catch (error) {
+			console.error('Error al cargar centros:', error);
+			loadingEl.classList.add('hidden');
+		}
+	}
+
+	function renderTable() {
+		tbody.innerHTML = '';
+
+		centers.forEach(center => {
+			const tr = document.createElement('tr');
+			tr.className = 'hover:bg-bg-light transition-colors';
+			tr.innerHTML = `
+				<td class="px-4 py-3 font-display font-semibold text-sm text-text-dark">${center.name}</td>
+				<td class="px-4 py-3 text-sm text-text-dark/80">${center.state}</td>
+				<td class="px-4 py-3 text-sm text-text-dark/80">${center.municipality || '-'}</td>
+				<td class="px-4 py-3 text-sm text-text-dark/60 max-w-xs truncate">${center.address || '-'}</td>
+				<td class="px-4 py-3">
+					<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${center.isActive ? 'bg-success-light text-success-text' : 'bg-error-light text-error-text'}">
+						${center.isActive ? 'Activo' : 'Inactivo'}
+					</span>
+				</td>
+				<td class="px-4 py-3 text-right space-x-2">
+					<button class="btn-edit text-sm text-vzla-blue hover:underline font-display font-semibold" data-center='${JSON.stringify(center)}'>
+						Editar
+					</button>
+					<button class="btn-toggle-status text-sm ${center.isActive ? 'text-error-text' : 'text-success-text'} hover:underline font-display font-semibold" data-id="${center.id}" data-active="${center.isActive}">
+						${center.isActive ? 'Desactivar' : 'Activar'}
+					</button>
+				</td>
+			`;
+			tbody.appendChild(tr);
+		});
+
+		// Event listeners
+		document.querySelectorAll('.btn-edit').forEach(btn => {
+			btn.addEventListener('click', (e) => {
+				const data = (e.currentTarget as HTMLElement).getAttribute('data-center');
+				if (data) openModal(JSON.parse(data));
+			});
+		});
+
+		document.querySelectorAll('.btn-toggle-status').forEach(btn => {
+			btn.addEventListener('click', async (e) => {
+				const id = parseInt((e.currentTarget as HTMLElement).getAttribute('data-id') || '0');
+				const isActive = (e.currentTarget as HTMLElement).getAttribute('data-active') === 'true';
+				
+				if (confirm(`¿Estás seguro de ${isActive ? 'desactivar' : 'activar'} este centro?`)) {
+					try {
+						await changeMedicalCenterStatus(id);
+						loadCenters();
+					} catch (error: any) {
+						alert('Error: ' + (error.message || 'Error al cambiar estado'));
+					}
+				}
+			});
+		});
+	}
+
+	function updatePagination() {
+		const start = (currentPage - 1) * rowsPerPage + 1;
+		const end = Math.min(currentPage * rowsPerPage, totalCenters);
+		paginationInfo.textContent = `Mostrando ${start}-${end} de ${totalCenters}`;
+
+		btnPrev.disabled = currentPage === 1;
+		btnNext.disabled = currentPage * rowsPerPage >= totalCenters;
+	}
+
+	btnPrev.addEventListener('click', () => {
+		if (currentPage > 1) {
+			currentPage--;
+			loadCenters();
+		}
+	});
+
+	btnNext.addEventListener('click', () => {
+		if (currentPage * rowsPerPage < totalCenters) {
+			currentPage++;
+			loadCenters();
+		}
+	});
+
+	// ==================== MODAL ====================
+	function openModal(center?: IMedicalCenter) {
+		if (center) {
+			modalTitle.textContent = 'Editar Centro Médico';
+			editingId = center.id || null;
+			(document.getElementById('center-id') as HTMLInputElement).value = String(center.id);
+			(document.getElementById('center-name') as HTMLInputElement).value = center.name;
+			(document.getElementById('center-state') as HTMLInputElement).value = center.state;
+			(document.getElementById('center-municipality') as HTMLInputElement).value = center.municipality || '';
+			(document.getElementById('center-address') as HTMLTextAreaElement).value = center.address || '';
+		} else {
+			modalTitle.textContent = 'Nuevo Centro Médico';
+			editingId = null;
+			centerForm.reset();
+		}
+
+		modal.classList.remove('hidden');
+	}
+
+	function closeModal() {
+		modal.classList.add('hidden');
+		centerForm.reset();
+		editingId = null;
+		(document.getElementById('form-error') as HTMLElement).classList.add('hidden');
+		(document.getElementById('form-success') as HTMLElement).classList.add('hidden');
+	}
+
+	btnNewCenter.addEventListener('click', () => openModal());
+	modalClose.addEventListener('click', closeModal);
+	modalCancel.addEventListener('click', closeModal);
+
+	// Submit
+	centerForm.addEventListener('submit', async (e) => {
+		e.preventDefault();
+
+		const formError = document.getElementById('form-error') as HTMLElement;
+		const formSuccess = document.getElementById('form-success') as HTMLElement;
+		const submitBtn = document.getElementById('modal-submit') as HTMLButtonElement;
+
+		formError.classList.add('hidden');
+		formSuccess.classList.add('hidden');
+
+		const name = (document.getElementById('center-name') as HTMLInputElement).value.trim();
+		const state = (document.getElementById('center-state') as HTMLInputElement).value.trim();
+		const municipality = (document.getElementById('center-municipality') as HTMLInputElement).value.trim();
+		const address = (document.getElementById('center-address') as HTMLTextAreaElement).value.trim();
+
+		const dto: ICreateMedicalCenterDto | IUpdateMedicalCenterDto = {
+			name,
+			state,
+			...(municipality && { municipality }),
+			...(address && { address }),
+		};
+
+		try {
+			submitBtn.disabled = true;
+			submitBtn.textContent = 'Guardando...';
+
+			if (editingId) {
+				await updateMedicalCenter(editingId, dto);
+			} else {
+				await createMedicalCenter(dto as ICreateMedicalCenterDto);
+			}
+
+			formSuccess.textContent = 'Centro guardado exitosamente';
+			formSuccess.classList.remove('hidden');
+
+			setTimeout(() => {
+				closeModal();
+				loadCenters();
+			}, 1500);
+		} catch (error: any) {
+			formError.textContent = error.message || 'Error al guardar';
+			formError.classList.remove('hidden');
+			submitBtn.disabled = false;
+			submitBtn.textContent = 'Guardar Centro';
+		}
+	});
+
+	// ==================== INICIALIZACIÓN ====================
+	loadCenters();
+</script>

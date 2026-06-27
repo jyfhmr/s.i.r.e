@@ -1,0 +1,123 @@
+---
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Perfiles del Sistema - S.I.R.E.">
+	<div class="space-y-6">
+		<!-- Header -->
+		<div>
+			<h2 class="font-display font-bold text-2xl md:text-3xl text-text-dark">Perfiles del Sistema</h2>
+			<p class="text-sm text-text-dark/60 mt-1">Visualiza los perfiles y roles configurados en el sistema</p>
+		</div>
+
+		<!-- Info -->
+		<div class="bg-info-light border border-info-border rounded-xl p-5">
+			<div class="flex items-start gap-3">
+				<div class="flex-shrink-0 w-10 h-10 rounded-full bg-info-text/10 flex items-center justify-center text-info-text">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="10"></circle>
+						<line x1="12" y1="16" x2="12" y2="12"></line>
+						<line x1="12" y1="8" x2="12.01" y2="8"></line>
+					</svg>
+				</div>
+				<div class="flex-1 space-y-2">
+					<p class="text-sm font-display font-semibold text-info-text">Información sobre Perfiles</p>
+					<p class="text-sm text-text-dark/70 leading-relaxed">
+						Los perfiles del sistema están predefinidos y no pueden ser modificados desde la interfaz. 
+						Cada perfil tiene permisos específicos configurados en el código.
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Lista de perfiles -->
+		<div class="bg-white border border-border-subtle rounded-xl shadow-sm">
+			<div class="p-4 border-b border-border-subtle">
+				<h3 class="font-display font-bold text-lg text-text-dark">Perfiles Disponibles</h3>
+			</div>
+
+			<!-- Loading -->
+			<div id="profiles-loading" class="p-8 text-center">
+				<div class="animate-spin h-8 w-8 border-2 border-vzla-blue border-t-transparent rounded-full mx-auto"></div>
+				<p class="text-sm text-text-dark/60 mt-3">Cargando perfiles...</p>
+			</div>
+
+			<!-- Lista -->
+			<div id="profiles-list" class="hidden divide-y divide-border-subtle">
+				<!-- Perfiles estáticos predefinidos -->
+				<div class="p-6 space-y-3">
+					<div class="flex items-center justify-between">
+						<h4 class="font-display font-bold text-lg text-text-dark">DIOS (Administrador Total)</h4>
+						<span class="px-3 py-1 bg-vzla-blue/10 text-vzla-blue text-xs font-bold rounded-full">ID: 1</span>
+					</div>
+					<p class="text-sm text-text-dark/70">
+						Acceso total al sistema. Puede gestionar usuarios, centros médicos, aprobar solicitudes de acceso, 
+						y administrar todas las configuraciones del sistema.
+					</p>
+					<div class="flex items-center gap-2 text-xs text-success-text">
+						<span class="w-2 h-2 rounded-full bg-success-text"></span>
+						<span>Modo GodMode: Acceso ilimitado a todas las páginas</span>
+					</div>
+				</div>
+
+				<div class="p-6 space-y-3">
+					<div class="flex items-center justify-between">
+						<h4 class="font-display font-bold text-lg text-text-dark">PERSONAL SALUD (Médico)</h4>
+						<span class="px-3 py-1 bg-vzla-blue/10 text-vzla-blue text-xs font-bold rounded-full">ID: 2</span>
+					</div>
+					<p class="text-sm text-text-dark/70">
+						Personal médico con acceso a la gestión de pacientes. Puede registrar, actualizar y consultar 
+						pacientes en el sistema.
+					</p>
+					<div class="space-y-1">
+						<p class="text-xs font-display font-semibold text-text-dark/60">Permisos:</p>
+						<ul class="text-xs text-text-dark/70 space-y-0.5 ml-4 list-disc">
+							<li>Gestión de Pacientes (registrar, actualizar, buscar)</li>
+							<li>Solo ve pacientes que él mismo haya registrado o actualizado</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="p-6 space-y-3">
+					<div class="flex items-center justify-between">
+						<h4 class="font-display font-bold text-lg text-text-dark">USUARIO_COMUN (Ciudadano)</h4>
+						<span class="px-3 py-1 bg-vzla-blue/10 text-vzla-blue text-xs font-bold rounded-full">ID: 3</span>
+					</div>
+					<p class="text-sm text-text-dark/70">
+						Usuario común del sistema. Puede configurar alertas para recibir notificaciones por email 
+						cuando una persona de su lista sea registrada en un centro de salud.
+					</p>
+					<div class="space-y-1">
+						<p class="text-xs font-display font-semibold text-text-dark/60">Permisos:</p>
+						<ul class="text-xs text-text-dark/70 space-y-0.5 ml-4 list-disc">
+							<li>Gestión de Alertas (hasta 15 cédulas)</li>
+							<li>Recibe notificaciones automáticas por correo</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Nota adicional -->
+		<div class="bg-bg-light border border-border-subtle rounded-xl p-5">
+			<p class="text-sm text-text-dark/70">
+				<strong>Nota técnica:</strong> Los permisos de cada perfil están definidos en 
+				<code class="px-2 py-1 bg-white border border-border-subtle rounded text-xs font-mono">@shared/common/profile-rules.ts</code> 
+				y son validados tanto en el frontend (guard de rutas) como en el backend (decoradores de permisos).
+			</p>
+		</div>
+	</div>
+</DashboardLayout>
+
+<script>
+	// Simplemente ocultar el loading y mostrar la lista estática
+	const loadingEl = document.getElementById('profiles-loading');
+	const listEl = document.getElementById('profiles-list');
+
+	if (loadingEl && listEl) {
+		setTimeout(() => {
+			loadingEl.classList.add('hidden');
+			listEl.classList.remove('hidden');
+		}, 300);
+	}
+</script>

@@ -103,31 +103,49 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
+  import { registerCitizen } from '../lib/api';
+
   if (typeof window !== 'undefined') {
     const form = document.getElementById('signup-form') as HTMLFormElement;
-    const successAlert = document.getElementById('signup-success');
+    const successAlert = document.getElementById('signup-success') as HTMLElement;
+    const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
     
-    if (form && successAlert) {
-      form.addEventListener('submit', (e) => {
+    if (form && successAlert && submitBtn) {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const name = (document.getElementById('reg-name') as HTMLInputElement).value;
-        const email = (document.getElementById('reg-email') as HTMLInputElement).value;
+        const fullName = (document.getElementById('reg-name') as HTMLInputElement).value.trim();
+        const email = (document.getElementById('reg-email') as HTMLInputElement).value.trim();
         const password = (document.getElementById('reg-password') as HTMLInputElement).value;
-        
-        // Guardar el registro en localStorage para simular persistencia
-        const users = JSON.parse(localStorage.getItem('sire_familiar_users') || '[]');
-        users.push({ name, email, password, createdAt: new Date().toISOString() });
-        localStorage.setItem('sire_familiar_users', JSON.stringify(users));
 
-        // Mostrar alerta de éxito
-        successAlert.classList.remove('hidden');
-        form.reset();
-        
-        // Redirigir a /login después de 1.5 segundos
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 1500);
+        // Deshabilitar botón
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creando cuenta...';
+        successAlert.classList.add('hidden');
+
+        try {
+          // Registro real en el backend
+          await registerCitizen({ fullName, email, password });
+
+          // Mostrar alerta de éxito
+          if (successAlert) {
+            successAlert.textContent = '✓ ¡Registro completado con éxito! Redirigiendo al login...';
+            successAlert.classList.remove('hidden');
+          }
+          form.reset();
+          
+          // Redirigir a /login después de 1.5 segundos
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 1500);
+        } catch (error: any) {
+          // Mostrar error
+          alert('Error al registrar: ' + (error.message || 'Error desconocido. Intenta nuevamente.'));
+          
+          // Re-habilitar botón
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Crear Cuenta';
+        }
       });
     }
   }

@@ -1,0 +1,334 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	title?: string;
+}
+
+const { title = "Dashboard - S.I.R.E." } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		
+		<!-- SEGURIDAD: Evitar indexación en motores de búsqueda -->
+		<meta name="robots" content="noindex, nofollow" />
+		
+		<!-- Preconexión de fuentes -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link 
+			href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" 
+			rel="stylesheet" 
+		/>
+		
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body class="bg-bg-light text-text-dark selection:bg-vzla-blue/10 selection:text-vzla-blue">
+		<div class="flex min-h-screen">
+		<!-- Sidebar -->
+		<aside id="sidebar" class="hidden lg:flex lg:flex-col w-64 bg-white border-r border-border-subtle fixed h-screen">
+			<!-- Logo / Brand -->
+			<div class="h-16 border-b border-border-subtle flex items-center px-6">
+				<a href="/" class="flex items-center gap-2 group no-underline">
+					<span class="w-2 h-2 rounded-full bg-vzla-blue animate-pulse"></span>
+					<span class="font-display font-bold text-xl text-text-dark">S.I.R.E.</span>
+				</a>
+			</div>
+
+			<!-- Navegación dinámica (se inyecta con JS) -->
+			<nav id="sidebar-nav" class="flex-1 overflow-y-auto py-4 px-3">
+				<!-- Loading -->
+				<div class="flex items-center justify-center py-12">
+					<div class="animate-spin h-6 w-6 border-2 border-vzla-blue border-t-transparent rounded-full"></div>
+				</div>
+			</nav>
+
+			<!-- Footer del sidebar -->
+			<div class="border-t border-border-subtle p-4">
+				<div class="flex items-center gap-3">
+					<div class="w-10 h-10 rounded-full bg-vzla-blue/10 flex items-center justify-center text-vzla-blue font-display font-bold text-sm">
+						<span id="sidebar-user-initial">U</span>
+					</div>
+					<div class="flex-1 min-w-0">
+						<p id="sidebar-user-name" class="font-display font-semibold text-sm text-text-dark truncate">Usuario</p>
+						<p class="text-xs text-text-dark/50">Panel de Control</p>
+					</div>
+				</div>
+			</div>
+		</aside>
+
+		<!-- Contenido principal -->
+		<div class="flex-1 flex flex-col min-w-0 lg:ml-64">
+			<!-- Header superior -->
+			<header class="h-16 bg-white border-b border-border-subtle flex items-center justify-between px-4 lg:px-6 sticky top-0 z-40">
+				<!-- Mobile: Botón menú + Logo -->
+				<div class="flex items-center gap-3 lg:hidden">
+					<button 
+						id="mobile-menu-btn"
+						class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-bg-light transition-colors"
+						aria-label="Abrir menú"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<line x1="3" y1="12" x2="21" y2="12"></line>
+							<line x1="3" y1="6" x2="21" y2="6"></line>
+							<line x1="3" y1="18" x2="21" y2="18"></line>
+						</svg>
+					</button>
+					<a href="/" class="font-display font-bold text-lg text-vzla-blue no-underline">S.I.R.E.</a>
+				</div>
+
+				<!-- Desktop: Título de página -->
+				<div class="hidden lg:block">
+					<h1 id="page-title" class="font-display font-bold text-xl text-text-dark">Dashboard</h1>
+				</div>
+
+				<!-- Usuario + Logout -->
+				<div class="flex items-center gap-3">
+					<span id="header-user-name" class="hidden sm:block font-display font-semibold text-sm text-text-dark"></span>
+					<button 
+						id="logout-btn"
+						class="h-9 px-4 bg-error-light hover:bg-error-border/40 text-error-text border border-error-border rounded-xl font-display font-semibold text-xs transition-all"
+					>
+						Cerrar Sesión
+					</button>
+				</div>
+			</header>
+
+			<!-- Contenido de la página -->
+			<main class="flex-1 overflow-y-auto p-4 lg:p-8">
+				<slot />
+			</main>
+		</div>
+
+		<!-- Mobile Sidebar (overlay) -->
+		<div id="mobile-sidebar-overlay" class="hidden fixed inset-0 bg-black/50 z-50 lg:hidden">
+			<aside class="w-64 h-full bg-white border-r border-border-subtle flex flex-col">
+				<!-- Logo / Brand -->
+				<div class="h-16 border-b border-border-subtle flex items-center justify-between px-6">
+					<a href="/" class="flex items-center gap-2 group no-underline">
+						<span class="w-2 h-2 rounded-full bg-vzla-blue animate-pulse"></span>
+						<span class="font-display font-bold text-xl text-text-dark">S.I.R.E.</span>
+					</a>
+					<button 
+						id="mobile-menu-close"
+						class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-bg-light transition-colors"
+						aria-label="Cerrar menú"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<line x1="18" y1="6" x2="6" y2="18"></line>
+							<line x1="6" y1="6" x2="18" y2="18"></line>
+						</svg>
+					</button>
+				</div>
+
+				<!-- Navegación dinámica (se inyecta con JS) -->
+				<nav id="mobile-sidebar-nav" class="flex-1 overflow-y-auto py-4 px-3">
+					<!-- Loading -->
+					<div class="flex items-center justify-center py-12">
+						<div class="animate-spin h-6 w-6 border-2 border-vzla-blue border-t-transparent rounded-full"></div>
+					</div>
+				</nav>
+
+				<!-- Footer del sidebar -->
+				<div class="border-t border-border-subtle p-4">
+					<div class="flex items-center gap-3">
+						<div class="w-10 h-10 rounded-full bg-vzla-blue/10 flex items-center justify-center text-vzla-blue font-display font-bold text-sm">
+							<span id="mobile-user-initial">U</span>
+						</div>
+						<div class="flex-1 min-w-0">
+							<p id="mobile-user-name" class="font-display font-semibold text-sm text-text-dark truncate">Usuario</p>
+							<p class="text-xs text-text-dark/50">Panel de Control</p>
+						</div>
+					</div>
+				</div>
+			</aside>
+		</div>
+		</div> <!-- Cierre del flex container principal -->
+
+		<!-- Guard de cliente + Menú dinámico -->
+		<script>
+			import { requireAuth, getMenu, logout, canAccessRoute, getFirstRoute, type MenuItem } from '../lib/auth';
+
+			// ==================== GUARD DE CLIENTE ====================
+			// Se ejecuta ANTES de renderizar contenido
+			const session = requireAuth(); // Si no hay sesión → redirige a /login
+
+			// ==================== OBTENER MENÚ DINÁMICO ====================
+			let userMenu: MenuItem[] = [];
+
+			async function loadMenu() {
+				try {
+					const { menu } = await getMenu(session.profileId);
+					userMenu = menu;
+					
+					// LOG: Confirmar que obtenemos el menú del backend
+					console.log('🎯 Menú obtenido del backend:', userMenu);
+					console.log('📊 Perfil ID:', session.profileId);
+
+					// Validar si el usuario puede acceder a la ruta actual
+					const currentPath = window.location.pathname;
+					
+					// Si estamos en /dashboard (raíz), redirigir a la primera ruta válida
+					if (currentPath === '/dashboard' || currentPath === '/dashboard/') {
+						const firstRoute = getFirstRoute(userMenu);
+						if (firstRoute) {
+							window.location.replace(firstRoute);
+							return;
+						}
+					}
+
+					// Si estamos en una ruta específica, verificar acceso
+					if (!canAccessRoute(userMenu, currentPath)) {
+						// No tiene acceso a esta ruta → redirigir a su primera ruta válida
+						const firstRoute = getFirstRoute(userMenu);
+						if (firstRoute) {
+							window.location.replace(firstRoute);
+							return;
+						} else {
+							// No tiene ninguna ruta válida → logout
+							logout();
+							return;
+						}
+					}
+
+					// Renderizar menú en sidebar
+					renderMenu(userMenu);
+				} catch (error) {
+					console.error('Error al cargar el menú:', error);
+					logout(); // Si falla, cerrar sesión
+				}
+			}
+
+			// ==================== RENDER DEL MENÚ ====================
+			function renderMenu(menu: MenuItem[]) {
+				const navDesktop = document.getElementById('sidebar-nav');
+				const navMobile = document.getElementById('mobile-sidebar-nav');
+				
+				if (!navDesktop || !navMobile) return;
+
+				const currentPath = window.location.pathname;
+				let menuHTML = '';
+
+				menu.forEach(item => {
+					const isActive = currentPath.startsWith(item.route || '');
+					
+					if (item.children && item.children.length > 0) {
+						// Item con hijos (expandible)
+						menuHTML += `
+							<div class="mb-2">
+								<div class="px-3 py-2 text-xs font-display font-bold text-text-dark/50 uppercase tracking-wider">
+									${item.label}
+								</div>
+								<div class="space-y-1">
+						`;
+						
+						item.children.forEach(child => {
+							const isChildActive = currentPath === child.route;
+							menuHTML += `
+								<a 
+									href="${child.route}"
+									class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-display font-semibold transition-all no-underline ${
+										isChildActive 
+											? 'bg-vzla-blue text-white' 
+											: 'text-text-dark/70 hover:bg-bg-light hover:text-vzla-blue'
+									}"
+								>
+									<span class="w-1.5 h-1.5 rounded-full ${isChildActive ? 'bg-white' : 'bg-vzla-blue/40'}"></span>
+									${child.label}
+								</a>
+							`;
+						});
+						
+						menuHTML += `
+								</div>
+							</div>
+						`;
+					} else if (item.route) {
+						// Item sin hijos (enlace directo)
+						menuHTML += `
+<a 
+								href="${item.route}"
+								class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-display font-semibold transition-all mb-1 no-underline ${
+									isActive 
+										? 'bg-vzla-blue text-white' 
+										: 'text-text-dark/70 hover:bg-bg-light hover:text-vzla-blue'
+								}"
+							>
+								<span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-white' : 'bg-vzla-blue/40'}"></span>
+								${item.label}
+							</a>
+						`;
+					}
+				});
+
+				navDesktop.innerHTML = menuHTML;
+				navMobile.innerHTML = menuHTML;
+			}
+
+			// ==================== ACTUALIZAR NOMBRE DE USUARIO ====================
+			function updateUserInfo() {
+				const userName = session.name;
+				const userInitial = userName.charAt(0).toUpperCase();
+
+				// Desktop sidebar
+				const sidebarUserName = document.getElementById('sidebar-user-name');
+				const sidebarUserInitial = document.getElementById('sidebar-user-initial');
+				if (sidebarUserName) sidebarUserName.textContent = userName;
+				if (sidebarUserInitial) sidebarUserInitial.textContent = userInitial;
+
+				// Mobile sidebar
+				const mobileUserName = document.getElementById('mobile-user-name');
+				const mobileUserInitial = document.getElementById('mobile-user-initial');
+				if (mobileUserName) mobileUserName.textContent = userName;
+				if (mobileUserInitial) mobileUserInitial.textContent = userInitial;
+
+				// Header
+				const headerUserName = document.getElementById('header-user-name');
+				if (headerUserName) headerUserName.textContent = userName;
+			}
+
+			// ==================== LOGOUT ====================
+			const logoutBtn = document.getElementById('logout-btn');
+			if (logoutBtn) {
+				logoutBtn.addEventListener('click', () => {
+					logout();
+				});
+			}
+
+			// ==================== MOBILE MENU ====================
+			const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+			const mobileMenuClose = document.getElementById('mobile-menu-close');
+			const mobileOverlay = document.getElementById('mobile-sidebar-overlay');
+
+			if (mobileMenuBtn && mobileOverlay) {
+				mobileMenuBtn.addEventListener('click', () => {
+					mobileOverlay.classList.remove('hidden');
+				});
+			}
+
+			if (mobileMenuClose && mobileOverlay) {
+				mobileMenuClose.addEventListener('click', () => {
+					mobileOverlay.classList.add('hidden');
+				});
+
+				// Cerrar al hacer clic en el overlay
+				mobileOverlay.addEventListener('click', (e) => {
+					if (e.target === mobileOverlay) {
+						mobileOverlay.classList.add('hidden');
+					}
+				});
+			}
+
+			// ==================== INICIALIZACIÓN ====================
+			updateUserInfo();
+			loadMenu();
+		</script>
+	</body>
+</html>

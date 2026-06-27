@@ -1,0 +1,274 @@
+---
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Mis Alertas - S.I.R.E.">
+	<div class="space-y-6 max-w-4xl">
+		<!-- Header -->
+		<div>
+			<h2 class="font-display font-bold text-2xl md:text-3xl text-text-dark">Mis Alertas por Correo</h2>
+			<p class="text-sm text-text-dark/60 mt-1">Recibe notificaciones automáticas cuando alguien de tu lista sea registrado en un centro de salud</p>
+		</div>
+
+		<!-- Info Box -->
+		<div class="bg-info-light border border-info-border rounded-xl p-5">
+			<div class="flex items-start gap-3">
+				<div class="flex-shrink-0 w-10 h-10 rounded-full bg-info-text/10 flex items-center justify-center text-info-text">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="10"></circle>
+						<line x1="12" y1="16" x2="12" y2="12"></line>
+						<line x1="12" y1="8" x2="12.01" y2="8"></line>
+					</svg>
+				</div>
+				<div class="flex-1 space-y-2">
+					<p class="text-sm font-display font-semibold text-info-text">¿Cómo funcionan las alertas?</p>
+					<p class="text-sm text-text-dark/70 leading-relaxed">
+						Puedes agregar hasta <strong>15 cédulas</strong> a tu lista de seguimiento. 
+						Cuando un médico registre o actualice a una persona con alguna de esas cédulas, 
+						recibirás un <strong>correo automático</strong> con la ubicación del centro de salud.
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Formulario agregar alerta -->
+		<div class="bg-white border border-border-subtle rounded-xl p-6 shadow-sm">
+			<h3 class="font-display font-bold text-lg text-text-dark mb-4">Agregar Nueva Alerta</h3>
+			
+			<form id="add-alert-form" class="space-y-4">
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+					<div class="space-y-2">
+						<label for="alert-dni" class="block text-sm font-display font-semibold text-text-dark">
+							Cédula <span class="text-error-text">*</span>
+						</label>
+						<input 
+							type="text"
+							id="alert-dni"
+							required
+							class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+							placeholder="Ej: 12345678"
+						/>
+						<p class="text-xs text-text-dark/50">Solo números, sin puntos ni guiones</p>
+					</div>
+
+					<div class="space-y-2">
+						<label for="alert-alias" class="block text-sm font-display font-semibold text-text-dark">
+							Alias / Relación (opcional)
+						</label>
+						<input 
+							type="text"
+							id="alert-alias"
+							class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+							placeholder="Ej: Mamá, Hermano Pedro"
+							maxlength="50"
+						/>
+						<p class="text-xs text-text-dark/50">Para identificar fácilmente</p>
+					</div>
+				</div>
+
+				<div id="form-error" class="hidden bg-error-light border border-error-border text-error-text text-sm rounded-lg p-3"></div>
+				<div id="form-success" class="hidden bg-success-light border border-success-border text-success-text text-sm rounded-lg p-3"></div>
+
+				<button 
+					type="submit"
+					id="btn-add-alert"
+					class="h-11 px-6 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-xl transition-all shadow-xs"
+				>
+					+ Agregar a Mi Lista
+				</button>
+			</form>
+		</div>
+
+		<!-- Lista de alertas -->
+		<div class="bg-white border border-border-subtle rounded-xl shadow-sm">
+			<div class="p-4 border-b border-border-subtle flex items-center justify-between">
+				<h3 class="font-display font-bold text-lg text-text-dark">Mi Lista de Seguimiento</h3>
+				<span id="alerts-count" class="text-sm font-display font-semibold text-vzla-blue">0 / 15</span>
+			</div>
+
+			<!-- Loading -->
+			<div id="alerts-loading" class="p-8 text-center">
+				<div class="animate-spin h-8 w-8 border-2 border-vzla-blue border-t-transparent rounded-full mx-auto"></div>
+				<p class="text-sm text-text-dark/60 mt-3">Cargando alertas...</p>
+			</div>
+
+			<!-- Lista -->
+			<div id="alerts-list" class="hidden divide-y divide-border-subtle"></div>
+
+			<!-- Empty State -->
+			<div id="alerts-empty" class="hidden p-12 text-center space-y-3">
+				<div class="w-16 h-16 mx-auto rounded-full bg-bg-light flex items-center justify-center text-text-dark/40">
+					<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"></path>
+					</svg>
+				</div>
+				<p class="font-display font-semibold text-text-dark">No tienes alertas configuradas</p>
+				<p class="text-sm text-text-dark/60">Agrega cédulas para recibir notificaciones automáticas</p>
+			</div>
+		</div>
+	</div>
+</DashboardLayout>
+
+<script>
+	import { findAllAlerts, createAlert, deleteAlert } from '../../../lib/api';
+	import { MAX_ALERTS_PER_USER } from '@shared/core/citizen/alerts/interfaces';
+	import type { IWatchListItem, ICreateAlertDto } from '@shared/core/citizen/alerts/interfaces';
+
+	// ==================== ELEMENTOS ====================
+	const loadingEl = document.getElementById('alerts-loading') as HTMLElement;
+	const listEl = document.getElementById('alerts-list') as HTMLElement;
+	const emptyEl = document.getElementById('alerts-empty') as HTMLElement;
+	const alertsCount = document.getElementById('alerts-count') as HTMLElement;
+	const addAlertForm = document.getElementById('add-alert-form') as HTMLFormElement;
+	const formError = document.getElementById('form-error') as HTMLElement;
+	const formSuccess = document.getElementById('form-success') as HTMLElement;
+	const btnAddAlert = document.getElementById('btn-add-alert') as HTMLButtonElement;
+
+	// ==================== STATE ====================
+	let alerts: IWatchListItem[] = [];
+
+	// ==================== CARGAR ALERTAS ====================
+	async function loadAlerts() {
+		try {
+			loadingEl.classList.remove('hidden');
+			listEl.classList.add('hidden');
+			emptyEl.classList.add('hidden');
+
+			alerts = await findAllAlerts();
+
+			// Actualizar contador
+			alertsCount.textContent = `${alerts.length} / ${MAX_ALERTS_PER_USER}`;
+
+			if (alerts.length === 0) {
+				loadingEl.classList.add('hidden');
+				emptyEl.classList.remove('hidden');
+			} else {
+				renderAlerts();
+				loadingEl.classList.add('hidden');
+				listEl.classList.remove('hidden');
+			}
+
+			// Deshabilitar botón si llegó al límite
+			if (alerts.length >= MAX_ALERTS_PER_USER) {
+				btnAddAlert.disabled = true;
+				btnAddAlert.textContent = `Límite Alcanzado (${MAX_ALERTS_PER_USER})`;
+			} else {
+				btnAddAlert.disabled = false;
+				btnAddAlert.textContent = '+ Agregar a Mi Lista';
+			}
+		} catch (error) {
+			console.error('Error al cargar alertas:', error);
+			loadingEl.classList.add('hidden');
+			emptyEl.classList.remove('hidden');
+		}
+	}
+
+	// ==================== RENDERIZAR LISTA ====================
+	function renderAlerts() {
+		listEl.innerHTML = '';
+
+		alerts.forEach(alert => {
+			const createdDate = new Date(alert.createdAt || '').toLocaleDateString('es-VE', {
+				year: 'numeric',
+				month: 'short',
+				day: 'numeric'
+			});
+
+			const div = document.createElement('div');
+			div.className = 'p-5 hover:bg-bg-light/50 transition-colors flex items-center justify-between gap-4';
+			div.innerHTML = `
+				<div class="flex-1 min-w-0">
+					<div class="flex items-center gap-3 mb-1">
+						<span class="font-mono text-base font-semibold text-text-dark">${alert.watchedDni}</span>
+						${alert.alias ? `<span class="px-2.5 py-0.5 bg-vzla-blue/10 text-vzla-blue text-xs font-display font-bold rounded-full">${alert.alias}</span>` : ''}
+					</div>
+					<p class="text-xs text-text-dark/50">Agregado el ${createdDate}</p>
+				</div>
+				<button 
+					class="btn-delete-alert h-9 px-4 border border-error-border text-error-text hover:bg-error-light rounded-lg text-sm font-display font-semibold transition-colors"
+					data-alert-id="${alert.id}"
+				>
+					Eliminar
+				</button>
+			`;
+			listEl.appendChild(div);
+		});
+
+		// Event listeners para eliminar
+		document.querySelectorAll('.btn-delete-alert').forEach(btn => {
+			btn.addEventListener('click', async (e) => {
+				const id = (e.currentTarget as HTMLElement).getAttribute('data-alert-id');
+				if (!id) return;
+
+				if (confirm('¿Estás seguro de eliminar esta alerta?')) {
+					try {
+						await deleteAlert(parseInt(id));
+						loadAlerts(); // Recargar lista
+					} catch (error: any) {
+						alert(`Error al eliminar: ${error.message || 'Error desconocido'}`);
+					}
+				}
+			});
+		});
+	}
+
+	// ==================== AGREGAR ALERTA ====================
+	addAlertForm.addEventListener('submit', async (e) => {
+		e.preventDefault();
+
+		formError.classList.add('hidden');
+		formSuccess.classList.add('hidden');
+
+		const dni = (document.getElementById('alert-dni') as HTMLInputElement).value.trim().replace(/[^0-9]/g, '');
+		const alias = (document.getElementById('alert-alias') as HTMLInputElement).value.trim();
+
+		if (!dni) {
+			formError.textContent = 'Por favor ingresa una cédula válida';
+			formError.classList.remove('hidden');
+			return;
+		}
+
+		// Verificar límite
+		if (alerts.length >= MAX_ALERTS_PER_USER) {
+			formError.textContent = `Has alcanzado el límite de ${MAX_ALERTS_PER_USER} alertas`;
+			formError.classList.remove('hidden');
+			return;
+		}
+
+		// Verificar duplicado
+		if (alerts.some(a => a.watchedDni === dni)) {
+			formError.textContent = 'Ya tienes una alerta configurada para esta cédula';
+			formError.classList.remove('hidden');
+			return;
+		}
+
+		const dto: ICreateAlertDto = {
+			watchedDni: dni,
+			...(alias && { alias }),
+		};
+
+		try {
+			btnAddAlert.disabled = true;
+			btnAddAlert.textContent = 'Agregando...';
+
+			await createAlert(dto);
+
+			formSuccess.textContent = '✓ Alerta agregada exitosamente';
+			formSuccess.classList.remove('hidden');
+			addAlertForm.reset();
+
+			setTimeout(() => {
+				formSuccess.classList.add('hidden');
+				loadAlerts(); // Recargar lista
+			}, 2000);
+		} catch (error: any) {
+			formError.textContent = error.message || 'Error al agregar la alerta';
+			formError.classList.remove('hidden');
+			btnAddAlert.disabled = false;
+			btnAddAlert.textContent = '+ Agregar a Mi Lista';
+		}
+	});
+
+	// ==================== INICIALIZACIÓN ====================
+	loadAlerts();
+</script>

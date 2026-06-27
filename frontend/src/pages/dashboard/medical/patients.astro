@@ -1,0 +1,524 @@
+---
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Gestión de Pacientes - S.I.R.E.">
+	<div class="space-y-6">
+		<!-- Header -->
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+			<div>
+				<h2 class="font-display font-bold text-2xl md:text-3xl text-text-dark">Mis Pacientes</h2>
+				<p class="text-sm text-text-dark/60 mt-1">Administra los pacientes que has registrado o actualizado</p>
+			</div>
+			<button 
+				id="btn-new-patient"
+				class="h-11 px-6 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-xl transition-all shadow-xs"
+			>
+				+ Registrar Paciente
+			</button>
+		</div>
+
+		<!-- Buscador Global (por cédula) -->
+		<div class="bg-white border border-border-subtle rounded-xl p-4 shadow-sm">
+			<form id="search-form" class="flex gap-3">
+				<div class="flex-1">
+					<input 
+						type="text"
+						id="search-dni"
+						placeholder="Buscar paciente por cédula (cualquier centro médico)..."
+						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+					/>
+				</div>
+				<button 
+					type="submit"
+					class="h-11 px-6 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-lg transition-all"
+				>
+					Buscar
+				</button>
+			</form>
+			<div id="search-result" class="hidden mt-4"></div>
+		</div>
+
+		<!-- Tabla de Pacientes -->
+		<div class="bg-white border border-border-subtle rounded-xl shadow-sm overflow-hidden">
+			<div class="p-4 border-b border-border-subtle">
+				<h3 class="font-display font-bold text-lg text-text-dark">Lista de Pacientes</h3>
+			</div>
+
+			<!-- Loading -->
+			<div id="patients-loading" class="p-8 text-center">
+				<div class="animate-spin h-8 w-8 border-2 border-vzla-blue border-t-transparent rounded-full mx-auto"></div>
+				<p class="text-sm text-text-dark/60 mt-3">Cargando pacientes...</p>
+			</div>
+
+			<!-- Tabla -->
+			<div id="patients-table-container" class="hidden overflow-x-auto">
+				<table class="w-full">
+					<thead class="bg-bg-light border-b border-border-subtle">
+						<tr class="text-left text-xs font-display font-bold text-text-dark/70 uppercase tracking-wider">
+							<th class="px-4 py-3">Cédula</th>
+							<th class="px-4 py-3">Nombre Completo</th>
+							<th class="px-4 py-3">Estado</th>
+							<th class="px-4 py-3">Centro / Ubicación</th>
+							<th class="px-4 py-3">Última Act.</th>
+							<th class="px-4 py-3 text-right">Acciones</th>
+						</tr>
+					</thead>
+					<tbody id="patients-tbody" class="divide-y divide-border-subtle"></tbody>
+				</table>
+			</div>
+
+			<!-- Empty State -->
+			<div id="patients-empty" class="hidden p-12 text-center space-y-3">
+				<div class="w-16 h-16 mx-auto rounded-full bg-bg-light flex items-center justify-center text-text-dark/40">
+					<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+						<circle cx="9" cy="7" r="4"></circle>
+						<path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+						<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+					</svg>
+				</div>
+				<p class="font-display font-semibold text-text-dark">No has registrado pacientes aún</p>
+				<p class="text-sm text-text-dark/60">Haz clic en "Registrar Paciente" para comenzar</p>
+			</div>
+
+			<!-- Paginación -->
+			<div id="patients-pagination" class="hidden border-t border-border-subtle p-4 flex items-center justify-between">
+				<span id="pagination-info" class="text-sm text-text-dark/60"></span>
+				<div class="flex gap-2">
+					<button id="btn-prev" class="h-9 px-4 border border-border-subtle rounded-lg text-sm font-display font-semibold hover:bg-bg-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+						Anterior
+					</button>
+					<button id="btn-next" class="h-9 px-4 border border-border-subtle rounded-lg text-sm font-display font-semibold hover:bg-bg-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+						Siguiente
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal Upsert Paciente -->
+	<div id="patient-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+		<div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+			<div class="sticky top-0 bg-white border-b border-border-subtle p-6 flex items-center justify-between">
+				<h3 id="modal-title" class="font-display font-bold text-xl text-text-dark">Registrar Nuevo Paciente</h3>
+				<button id="modal-close" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-bg-light transition-colors">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="18" y1="6" x2="6" y2="18"></line>
+						<line x1="6" y1="6" x2="18" y2="18"></line>
+					</svg>
+				</button>
+			</div>
+
+			<form id="patient-form" class="p-6 space-y-5">
+				<!-- Cédula -->
+				<div class="space-y-2">
+					<label for="patient-dni" class="block text-sm font-display font-bold text-text-dark">
+						Cédula de Identidad <span class="text-error-text">*</span>
+					</label>
+					<input 
+						type="text"
+						id="patient-dni"
+						required
+						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+						placeholder="Ej: 12345678"
+					/>
+					<p class="text-xs text-text-dark/50">Solo números, sin puntos ni guiones</p>
+				</div>
+
+				<!-- Nombre Completo -->
+				<div class="space-y-2">
+					<label for="patient-name" class="block text-sm font-display font-bold text-text-dark">
+						Nombre Completo <span class="text-error-text">*</span>
+					</label>
+					<input 
+						type="text"
+						id="patient-name"
+						required
+						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+						placeholder="Ej: Juan Alberto Pérez"
+					/>
+				</div>
+
+				<!-- Estado -->
+				<div class="space-y-2">
+					<label for="patient-status" class="block text-sm font-display font-bold text-text-dark">
+						Estado del Paciente <span class="text-error-text">*</span>
+					</label>
+					<select 
+						id="patient-status"
+						required
+						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+					>
+						<option value="">Seleccionar estado...</option>
+						<option value="ESTABLE">Estable</option>
+						<option value="CRÍTICO">Crítico</option>
+						<option value="CONTACTAR_INMEDIATO">Contactar Inmediato</option>
+						<option value="DESAPARECIDO">Desaparecido</option>
+					</select>
+				</div>
+
+				<!-- Centro Médico (autocomplete) -->
+				<div class="space-y-2">
+					<label for="medical-center-search" class="block text-sm font-display font-bold text-text-dark">
+						Centro de Salud
+					</label>
+					<div class="relative">
+						<input 
+							type="text"
+							id="medical-center-search"
+							autocomplete="off"
+							class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+							placeholder="Escribe para buscar o escribir manualmente..."
+						/>
+						<div id="medical-center-dropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-border-subtle rounded-lg shadow-lg max-h-48 overflow-y-auto z-10"></div>
+					</div>
+					<p class="text-xs text-text-dark/50">Selecciona del catálogo o escribe manualmente</p>
+				</div>
+
+				<!-- Manual Location (se muestra si no selecciona del catálogo) -->
+				<input type="hidden" id="selected-center-id" value="" />
+
+				<!-- Mensajes -->
+				<div id="form-error" class="hidden bg-error-light border border-error-border text-error-text text-sm rounded-lg p-3"></div>
+				<div id="form-success" class="hidden bg-success-light border border-success-border text-success-text text-sm rounded-lg p-3"></div>
+
+				<!-- Botones -->
+				<div class="flex gap-3 pt-2">
+					<button 
+						type="button"
+						id="modal-cancel"
+						class="flex-1 h-11 border border-border-subtle rounded-lg text-sm font-display font-semibold hover:bg-bg-light transition-colors"
+					>
+						Cancelar
+					</button>
+					<button 
+						type="submit"
+						id="modal-submit"
+						class="flex-1 h-11 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-lg transition-all"
+					>
+						Guardar Paciente
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</DashboardLayout>
+
+<script>
+	import { findAllPatients, searchPatientByDniMedical, upsertPatient, searchMedicalCenters } from '../../../lib/api';
+	import { getStatusConfig } from '../../../lib/patient-status';
+	import type { IPatient, IUpsertPatientDto } from '@shared/core/medical/patients/interfaces';
+	import type { PatientStatus } from '@shared/common';
+	import type { IMedicalCenter } from '@shared/core/config/medical-centers/interfaces';
+
+	// ==================== STATE ====================
+	let currentPage = 1;
+	const rowsPerPage = 10;
+	let totalPatients = 0;
+	let patients: IPatient[] = [];
+	let searchTimeout: number;
+
+	// ==================== ELEMENTOS ====================
+	const loadingEl = document.getElementById('patients-loading') as HTMLElement;
+	const tableContainer = document.getElementById('patients-table-container') as HTMLElement;
+	const emptyEl = document.getElementById('patients-empty') as HTMLElement;
+	const tbody = document.getElementById('patients-tbody') as HTMLTableSectionElement;
+	const paginationEl = document.getElementById('patients-pagination') as HTMLElement;
+	const paginationInfo = document.getElementById('pagination-info') as HTMLElement;
+	const btnPrev = document.getElementById('btn-prev') as HTMLButtonElement;
+	const btnNext = document.getElementById('btn-next') as HTMLButtonElement;
+
+	const modal = document.getElementById('patient-modal') as HTMLElement;
+	const modalTitle = document.getElementById('modal-title') as HTMLElement;
+	const modalClose = document.getElementById('modal-close') as HTMLElement;
+	const modalCancel = document.getElementById('modal-cancel') as HTMLElement;
+	const patientForm = document.getElementById('patient-form') as HTMLFormElement;
+
+	const btnNewPatient = document.getElementById('btn-new-patient') as HTMLButtonElement;
+	const searchForm = document.getElementById('search-form') as HTMLFormElement;
+	const searchResult = document.getElementById('search-result') as HTMLElement;
+
+	// ==================== CARGAR LISTA DE PACIENTES ====================
+	async function loadPatients() {
+		try {
+			loadingEl.classList.remove('hidden');
+			tableContainer.classList.add('hidden');
+			emptyEl.classList.add('hidden');
+
+			const response = await findAllPatients({ page: currentPage, rows: rowsPerPage });
+			patients = response.data;
+			totalPatients = response.total;
+
+			if (patients.length === 0 && currentPage === 1) {
+				// Sin pacientes
+				loadingEl.classList.add('hidden');
+				emptyEl.classList.remove('hidden');
+			} else {
+				// Renderizar tabla
+				renderTable();
+				updatePagination();
+				loadingEl.classList.add('hidden');
+				tableContainer.classList.remove('hidden');
+				paginationEl.classList.remove('hidden');
+			}
+		} catch (error) {
+			console.error('Error al cargar pacientes:', error);
+			loadingEl.classList.add('hidden');
+			emptyEl.classList.remove('hidden');
+		}
+	}
+
+	function renderTable() {
+		tbody.innerHTML = '';
+
+		patients.forEach(patient => {
+			const config = getStatusConfig(patient.currentStatus as PatientStatus);
+			const location = patient.currentMedicalCenter?.name || patient.manualLocation || 'No especificado';
+			const lastUpdated = new Date(patient.lastUpdatedAt || patient.createdAt || '').toLocaleDateString('es-VE', {
+				year: 'numeric',
+				month: 'short',
+				day: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit'
+			});
+
+			const tr = document.createElement('tr');
+			tr.className = 'hover:bg-bg-light transition-colors';
+			tr.innerHTML = `
+				<td class="px-4 py-3 font-mono text-sm text-text-dark">${patient.dni}</td>
+				<td class="px-4 py-3 font-display font-semibold text-sm text-text-dark">${patient.fullName}</td>
+				<td class="px-4 py-3">
+					<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${config.bgClass}">
+						<span class="w-1.5 h-1.5 rounded-full ${config.badgeClass}"></span>
+						${config.label}
+					</span>
+				</td>
+				<td class="px-4 py-3 text-sm text-text-dark/80">${location}</td>
+				<td class="px-4 py-3 text-xs text-text-dark/60">${lastUpdated}</td>
+				<td class="px-4 py-3 text-right">
+					<button 
+						class="btn-edit-patient text-sm text-vzla-blue hover:underline font-display font-semibold"
+						data-patient='${JSON.stringify(patient)}'
+					>
+						Actualizar
+					</button>
+				</td>
+			`;
+			tbody.appendChild(tr);
+		});
+
+		// Event listeners para editar
+		document.querySelectorAll('.btn-edit-patient').forEach(btn => {
+			btn.addEventListener('click', (e) => {
+				const data = (e.currentTarget as HTMLElement).getAttribute('data-patient');
+				if (data) {
+					const patient = JSON.parse(data) as IPatient;
+					openModal(patient);
+				}
+			});
+		});
+	}
+
+	function updatePagination() {
+		const start = (currentPage - 1) * rowsPerPage + 1;
+		const end = Math.min(currentPage * rowsPerPage, totalPatients);
+		paginationInfo.textContent = `Mostrando ${start}-${end} de ${totalPatients}`;
+
+		btnPrev.disabled = currentPage === 1;
+		btnNext.disabled = currentPage * rowsPerPage >= totalPatients;
+	}
+
+	btnPrev.addEventListener('click', () => {
+		if (currentPage > 1) {
+			currentPage--;
+			loadPatients();
+		}
+	});
+
+	btnNext.addEventListener('click', () => {
+		if (currentPage * rowsPerPage < totalPatients) {
+			currentPage++;
+			loadPatients();
+		}
+	});
+
+	// ==================== BUSCAR PACIENTE GLOBAL ====================
+	searchForm.addEventListener('submit', async (e) => {
+		e.preventDefault();
+		const dni = (document.getElementById('search-dni') as HTMLInputElement).value.trim();
+		if (!dni) return;
+
+		searchResult.innerHTML = '<p class="text-sm text-text-dark/60">Buscando...</p>';
+		searchResult.classList.remove('hidden');
+
+		try {
+			const patient = await searchPatientByDniMedical(dni);
+			if (patient) {
+				const config = getStatusConfig(patient.currentStatus as PatientStatus);
+				const location = patient.currentMedicalCenter?.name || patient.manualLocation || 'No especificado';
+				
+				searchResult.innerHTML = `
+					<div class="bg-bg-light border border-border-subtle rounded-lg p-4 space-y-3">
+						<div class="flex items-start justify-between gap-4">
+							<div class="flex-1">
+								<p class="font-display font-bold text-lg text-text-dark">${patient.fullName}</p>
+								<p class="text-sm text-text-dark/60 font-mono">CI: ${patient.dni}</p>
+							</div>
+							<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${config.bgClass}">
+								<span class="w-1.5 h-1.5 rounded-full ${config.badgeClass}"></span>
+								${config.label}
+							</span>
+						</div>
+						<p class="text-sm text-text-dark/80"><strong>Ubicación:</strong> ${location}</p>
+						<button class="btn-update-found h-9 px-4 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-xs rounded-lg transition-all" data-patient='${JSON.stringify(patient)}'>
+							Actualizar Este Paciente
+						</button>
+					</div>
+				`;
+
+				const btnUpdate = searchResult.querySelector('.btn-update-found') as HTMLElement;
+				btnUpdate?.addEventListener('click', () => {
+					const data = btnUpdate.getAttribute('data-patient');
+					if (data) openModal(JSON.parse(data));
+				});
+			} else {
+				searchResult.innerHTML = '<p class="text-sm text-error-text">No se encontró ningún paciente con esa cédula.</p>';
+			}
+		} catch (error: any) {
+			searchResult.innerHTML = `<p class="text-sm text-error-text">${error.message || 'Error al buscar'}</p>`;
+		}
+	});
+
+	// ==================== MODAL ====================
+	function openModal(patient?: IPatient) {
+		if (patient) {
+			modalTitle.textContent = 'Actualizar Paciente';
+			(document.getElementById('patient-dni') as HTMLInputElement).value = patient.dni;
+			(document.getElementById('patient-dni') as HTMLInputElement).readOnly = true;
+			(document.getElementById('patient-name') as HTMLInputElement).value = patient.fullName;
+			(document.getElementById('patient-status') as HTMLSelectElement).value = patient.currentStatus;
+			
+			if (patient.currentMedicalCenter) {
+				(document.getElementById('selected-center-id') as HTMLInputElement).value = String(patient.currentMedicalCenter.id);
+				(document.getElementById('medical-center-search') as HTMLInputElement).value = patient.currentMedicalCenter.name;
+			} else if (patient.manualLocation) {
+				(document.getElementById('medical-center-search') as HTMLInputElement).value = patient.manualLocation;
+			}
+		} else {
+			modalTitle.textContent = 'Registrar Nuevo Paciente';
+			patientForm.reset();
+			(document.getElementById('patient-dni') as HTMLInputElement).readOnly = false;
+			(document.getElementById('selected-center-id') as HTMLInputElement).value = '';
+		}
+
+		modal.classList.remove('hidden');
+	}
+
+	function closeModal() {
+		modal.classList.add('hidden');
+		patientForm.reset();
+		(document.getElementById('form-error') as HTMLElement).classList.add('hidden');
+		(document.getElementById('form-success') as HTMLElement).classList.add('hidden');
+	}
+
+	btnNewPatient.addEventListener('click', () => openModal());
+	modalClose.addEventListener('click', closeModal);
+	modalCancel.addEventListener('click', closeModal);
+
+	// Autocomplete de centros médicos
+	const centerSearch = document.getElementById('medical-center-search') as HTMLInputElement;
+	const centerDropdown = document.getElementById('medical-center-dropdown') as HTMLElement;
+	const selectedCenterId = document.getElementById('selected-center-id') as HTMLInputElement;
+
+	centerSearch.addEventListener('input', () => {
+		clearTimeout(searchTimeout);
+		const query = centerSearch.value.trim();
+
+		if (query.length < 2) {
+			centerDropdown.classList.add('hidden');
+			return;
+		}
+
+		searchTimeout = window.setTimeout(async () => {
+			try {
+				const centers = await searchMedicalCenters(query);
+				if (centers.length > 0) {
+					centerDropdown.innerHTML = centers.map(c => 
+						`<button type="button" class="center-option w-full text-left px-4 py-2.5 hover:bg-bg-light transition-colors text-sm" data-id="${c.id}" data-name="${c.name}">
+							<span class="font-display font-semibold text-text-dark">${c.name}</span>
+							<span class="text-xs text-text-dark/50 block">${c.state}${c.municipality ? ', ' + c.municipality : ''}</span>
+						</button>`
+					).join('');
+
+					document.querySelectorAll('.center-option').forEach(btn => {
+						btn.addEventListener('click', () => {
+							const id = btn.getAttribute('data-id');
+							const name = btn.getAttribute('data-name');
+							if (id && name) {
+								selectedCenterId.value = id;
+								centerSearch.value = name;
+								centerDropdown.classList.add('hidden');
+							}
+						});
+					});
+
+					centerDropdown.classList.remove('hidden');
+				} else {
+					centerDropdown.classList.add('hidden');
+				}
+			} catch (error) {
+				console.error('Error al buscar centros:', error);
+			}
+		}, 300);
+	});
+
+	// Submit del formulario
+	patientForm.addEventListener('submit', async (e) => {
+		e.preventDefault();
+
+		const formError = document.getElementById('form-error') as HTMLElement;
+		const formSuccess = document.getElementById('form-success') as HTMLElement;
+		const submitBtn = document.getElementById('modal-submit') as HTMLButtonElement;
+
+		formError.classList.add('hidden');
+		formSuccess.classList.add('hidden');
+
+		const dni = (document.getElementById('patient-dni') as HTMLInputElement).value.trim();
+		const fullName = (document.getElementById('patient-name') as HTMLInputElement).value.trim();
+		const status = (document.getElementById('patient-status') as HTMLSelectElement).value as PatientStatus;
+		const centerIdStr = selectedCenterId.value;
+		const manualLocation = centerSearch.value.trim();
+
+		const dto: IUpsertPatientDto = {
+			dni,
+			fullName,
+			status,
+			...(centerIdStr ? { medicalCenterId: parseInt(centerIdStr) } : { manualLocation }),
+		};
+
+		try {
+			submitBtn.disabled = true;
+			submitBtn.textContent = 'Guardando...';
+
+			await upsertPatient(dto);
+
+			formSuccess.textContent = 'Paciente guardado exitosamente';
+			formSuccess.classList.remove('hidden');
+
+			setTimeout(() => {
+				closeModal();
+				loadPatients(); // Recargar lista
+				searchResult.classList.add('hidden'); // Ocultar resultado de búsqueda
+			}, 1500);
+		} catch (error: any) {
+			formError.textContent = error.message || 'Error al guardar el paciente';
+			formError.classList.remove('hidden');
+			submitBtn.disabled = false;
+			submitBtn.textContent = 'Guardar Paciente';
+		}
+	});
+
+	// ==================== INICIALIZACIÓN ====================
+	loadPatients();
+</script>

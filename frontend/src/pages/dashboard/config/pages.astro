@@ -1,0 +1,415 @@
+---
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Gestión de Páginas - S.I.R.E.">
+	<div class="space-y-6">
+		<!-- Header -->
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+			<div>
+				<h2 class="font-display font-bold text-2xl md:text-3xl text-text-dark">Páginas del Menú</h2>
+				<p class="text-sm text-text-dark/60 mt-1">Administra las páginas y estructura del menú del sistema</p>
+			</div>
+			<button 
+				id="btn-new-page"
+				class="h-11 px-6 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-xl transition-all shadow-xs"
+			>
+				+ Nueva Página
+			</button>
+		</div>
+
+		<!-- Info -->
+		<div class="bg-info-light border border-info-border rounded-xl p-5">
+			<div class="flex items-start gap-3">
+				<div class="flex-shrink-0 w-10 h-10 rounded-full bg-info-text/10 flex items-center justify-center text-info-text">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="10"></circle>
+						<line x1="12" y1="16" x2="12" y2="12"></line>
+						<line x1="12" y1="8" x2="12.01" y2="8"></line>
+					</svg>
+				</div>
+				<div class="flex-1 space-y-2">
+					<p class="text-sm font-display font-semibold text-info-text">Importante</p>
+					<p class="text-sm text-text-dark/70 leading-relaxed">
+						Las páginas con padre aparecerán como submenús en el sidebar. El orden determina la posición en el menú.
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Tabla de páginas -->
+		<div class="bg-white border border-border-subtle rounded-xl shadow-sm overflow-hidden">
+			<div class="p-4 border-b border-border-subtle">
+				<h3 class="font-display font-bold text-lg text-text-dark">Lista de Páginas</h3>
+			</div>
+
+			<!-- Loading -->
+			<div id="pages-loading" class="p-8 text-center">
+				<div class="animate-spin h-8 w-8 border-2 border-vzla-blue border-t-transparent rounded-full mx-auto"></div>
+				<p class="text-sm text-text-dark/60 mt-3">Cargando páginas...</p>
+			</div>
+
+			<!-- Tabla -->
+			<div id="pages-table-container" class="hidden overflow-x-auto">
+				<table class="w-full">
+					<thead class="bg-bg-light border-b border-border-subtle">
+						<tr class="text-left text-xs font-display font-bold text-text-dark/70 uppercase tracking-wider">
+							<th class="px-4 py-3">Nombre</th>
+							<th class="px-4 py-3">Ruta</th>
+							<th class="px-4 py-3">Icono</th>
+							<th class="px-4 py-3">Padre</th>
+							<th class="px-4 py-3">Orden</th>
+							<th class="px-4 py-3">Estado</th>
+							<th class="px-4 py-3 text-right">Acciones</th>
+						</tr>
+					</thead>
+					<tbody id="pages-tbody" class="divide-y divide-border-subtle"></tbody>
+				</table>
+			</div>
+
+			<!-- Paginación -->
+			<div id="pages-pagination" class="hidden border-t border-border-subtle p-4 flex items-center justify-between">
+				<span id="pagination-info" class="text-sm text-text-dark/60"></span>
+				<div class="flex gap-2">
+					<button id="btn-prev" class="h-9 px-4 border border-border-subtle rounded-lg text-sm font-display font-semibold hover:bg-bg-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+						Anterior
+					</button>
+					<button id="btn-next" class="h-9 px-4 border border-border-subtle rounded-lg text-sm font-display font-semibold hover:bg-bg-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+						Siguiente
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal Crear/Editar -->
+	<div id="page-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+		<div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+			<div class="sticky top-0 bg-white border-b border-border-subtle p-6 flex items-center justify-between">
+				<h3 id="modal-title" class="font-display font-bold text-xl text-text-dark">Nueva Página</h3>
+				<button id="modal-close" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-bg-light transition-colors">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="18" y1="6" x2="6" y2="18"></line>
+						<line x1="6" y1="6" x2="18" y2="18"></line>
+					</svg>
+				</button>
+			</div>
+
+			<form id="page-form" class="p-6 space-y-5">
+				<input type="hidden" id="page-id" value="" />
+
+				<div class="space-y-2">
+					<label for="page-name" class="block text-sm font-display font-bold text-text-dark">
+						Nombre <span class="text-error-text">*</span>
+					</label>
+					<input 
+						type="text"
+						id="page-name"
+						required
+						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+						placeholder="Ej: Gestión de Pacientes"
+					/>
+				</div>
+
+				<div class="space-y-2">
+					<label for="page-route" class="block text-sm font-display font-bold text-text-dark">
+						Ruta
+					</label>
+					<input 
+						type="text"
+						id="page-route"
+						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+						placeholder="/dashboard/medical/patients"
+					/>
+					<p class="text-xs text-text-dark/50">Deja vacío si es solo un contenedor (tiene hijos)</p>
+				</div>
+
+				<div class="space-y-2">
+					<label for="page-icon" class="block text-sm font-display font-bold text-text-dark">
+						Icono (opcional)
+					</label>
+					<input 
+						type="text"
+						id="page-icon"
+						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+						placeholder="heroicons/users"
+					/>
+				</div>
+
+				<div class="space-y-2">
+					<label for="page-order" class="block text-sm font-display font-bold text-text-dark">
+						Orden <span class="text-error-text">*</span>
+					</label>
+					<input 
+						type="number"
+						id="page-order"
+						required
+						min="1"
+						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+						placeholder="1"
+					/>
+				</div>
+
+				<div class="space-y-2">
+					<label for="page-parent" class="block text-sm font-display font-bold text-text-dark">
+						Página Padre (opcional)
+					</label>
+					<select 
+						id="page-parent"
+						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+					>
+						<option value="">Sin padre (nivel raíz)</option>
+					</select>
+					<p class="text-xs text-text-dark/50">Si seleccionas un padre, esta página será un submenú</p>
+				</div>
+
+				<div id="form-error" class="hidden bg-error-light border border-error-border text-error-text text-sm rounded-lg p-3"></div>
+				<div id="form-success" class="hidden bg-success-light border border-success-border text-success-text text-sm rounded-lg p-3"></div>
+
+				<div class="flex gap-3 pt-2">
+					<button 
+						type="button"
+						id="modal-cancel"
+						class="flex-1 h-11 border border-border-subtle rounded-lg text-sm font-display font-semibold hover:bg-bg-light transition-colors"
+					>
+						Cancelar
+					</button>
+					<button 
+						type="submit"
+						id="modal-submit"
+						class="flex-1 h-11 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-lg transition-all"
+					>
+						Guardar Página
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</DashboardLayout>
+
+<script>
+	import { findAllPages, listActivePages, createPage, updatePage, changePageStatus } from '../../../lib/api';
+	import type { IPage, ICreatePageDto, IUpdatePageDto } from '@shared/core/config/pages/interfaces';
+
+	// ==================== STATE ====================
+	let currentPage = 1;
+	const rowsPerPage = 10;
+	let totalPages = 0;
+	let pages: IPage[] = [];
+	let allPages: IPage[] = [];
+	let editingId: number | null = null;
+
+	// ==================== ELEMENTOS ====================
+	const loadingEl = document.getElementById('pages-loading') as HTMLElement;
+	const tableContainer = document.getElementById('pages-table-container') as HTMLElement;
+	const tbody = document.getElementById('pages-tbody') as HTMLTableSectionElement;
+	const paginationEl = document.getElementById('pages-pagination') as HTMLElement;
+	const paginationInfo = document.getElementById('pagination-info') as HTMLElement;
+	const btnPrev = document.getElementById('btn-prev') as HTMLButtonElement;
+	const btnNext = document.getElementById('btn-next') as HTMLButtonElement;
+
+	const modal = document.getElementById('page-modal') as HTMLElement;
+	const modalTitle = document.getElementById('modal-title') as HTMLElement;
+	const modalClose = document.getElementById('modal-close') as HTMLElement;
+	const modalCancel = document.getElementById('modal-cancel') as HTMLElement;
+	const pageForm = document.getElementById('page-form') as HTMLFormElement;
+	const btnNewPage = document.getElementById('btn-new-page') as HTMLButtonElement;
+
+	// ==================== CARGAR PÁGINAS ====================
+	async function loadPages() {
+		try {
+			loadingEl.classList.remove('hidden');
+			tableContainer.classList.add('hidden');
+
+			const response = await findAllPages({ page: currentPage, rows: rowsPerPage });
+			pages = response.data;
+			totalPages = response.total;
+
+			// Cargar todas las páginas activas para el dropdown de padres
+			allPages = await listActivePages();
+
+			renderTable();
+			updatePagination();
+			loadingEl.classList.add('hidden');
+			tableContainer.classList.remove('hidden');
+			paginationEl.classList.remove('hidden');
+		} catch (error) {
+			console.error('Error al cargar páginas:', error);
+			loadingEl.classList.add('hidden');
+		}
+	}
+
+function renderTable() {
+		tbody.innerHTML = '';
+
+		pages.forEach(page => {
+			const parentName = page.pageFatherId 
+				? (allPages.find(p => p.id === page.pageFatherId)?.name || 'N/A')
+				: '-';
+
+			const tr = document.createElement('tr');
+			tr.className = 'hover:bg-bg-light transition-colors';
+			tr.innerHTML = `
+				<td class="px-4 py-3 font-display font-semibold text-sm text-text-dark">${page.name}</td>
+				<td class="px-4 py-3 text-sm text-text-dark/80 font-mono">${page.route || '-'}</td>
+				<td class="px-4 py-3 text-xs text-text-dark/60">${page.icon || '-'}</td>
+				<td class="px-4 py-3 text-sm text-text-dark/70">${parentName}</td>
+				<td class="px-4 py-3 text-sm text-text-dark/70">${page.order || '-'}</td>
+				<td class="px-4 py-3">
+					<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${page.isActive ? 'bg-success-light text-success-text' : 'bg-error-light text-error-text'}">
+						${page.isActive ? 'Activa' : 'Inactiva'}
+					</span>
+				</td>
+				<td class="px-4 py-3 text-right space-x-2">
+					<button class="btn-edit text-sm text-vzla-blue hover:underline font-display font-semibold" data-page='${JSON.stringify(page)}'>
+						Editar
+					</button>
+					<button class="btn-toggle-status text-sm ${page.isActive ? 'text-error-text' : 'text-success-text'} hover:underline font-display font-semibold" data-id="${page.id}" data-active="${page.isActive}">
+						${page.isActive ? 'Desactivar' : 'Activar'}
+					</button>
+				</td>
+			`;
+			tbody.appendChild(tr);
+		});
+
+		document.querySelectorAll('.btn-edit').forEach(btn => {
+			btn.addEventListener('click', (e) => {
+				const data = (e.currentTarget as HTMLElement).getAttribute('data-page');
+				if (data) openModal(JSON.parse(data));
+			});
+		});
+
+		document.querySelectorAll('.btn-toggle-status').forEach(btn => {
+			btn.addEventListener('click', async (e) => {
+				const id = parseInt((e.currentTarget as HTMLElement).getAttribute('data-id') || '0');
+				const isActive = (e.currentTarget as HTMLElement).getAttribute('data-active') === 'true';
+				
+				if (confirm(`¿Estás seguro de ${isActive ? 'desactivar' : 'activar'} esta página?`)) {
+					try {
+						await changePageStatus(id);
+						loadPages();
+					} catch (error: any) {
+						alert('Error: ' + (error.message || 'Error al cambiar estado'));
+					}
+				}
+			});
+		});
+	}
+
+	function updatePagination() {
+		const start = (currentPage - 1) * rowsPerPage + 1;
+		const end = Math.min(currentPage * rowsPerPage, totalPages);
+		paginationInfo.textContent = `Mostrando ${start}-${end} de ${totalPages}`;
+
+		btnPrev.disabled = currentPage === 1;
+		btnNext.disabled = currentPage * rowsPerPage >= totalPages;
+	}
+
+	btnPrev.addEventListener('click', () => {
+		if (currentPage > 1) {
+			currentPage--;
+			loadPages();
+		}
+	});
+
+	btnNext.addEventListener('click', () => {
+		if (currentPage * rowsPerPage < totalPages) {
+			currentPage++;
+			loadPages();
+		}
+	});
+
+	// ==================== MODAL ====================
+	function openModal(page?: IPage) {
+		// Actualizar dropdown de padres
+		const parentSelect = document.getElementById('page-parent') as HTMLSelectElement;
+		parentSelect.innerHTML = '<option value="">Sin padre (nivel raíz)</option>';
+		allPages.filter(p => !page || p.id !== page.id).forEach(p => {
+			const option = document.createElement('option');
+			option.value = String(p.id);
+			option.textContent = p.name;
+			parentSelect.appendChild(option);
+		});
+
+		if (page) {
+			modalTitle.textContent = 'Editar Página';
+			editingId = page.id || null;
+			(document.getElementById('page-id') as HTMLInputElement).value = String(page.id);
+			(document.getElementById('page-name') as HTMLInputElement).value = page.name;
+			(document.getElementById('page-route') as HTMLInputElement).value = page.route || '';
+			(document.getElementById('page-icon') as HTMLInputElement).value = page.icon || '';
+			(document.getElementById('page-order') as HTMLInputElement).value = String(page.order || 1);
+			(document.getElementById('page-parent') as HTMLSelectElement).value = String(page.pageFatherId || '');
+		} else {
+			modalTitle.textContent = 'Nueva Página';
+			editingId = null;
+			pageForm.reset();
+		}
+
+		modal.classList.remove('hidden');
+	}
+
+	function closeModal() {
+		modal.classList.add('hidden');
+		pageForm.reset();
+		editingId = null;
+		(document.getElementById('form-error') as HTMLElement).classList.add('hidden');
+		(document.getElementById('form-success') as HTMLElement).classList.add('hidden');
+	}
+
+	btnNewPage.addEventListener('click', () => openModal());
+	modalClose.addEventListener('click', closeModal);
+	modalCancel.addEventListener('click', closeModal);
+
+	pageForm.addEventListener('submit', async (e) => {
+		e.preventDefault();
+
+		const formError = document.getElementById('form-error') as HTMLElement;
+		const formSuccess = document.getElementById('form-success') as HTMLElement;
+		const submitBtn = document.getElementById('modal-submit') as HTMLButtonElement;
+
+		formError.classList.add('hidden');
+		formSuccess.classList.add('hidden');
+
+		const name = (document.getElementById('page-name') as HTMLInputElement).value.trim();
+		const route = (document.getElementById('page-route') as HTMLInputElement).value.trim();
+		const icon = (document.getElementById('page-icon') as HTMLInputElement).value.trim();
+		const order = parseInt((document.getElementById('page-order') as HTMLInputElement).value);
+		const pageFatherIdStr = (document.getElementById('page-parent') as HTMLSelectElement).value;
+
+		const dto: ICreatePageDto | IUpdatePageDto = {
+			name,
+			...(route && { route }),
+			...(icon && { icon }),
+			order,
+			...(pageFatherIdStr && { pageFather: parseInt(pageFatherIdStr) }),
+		};
+
+		try {
+			submitBtn.disabled = true;
+			submitBtn.textContent = 'Guardando...';
+
+			if (editingId) {
+				await updatePage(editingId, dto);
+			} else {
+				await createPage(dto as ICreatePageDto);
+			}
+
+			formSuccess.textContent = 'Página guardada exitosamente';
+			formSuccess.classList.remove('hidden');
+
+			setTimeout(() => {
+				closeModal();
+				loadPages();
+			}, 1500);
+		} catch (error: any) {
+			formError.textContent = error.message || 'Error al guardar';
+			formError.classList.remove('hidden');
+			submitBtn.disabled = false;
+			submitBtn.textContent = 'Guardar Página';
+		}
+	});
+
+	// ==================== INICIALIZACIÓN ====================
+	loadPages();
+</script>

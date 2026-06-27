@@ -50,6 +50,11 @@ import Layout from '../layouts/Layout.astro';
           Ingresar al Sistema
         </button>
       </form>
+
+      <!-- Enlace recuperar contraseña -->
+      <div class="text-center">
+        <a href="/forgot-password" class="text-xs text-vzla-blue hover:underline font-semibold">¿Olvidaste tu contraseña?</a>
+      </div>
     </div>
 
     <!-- Enlace de registro rápido -->
@@ -61,58 +66,54 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
+  import { login } from '../lib/auth';
+
   if (typeof window !== 'undefined') {
     const loginForm = document.getElementById('form-user-login') as HTMLFormElement;
-    const loginError = document.getElementById('login-error');
+    const loginError = document.getElementById('login-error') as HTMLElement;
+    const submitBtn = loginForm?.querySelector('button[type="submit"]') as HTMLButtonElement;
 
-    // Procesar Inicio de Sesión Secundario / Unificado
-    if (loginForm && loginError) {
-      loginForm.addEventListener('submit', (e) => {
+    // Mostrar mensaje si viene de sesión expirada
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') === 'session_expired') {
+      if (loginError) {
+        loginError.textContent = '⚠️ ' + (params.get('message') || 'Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
+        loginError.classList.remove('hidden');
+      }
+    } else if (params.get('error') === 'auth_required') {
+      if (loginError) {
+        loginError.textContent = '⚠️ Debes iniciar sesión para acceder a esa página.';
+        loginError.classList.remove('hidden');
+      }
+    }
+
+    if (loginForm && loginError && submitBtn) {
+      loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const email = (document.getElementById('login-email') as HTMLInputElement).value.trim().toLowerCase();
+        const email = (document.getElementById('login-email') as HTMLInputElement).value.trim();
         const password = (document.getElementById('login-password') as HTMLInputElement).value;
 
-        // 1. Intentar validar como Administrador del sistema
-        if (email === 'admin@sire.org' && password === 'SireControl2026!') {
-          sessionStorage.setItem('sire_admin_logged_in', 'true');
-          sessionStorage.setItem('sire_medic_name', 'Administrador');
-          loginError.classList.add('hidden');
-          window.location.href = '/sire-admin-portal';
-          return;
+        // Deshabilitar botón
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Iniciando sesión...';
+        loginError.classList.add('hidden');
+
+        try {
+          // Login real con JWT
+          await login(email, password);
+          
+          // Redirigir al dashboard (el layout se encarga de redirigir a la ruta correcta)
+          window.location.href = '/dashboard';
+        } catch (error: any) {
+          // Mostrar error
+          loginError.textContent = '⚠️ ' + (error.message || 'Credenciales incorrectas o usuario no registrado.');
+          loginError.classList.remove('hidden');
+          
+          // Re-habilitar botón
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Ingresar al Sistema';
         }
-
-        // 2. Intentar validar como Familiar en localStorage
-        const familiarUsers = JSON.parse(localStorage.getItem('sire_familiar_users') || '[]');
-        const user = familiarUsers.find((u: any) => u.email.toLowerCase() === email && u.password === password);
-
-        if (user) {
-          sessionStorage.setItem('sire_user_logged_in', 'true');
-          sessionStorage.setItem('sire_user_name', user.name);
-          loginError.classList.add('hidden');
-          window.location.href = '/';
-          return;
-        }
-
-        // 3. Intentar validar como Personal Médico en localStorage (o los por defecto)
-        const medicalUsers = JSON.parse(localStorage.getItem('sire_medical_users') || '[]');
-        const defaultMedics = [
-          { name: 'Dra. Gabriela Rivas', email: 'gabriela.rivas@huc.org', hospital: 'Hospital Univ. de Caracas (HUC)', credentials: 'MPPS-94821' },
-          { name: 'Dr. Alejandro Marín', email: 'a.marin@centralmaracay.gob.ve', hospital: 'Hospital Central de Maracay', credentials: 'MPPS-82910' }
-        ];
-        const activeMedics = medicalUsers.length > 0 ? medicalUsers : defaultMedics;
-        const medic = activeMedics.find((m: any) => m.email.toLowerCase() === email && m.credentials === password);
-
-        if (medic) {
-          sessionStorage.setItem('sire_medic_logged_in', 'true');
-          sessionStorage.setItem('sire_medic_name', medic.name);
-          loginError.classList.add('hidden');
-          window.location.href = '/sire-admin-portal';
-          return;
-        }
-
-        // Si ninguno coincide, arrojar error
-        loginError.classList.remove('hidden');
       });
     }
   }

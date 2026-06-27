@@ -106,6 +106,8 @@ const isContactoActive = pathname.startsWith('/contact');
 
 		<!-- Script de control dinámico del Menú Público -->
 		<script>
+			import { getSession, logout } from '../lib/auth';
+
 			if (typeof window !== 'undefined') {
 				const loginLink = document.getElementById('nav-login-link');
 				const registerBtn = document.getElementById('nav-register-btn');
@@ -113,30 +115,28 @@ const isContactoActive = pathname.startsWith('/contact');
 				const userGreeting = document.getElementById('nav-user-greeting');
 				const logoutBtn = document.getElementById('nav-logout-btn');
 
-				const userLogged = sessionStorage.getItem('sire_user_logged_in') === 'true';
-				const medicLogged = sessionStorage.getItem('sire_medic_logged_in') === 'true';
-				const userName = sessionStorage.getItem('sire_user_name') || sessionStorage.getItem('sire_medic_name');
+				// Detectar sesión real (JWT)
+				const session = getSession();
 
-				if ((userLogged || medicLogged) && userName) {
+				if (session) {
 					// Ocultar botones de acceso
 					if (loginLink) loginLink.classList.add('hidden');
 					if (registerBtn) registerBtn.classList.add('hidden');
 					
 					// Mostrar saludo y botón de logout
 					if (userContainer && userGreeting) {
-						userGreeting.innerText = `Hola, ${userName}`;
+						userGreeting.innerHTML = `
+							<a href="/dashboard" class="text-text-dark hover:text-vzla-blue transition-colors no-underline font-bold">
+								Hola, ${session.name}
+							</a>
+						`;
 						userContainer.classList.remove('hidden');
 					}
 				}
 
 				if (logoutBtn) {
 					logoutBtn.addEventListener('click', () => {
-						// Limpiar toda la sesión
-						sessionStorage.removeItem('sire_user_logged_in');
-						sessionStorage.removeItem('sire_user_name');
-						sessionStorage.removeItem('sire_medic_logged_in');
-						sessionStorage.removeItem('sire_medic_name');
-						window.location.href = '/';
+						logout();
 					});
 				}
 			}

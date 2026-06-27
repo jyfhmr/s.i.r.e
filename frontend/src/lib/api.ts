@@ -3,10 +3,50 @@
  * Fuente única de verdad para rutas, DTOs e interfaces de @shared
  */
 
+import { authFetch } from "./auth";
 import { PUBLIC_SEARCH_ROUTES } from "@shared/core/public/search/routes";
 import { ACCESS_REQUEST_ROUTES } from "@shared/core/auth/access-requests/routes";
-import type { IPatientPublicResponse } from "@shared/core/medical/patients/interfaces";
-import type { ICreateAccessRequestDto } from "@shared/core/auth/access-requests/interfaces";
+import { PATIENT_ROUTES } from "@shared/core/medical/patients/routes";
+import { ALERT_ROUTES } from "@shared/core/citizen/alerts/routes";
+import { MEDICAL_CENTER_ROUTES } from "@shared/core/config/medical-centers/routes";
+import { USER_ROUTES } from "@shared/core/config/user/routes";
+import { PAGE_ROUTES } from "@shared/core/config/pages/routes";
+import type {
+  IPatientPublicResponse,
+  IUpsertPatientDto,
+  IPatientFilter,
+  IPatient,
+  IPatientStatusLog,
+} from "@shared/core/medical/patients/interfaces";
+import type {
+  ICreateAccessRequestDto,
+  IApproveAccessRequestDto,
+  IAccessRequestFilter,
+  IMedicalAccessRequest,
+} from "@shared/core/auth/access-requests/interfaces";
+import type {
+  ICreateAlertDto,
+  IWatchListItem,
+} from "@shared/core/citizen/alerts/interfaces";
+import type {
+  IMedicalCenter,
+  ICreateMedicalCenterDto,
+  IUpdateMedicalCenterDto,
+  IMedicalCenterFilter,
+} from "@shared/core/config/medical-centers/interfaces";
+import type {
+  IUser,
+  ICreateUserDto,
+  IUpdateUserDto,
+  IUserFilter,
+} from "@shared/core/config/user/interfaces";
+import type {
+  IPage,
+  ICreatePageDto,
+  IUpdatePageDto,
+  IPageFilter,
+} from "@shared/core/config/pages/interfaces";
+import type { PatientStatus } from "@shared/common";
 
 const API_BASE_URL =
   import.meta.env.PUBLIC_API_URL || "http://localhost:3000/api";
@@ -132,4 +172,419 @@ export async function createMedicalAccessRequest(
       statusCode: 0,
     } as ApiError;
   }
+}
+
+// ==================== AUTENTICACIÓN (CU 6, CU 7, CU 9) ====================
+
+/**
+ * Registro de ciudadano (CU 6)
+ * Endpoint: POST /api/auth/register/citizen
+ */
+export async function registerCitizen(data: {
+  fullName: string;
+  email: string;
+  password: string;
+}): Promise<{ success: boolean; message: string }> {
+  return authFetch("auth/register/citizen", {
+    method: "POST",
+    body: JSON.stringify(data),
+    skipAuth: true,
+  });
+}
+
+/**
+ * Solicitar reset de contraseña (CU 7)
+ * Endpoint: POST /api/auth/password/request-reset
+ */
+export async function requestPasswordReset(
+  email: string,
+): Promise<{ success: boolean; message: string }> {
+  return authFetch("auth/password/request-reset", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+    skipAuth: true,
+  });
+}
+
+/**
+ * Resetear contraseña con token (CU 7)
+ * Endpoint: POST /api/auth/password/reset
+ */
+export async function resetPassword(
+  userId: number,
+  token: string,
+  password: string,
+): Promise<{ success: boolean; message: string }> {
+  return authFetch("auth/password/reset", {
+    method: "POST",
+    body: JSON.stringify({ userId, token, password }),
+    skipAuth: true,
+  });
+}
+
+// ==================== PACIENTES (CU 1, CU 8) ====================
+
+/**
+ * Upsert (crear o actualizar) paciente
+ * Endpoint: POST /api/medical/patients
+ */
+export async function upsertPatient(dto: IUpsertPatientDto): Promise<IPatient> {
+  return authFetch(PATIENT_ROUTES.BASE, {
+    method: "POST",
+    body: JSON.stringify(dto),
+  });
+}
+
+/**
+ * Listar pacientes del médico autenticado (paginado)
+ * Endpoint: GET /api/medical/patients
+ */
+export async function findAllPatients(
+  filters?: IPatientFilter,
+): Promise<{ data: IPatient[]; total: number }> {
+  const params = new URLSearchParams();
+  if (filters) {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+  }
+
+  const endpoint = `${PATIENT_ROUTES.BASE}?${params.toString()}`;
+  return authFetch(endpoint, { method: "GET" });
+}
+
+/**
+ * Buscar paciente por DNI (buscador global para médicos)
+ * Endpoint: GET /api/medical/patients/search/:dni
+ */
+export async function searchPatientByDniMedical(
+  dni: string,
+): Promise<IPatient | null> {
+  const cleanDni = dni.replace(/[^0-9]/g, "");
+  return authFetch(
+    `${PATIENT_ROUTES.BASE}/${PATIENT_ROUTES.SEARCH_BY_DNI.replace(":dni", cleanDni)}`,
+    {
+      method: "GET",
+    },
+  );
+}
+
+/**
+ * Obtener historial completo de un paciente (bitácora)
+ * Endpoint: GET /api/medical/patients/:id/history
+ */
+export async function getPatientHistory(
+  patientId: number,
+): Promise<IPatientStatusLog[]> {
+  return authFetch(`${PATIENT_ROUTES.BASE}/${patientId}/history`, {
+    method: "GET",
+  });
+}
+
+// ==================== ALERTAS (CU 3) ====================
+
+/**
+ * Listar las alertas del usuario autenticado
+ * Endpoint: GET /api/citizen/alerts
+ */
+export async function findAllAlerts(): Promise<IWatchListItem[]> {
+  return authFetch(ALERT_ROUTES.BASE, { method: "GET" });
+}
+
+/**
+ * Crear una nueva alerta (agregar cédula a watchlist)
+ * Endpoint: POST /api/citizen/alerts
+ */
+export async function createAlert(
+  dto: ICreateAlertDto,
+): Promise<IWatchListItem> {
+  return authFetch(ALERT_ROUTES.BASE, {
+    method: "POST",
+    body: JSON.stringify(dto),
+  });
+}
+
+/**
+ * Eliminar alerta (quitar de watchlist)
+ * Endpoint: DELETE /api/citizen/alerts/:id
+ */
+export async function deleteAlert(id: number): Promise<{ success: boolean }> {
+  return authFetch(`${ALERT_ROUTES.BASE}/${id}`, { method: "DELETE" });
+}
+
+// ==================== CENTROS MÉDICOS (CU 5) ====================
+
+/**
+ * Listar todos los centros médicos (paginado)
+ * Endpoint: GET /api/config/medical-centers
+ */
+export async function findAllMedicalCenters(
+  filters?: IMedicalCenterFilter,
+): Promise<{ data: IMedicalCenter[]; total: number }> {
+  const params = new URLSearchParams();
+  if (filters) {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+  }
+
+  const endpoint = `${MEDICAL_CENTER_ROUTES.BASE}?${params.toString()}`;
+  return authFetch(endpoint, { method: "GET" });
+}
+
+/**
+ * Buscar centros médicos (autocomplete)
+ * Endpoint: GET /api/config/medical-centers/search?q=...
+ */
+export async function searchMedicalCenters(
+  query: string,
+): Promise<IMedicalCenter[]> {
+  return authFetch(
+    `${MEDICAL_CENTER_ROUTES.BASE}/${MEDICAL_CENTER_ROUTES.SEARCH}?q=${encodeURIComponent(query)}`,
+    {
+      method: "GET",
+    },
+  );
+}
+
+/**
+ * Lista simple de centros (dropdown)
+ * Endpoint: GET /api/config/medical-centers/list
+ */
+export async function listMedicalCenters(): Promise<IMedicalCenter[]> {
+  return authFetch(
+    `${MEDICAL_CENTER_ROUTES.BASE}/${MEDICAL_CENTER_ROUTES.LIST}`,
+    {
+      method: "GET",
+    },
+  );
+}
+
+/**
+ * Crear centro médico
+ * Endpoint: POST /api/config/medical-centers
+ */
+export async function createMedicalCenter(
+  dto: ICreateMedicalCenterDto,
+): Promise<IMedicalCenter> {
+  return authFetch(MEDICAL_CENTER_ROUTES.BASE, {
+    method: "POST",
+    body: JSON.stringify(dto),
+  });
+}
+
+/**
+ * Actualizar centro médico
+ * Endpoint: PATCH /api/config/medical-centers/:id
+ */
+export async function updateMedicalCenter(
+  id: number,
+  dto: IUpdateMedicalCenterDto,
+): Promise<IMedicalCenter> {
+  return authFetch(`${MEDICAL_CENTER_ROUTES.BASE}/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(dto),
+  });
+}
+
+/**
+ * Cambiar estado de centro médico (activar/desactivar)
+ * Endpoint: PATCH /api/config/medical-centers/:id/change_status
+ */
+export async function changeMedicalCenterStatus(
+  id: number,
+): Promise<{ success: boolean }> {
+  return authFetch(`${MEDICAL_CENTER_ROUTES.BASE}/${id}/change_status`, {
+    method: "PATCH",
+  });
+}
+
+// ==================== SOLICITUDES DE ACCESO (CU 5) ====================
+
+/**
+ * Listar solicitudes de acceso médico
+ * Endpoint: GET /api/auth/access-requests
+ */
+export async function findAllAccessRequests(
+  filters?: IAccessRequestFilter,
+): Promise<{ data: IMedicalAccessRequest[]; total: number }> {
+  const params = new URLSearchParams();
+  if (filters) {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+  }
+
+  const endpoint = `${ACCESS_REQUEST_ROUTES.BASE}?${params.toString()}`;
+  return authFetch(endpoint, { method: "GET" });
+}
+
+/**
+ * Aprobar solicitud de acceso médico
+ * Endpoint: POST /api/auth/access-requests/:id/approve
+ */
+export async function approveAccessRequest(
+  id: number,
+  dto: IApproveAccessRequestDto,
+): Promise<{ success: boolean; message: string }> {
+  return authFetch(`${ACCESS_REQUEST_ROUTES.BASE}/${id}/approve`, {
+    method: "POST",
+    body: JSON.stringify(dto),
+  });
+}
+
+/**
+ * Rechazar solicitud de acceso médico
+ * Endpoint: POST /api/auth/access-requests/:id/reject
+ */
+export async function rejectAccessRequest(
+  id: number,
+): Promise<{ success: boolean; message: string }> {
+  return authFetch(`${ACCESS_REQUEST_ROUTES.BASE}/${id}/reject`, {
+    method: "POST",
+  });
+}
+
+// ==================== USUARIOS (CU 5 - ADMIN) ====================
+
+/**
+ * Listar usuarios (paginado)
+ * Endpoint: GET /api/config/users
+ */
+export async function findAllUsers(
+  filters?: IUserFilter,
+): Promise<{ data: IUser[]; total: number }> {
+  const params = new URLSearchParams();
+  if (filters) {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+  }
+
+  const endpoint = `${USER_ROUTES.BASE}?${params.toString()}`;
+  return authFetch(endpoint, { method: "GET" });
+}
+
+/**
+ * Lista simple de usuarios
+ * Endpoint: GET /api/config/users/list
+ */
+export async function listUsers(): Promise<IUser[]> {
+  return authFetch(`${USER_ROUTES.BASE}/${USER_ROUTES.LIST}`, {
+    method: "GET",
+  });
+}
+
+/**
+ * Crear usuario
+ * Endpoint: POST /api/config/users
+ */
+export async function createUser(dto: ICreateUserDto): Promise<IUser> {
+  return authFetch(USER_ROUTES.BASE, {
+    method: "POST",
+    body: JSON.stringify(dto),
+  });
+}
+
+/**
+ * Actualizar usuario
+ * Endpoint: PATCH /api/config/users/:id
+ */
+export async function updateUser(
+  id: number,
+  dto: IUpdateUserDto,
+): Promise<IUser> {
+  return authFetch(`${USER_ROUTES.BASE}/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(dto),
+  });
+}
+
+/**
+ * Cambiar estado de usuario (activar/desactivar)
+ * Endpoint: PATCH /api/config/users/:id/change_status
+ */
+export async function changeUserStatus(
+  id: number,
+): Promise<{ success: boolean }> {
+  return authFetch(`${USER_ROUTES.BASE}/${id}/change_status`, {
+    method: "PATCH",
+  });
+}
+
+// ==================== PÁGINAS (CU 5 - ADMIN) ====================
+
+/**
+ * Listar páginas (paginado)
+ * Endpoint: GET /api/config/pages
+ */
+export async function findAllPages(
+  filters?: IPageFilter,
+): Promise<{ data: IPage[]; total: number }> {
+  const params = new URLSearchParams();
+  if (filters) {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+  }
+
+  const endpoint = `${PAGE_ROUTES.BASE}?${params.toString()}`;
+  return authFetch(endpoint, { method: "GET" });
+}
+
+/**
+ * Lista de páginas activas
+ * Endpoint: GET /api/config/pages/list
+ */
+export async function listActivePages(): Promise<IPage[]> {
+  return authFetch(`${PAGE_ROUTES.BASE}/${PAGE_ROUTES.LIST_ACTIVE}`, {
+    method: "GET",
+  });
+}
+
+/**
+ * Crear página
+ * Endpoint: POST /api/config/pages
+ */
+export async function createPage(dto: ICreatePageDto): Promise<IPage> {
+  return authFetch(PAGE_ROUTES.BASE, {
+    method: "POST",
+    body: JSON.stringify(dto),
+  });
+}
+
+/**
+ * Actualizar página
+ * Endpoint: PATCH /api/config/pages/:id
+ */
+export async function updatePage(
+  id: number,
+  dto: IUpdatePageDto,
+): Promise<IPage> {
+  return authFetch(`${PAGE_ROUTES.BASE}/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(dto),
+  });
+}
+
+/**
+ * Cambiar estado de página
+ * Endpoint: PATCH /api/config/pages/:id/change_status
+ */
+export async function changePageStatus(
+  id: number,
+): Promise<{ success: boolean }> {
+  return authFetch(`${PAGE_ROUTES.BASE}/${id}/change_status`, {
+    method: "PATCH",
+  });
 }
