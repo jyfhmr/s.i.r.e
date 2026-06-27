@@ -27,7 +27,7 @@ export default class UserSeeder implements Seeder {
 
     await userRepository.insert({
       name: 'José Hernández',
-      email: 'jyfhmra@gmail.com',
+      email: 'jyfhmr@gmail.com',
       password: hashedPassword,
       profile: superAdminProfile,
       fullName: 'Administrador',
@@ -35,8 +35,8 @@ export default class UserSeeder implements Seeder {
     });
 
     await userRepository.insert({
-      name: 'Usuario Perosnal',
-      email: 'doctor@medcore.com',
+      name: 'Usuario Personal',
+      email: 'doctor@sire.com',
       password: hashedPassword,
       profile: medicoProfile,
       fullName: 'Gregory House',

@@ -1,13 +1,16 @@
 ---
+/**
+ * PatientCard - Tarjeta de información pública de paciente
+ * Actualizado para usar los estados reales del backend (@shared/common)
+ */
+import { PatientStatus } from '@shared/common';
+import { getStatusConfig } from '../lib/patient-status';
+
 export interface Patient {
-  id: string;
-  name: string;
-  age: number;
-  status: 'ESTABLE' | 'OBSERVACION' | 'TRASLADADO' | 'CRITICO';
-  hospital: string;
+  fullName: string;
+  status: PatientStatus;
   location: string;
-  updatedAt: string;
-  notes: string;
+  lastUpdated: Date | string;
 }
 
 interface Props {
@@ -16,75 +19,31 @@ interface Props {
 
 const { patient } = Astro.props;
 
-// Configuración de colores, descripciones e iconos para cada estado usando la paleta venezolana cívica
-const statusConfig = {
-  ESTABLE: {
-    label: "Localizado - Estable",
-    bgClass: "bg-success-light text-success-text border-success-border",
-    badgeClass: "bg-success-text",
-    description: "La persona se encuentra bien, fuera de peligro. Está recibiendo atención de rutina y descanso.",
-  },
-  OBSERVACION: {
-    label: "Localizado - En Observación",
-    bgClass: "bg-alert-light text-alert-text border-alert-border",
-    badgeClass: "bg-amber-500",
-    description: "Se encuentra bajo estudios médicos de control o monitoreo preventivo de evolución.",
-  },
-  TRASLADADO: {
-    label: "Localizado - Trasladado",
-    bgClass: "bg-info-light text-info-text border-info-border",
-    badgeClass: "bg-sky-500",
-    description: "Fue derivado a otro centro médico para estudios o cuidados especializados.",
-  },
-  CRITICO: {
-    label: "Localizado - Reporte Especial",
-    bgClass: "bg-error-light text-error-text border-error-border",
-    badgeClass: "bg-rose-500",
-    description: "Bajo monitoreo médico intensivo. Se solicita a los familiares contactar urgentemente al personal médico.",
-  }
-};
+const config = getStatusConfig(patient.status);
 
-const config = statusConfig[patient.status] || statusConfig.ESTABLE;
-
-// Texto de lectura en voz alta
-const ttsText = `Información de paciente. Nombre: ${patient.name}. Edad: ${patient.age} años. Estado: ${config.label}. Centro de salud: ${patient.hospital}. Ubicación: ${patient.location}. Notas: ${patient.notes}. Última actualización: ${patient.updatedAt}.`;
+// Formatear fecha
+const formattedDate = typeof patient.lastUpdated === 'string' 
+  ? new Date(patient.lastUpdated).toLocaleDateString('es-VE', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  : patient.lastUpdated.toLocaleDateString('es-VE', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
 ---
 
-<div class="w-full bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-6">
+<div class="w-full bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-6 font-sans">
   <!-- Cabecera de la Tarjeta -->
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border-subtle/50 pb-5">
-    <div>
-      <span class="text-xs font-semibold text-text-dark/45 tracking-wider uppercase font-sans">Reporte Médico Oficial</span>
-      <h2 class="font-display font-bold text-2xl md:text-3xl text-text-dark mt-0.5">{patient.name}</h2>
-      <p class="text-sm md:text-base text-text-dark/60 mt-0.5 font-sans">
-        Cédula/Documento: <strong class="text-text-dark">{patient.id}</strong> &bull; Edad: <strong class="text-text-dark">{patient.age} años</strong>
-      </p>
-    </div>
-
-    <!-- Botón de Audio (Text-to-Speech) -->
-    <button
-      id="btn-tts"
-      data-text={ttsText}
-      class="h-12 px-5 bg-vzla-blue/5 hover:bg-vzla-blue/10 text-vzla-blue font-display font-semibold text-sm rounded-xl flex items-center justify-center gap-2 cursor-pointer border border-vzla-blue/10 hover:border-vzla-blue/20 transition-all self-start md:self-center shadow-3xs"
-      aria-label="Escuchar la información en voz alta"
-    >
-      <!-- Icono de altavoz -->
-      <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="18" 
-        height="18" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        stroke-width="2" 
-        stroke-linecap="round" 
-        stroke-linejoin="round"
-      >
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-      </svg>
-      <span>Escuchar Reporte</span>
-    </button>
+  <div class="border-b border-border-subtle/50 pb-5">
+    <span class="text-xs font-semibold text-text-dark/45 tracking-wider uppercase">Reporte Médico Oficial</span>
+    <h2 class="font-display font-bold text-2xl md:text-3xl text-text-dark mt-0.5">{patient.fullName}</h2>
   </div>
 
   <!-- Estado del Paciente -->
@@ -100,28 +59,14 @@ const ttsText = `Información de paciente. Nombre: ${patient.name}. Edad: ${pati
     </p>
   </div>
 
-  <!-- Datos de Ubicación y Notas -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-1">
-    <div class="space-y-4">
-      <div class="space-y-1">
-        <h3 class="text-xs font-semibold text-text-dark/45 tracking-wider uppercase font-sans">Establecimiento de Salud</h3>
-        <p class="font-display font-bold text-lg text-vzla-blue">{patient.hospital}</p>
-      </div>
-      
-      <div class="space-y-1">
-        <h3 class="text-xs font-semibold text-text-dark/45 tracking-wider uppercase font-sans">Ubicación Interna</h3>
-        <p class="text-base text-text-dark font-semibold font-sans">{patient.location}</p>
-      </div>
-    </div>
-
-    <div class="space-y-1">
-      <h3 class="text-xs font-semibold text-text-dark/45 tracking-wider uppercase font-sans">Observaciones y Tratamiento</h3>
-      <p class="text-base text-text-dark leading-relaxed font-sans bg-bg-light/60 p-4 rounded-xl border border-border-subtle/50">{patient.notes}</p>
-    </div>
+  <!-- Ubicación -->
+  <div class="space-y-1">
+    <h3 class="text-xs font-semibold text-text-dark/45 tracking-wider uppercase">Centro de Salud / Ubicación</h3>
+    <p class="font-display font-bold text-lg text-vzla-blue">{patient.location}</p>
   </div>
 
   <!-- Footer de la Tarjeta -->
-  <div class="border-t border-border-subtle/50 pt-5 mt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs md:text-sm text-text-dark/50 font-sans">
+  <div class="border-t border-border-subtle/50 pt-5 mt-2 flex items-center justify-between gap-3 text-xs md:text-sm text-text-dark/50">
     <div class="flex items-center gap-1.5">
       <svg 
         xmlns="http://www.w3.org/2000/svg" 
@@ -137,64 +82,8 @@ const ttsText = `Información de paciente. Nombre: ${patient.name}. Edad: ${pati
         <circle cx="12" cy="12" r="10"></circle>
         <polyline points="12 6 12 12 16 14"></polyline>
       </svg>
-      <span>Última actualización: <strong>{patient.updatedAt}</strong></span>
+      <span>Última actualización: <strong>{formattedDate}</strong></span>
     </div>
-    
-    <div>
-      <span>Verificado por Personal de Triaje SIRE.</span>
-    </div>
+    <span>Verificado por Personal Médico</span>
   </div>
 </div>
-
-<!-- Script del cliente para Text-to-Speech nativo -->
-<script>
-  const button = document.getElementById('btn-tts');
-  if (button) {
-    let utterance: SpeechSynthesisUtterance | null = null;
-    let isSpeaking = false;
-
-    button.addEventListener('click', () => {
-      const text = button.getAttribute('data-text');
-      if (!text) return;
-
-      if (isSpeaking) {
-        window.speechSynthesis.cancel();
-        isSpeaking = false;
-        button.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-          <span>Escuchar Reporte</span>
-        `;
-        button.classList.remove('bg-vzla-blue/20', 'border-vzla-blue/30');
-        button.classList.add('bg-vzla-blue/5', 'text-vzla-blue', 'border-vzla-blue/10');
-        return;
-      }
-
-      window.speechSynthesis.cancel();
-
-      utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'es-ES'; // Español
-      
-      utterance.onstart = () => {
-        isSpeaking = true;
-        button.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect></svg>
-          <span>Detener Lectura</span>
-        `;
-        button.classList.remove('bg-vzla-blue/5', 'text-vzla-blue', 'border-vzla-blue/10');
-        button.classList.add('bg-vzla-blue/20', 'border-vzla-blue/30');
-      };
-
-      utterance.onend = () => {
-        isSpeaking = false;
-        button.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-          <span>Escuchar Reporte</span>
-        `;
-        button.classList.remove('bg-vzla-blue/20', 'border-vzla-blue/30');
-        button.classList.add('bg-vzla-blue/5', 'text-vzla-blue', 'border-vzla-blue/10');
-      };
-
-      window.speechSynthesis.speak(utterance);
-    });
-  }
-</script>
