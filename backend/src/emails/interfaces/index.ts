@@ -1,14 +1,32 @@
 // 1. Define las propiedades exactas que necesita cada plantilla
-export interface WelcomeEmailContext {
+export interface PatientAlertEmailContext {
+  recipientName: string;
+  patientName: string;
+  alias?: string;
+  status: string;
+  location: string;
+  dni: string;
+}
+
+export interface PasswordResetEmailContext {
   name: string;
-  role: string;
-  actionUrl: string;
+  resetToken: string;
+  userId: number;
+}
+
+export interface MedicalAccessApprovedEmailContext {
+  fullName: string;
+  email: string;
+  position: string;
+  medicalCenter: string;
 }
 
 // 2. Creamos una Unión Discriminada.
 // Esto ata un nombre de plantilla específico con su contexto específico.
 export type EmailTemplatePayload =
-  | { template: 'welcome'; context: WelcomeEmailContext }
+  | { template: 'patient-alert'; context: PatientAlertEmailContext }
+  | { template: 'password-reset'; context: PasswordResetEmailContext }
+  | { template: 'medical-access-approved'; context: MedicalAccessApprovedEmailContext }
   | { template?: never; context?: never };
 
 // 3. El DTO principal ahora es la intersección de la base y el payload de la plantilla

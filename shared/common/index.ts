@@ -5,3 +5,10 @@ export const ROLES = {
   MEDICO: 2,
   USUARIO_COMUN: 3,
 } as const;
+
+export enum PatientStatus {
+  ESTABLE = "ESTABLE",
+  CRITICO = "CRÍTICO",
+  CONTACTAR_INMEDIATO = "CONTACTAR_INMEDIATO",
+  DESAPARECIDO = "DESAPARECIDO",
+}

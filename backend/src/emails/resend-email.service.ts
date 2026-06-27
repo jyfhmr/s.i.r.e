@@ -2,11 +2,15 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import { IEmailService, SendEmailDto } from './interfaces';
-import LoginAlertEmail from './templates/LoginAlertEmail';
+import PatientAlertEmail from './templates/PatientAlertEmail';
+import PasswordResetEmail from './templates/PasswordResetEmail';
+import MedicalAccessApprovedEmail from './templates/MedicalAccessApprovedEmail';
 
 // Diccionario de Plantillas (Patrón Strategy)
 const TemplateRegistry: Record<string, (context: any) => Promise<string>> = {
-  'login-alert': (ctx) => render(LoginAlertEmail(ctx)),
+  'patient-alert': (ctx) => render(PatientAlertEmail(ctx)),
+  'password-reset': (ctx) => render(PasswordResetEmail(ctx)),
+  'medical-access-approved': (ctx) => render(MedicalAccessApprovedEmail(ctx)),
 };
 
 @Injectable()

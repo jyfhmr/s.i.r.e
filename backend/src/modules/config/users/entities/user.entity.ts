@@ -10,7 +10,6 @@ import {
 } from 'typeorm';
 import { Profile } from '../../profiles/entities/profile.entity';
 import { Page } from '../../pages/entities/page.entity';
-import { Status } from '../../status/entities/status.entity';
 import { IUser } from '@shared/core/config/user/interfaces';
 
 @Entity('users')
