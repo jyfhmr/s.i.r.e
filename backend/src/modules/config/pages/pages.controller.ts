@@ -19,7 +19,6 @@ import { PageChangeStatusUseCase } from './use-cases/page-change-status.use-case
 import { PageFindAllService } from './services/page-find-all.service';
 import { PageFindOneService } from './services/page-find-one.service';
 import { PageListActiveService } from './services/page-list-active.service';
-import { PageExportService } from './helpers/page-export.service';
 import { PAGE_ROUTES } from '@shared/core/config/pages/routes';
 import { IPageFilter } from '@shared/core/config/pages/interfaces';
 import { RequirePage } from '@/decorators/require-page.decorator';

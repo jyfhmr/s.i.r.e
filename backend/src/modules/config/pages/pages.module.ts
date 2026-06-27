@@ -15,23 +15,21 @@ import { PageChangeStatusUseCase } from './use-cases/page-change-status.use-case
 import { PageFindAllService } from './services/page-find-all.service';
 import { PageFindOneService } from './services/page-find-one.service';
 import { PageListActiveService } from './services/page-list-active.service';
-import { PageExportService } from './helpers/page-export.service';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Page]), UsersModule],
-    controllers: [PagesController],
-    providers: [
-        HelpersService,
-        // Use Cases
-        PageCreateUseCase,
-        PageUpdateUseCase,
-        PageChangeStatusUseCase,
-        // Services
-        PageFindAllService,
-        PageFindOneService,
-        PageListActiveService,
-        PageExportService,
-    ],
-    exports: [PageFindOneService, PageFindAllService],
+  imports: [TypeOrmModule.forFeature([Page]), UsersModule],
+  controllers: [PagesController],
+  providers: [
+    HelpersService,
+    // Use Cases
+    PageCreateUseCase,
+    PageUpdateUseCase,
+    PageChangeStatusUseCase,
+    // Services
+    PageFindAllService,
+    PageFindOneService,
+    PageListActiveService,
+  ],
+  exports: [PageFindOneService, PageFindAllService],
 })
 export class PagesModule {}
