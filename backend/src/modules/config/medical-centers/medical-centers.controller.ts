@@ -25,6 +25,7 @@ import { MedicalCenterExportService } from './services/medical-center-export.ser
 import { MEDICAL_CENTER_ROUTES } from '@shared/core/config/medical-centers/routes';
 import { RequirePage } from '@/decorators/require-page.decorator';
 import { PermissionsGuard } from '@/guards/permissions.guard';
+import { Public } from '@/decorators/isPublic.decorator';
 import { SUB_PAGES } from '@shared/common/profile-rules';
 
 @Controller(MEDICAL_CENTER_ROUTES.BASE)
@@ -61,7 +62,8 @@ export class MedicalCentersController {
     return this.findAllService.execute(query);
   }
 
-  // Endpoint liviano para autocomplete - accesible a médicos autenticados
+  // Endpoint liviano para autocomplete - accesible a médicos autenticados y público
+  @Public()
   @Get(MEDICAL_CENTER_ROUTES.SEARCH)
   search(@Query('q') query: string) {
     return this.searchService.execute(query || '');

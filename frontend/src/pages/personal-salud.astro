@@ -109,20 +109,49 @@ import Layout from '../layouts/Layout.astro';
           </select>
         </div>
 
-        <!-- Centro de Salud (texto libre, ya que el autocomplete requiere auth) -->
+        <!-- Centro de Salud Autocomplete Combobox -->
         <div class="space-y-2">
-          <label for="manualMedicalCenter" class="block font-display font-bold text-base text-text-dark">
+          <label for="medical-center-search" class="block font-display font-bold text-base text-text-dark">
             Centro de Salud donde Laboras <span class="text-error-text">*</span>
           </label>
-          <input
+          
+          <div id="medical-center-combobox" class="relative">
+            <!-- Input de búsqueda -->
+            <input 
+              type="text"
+              id="medical-center-search"
+              class="w-full h-12 px-4 bg-white border border-border-subtle rounded-xl text-base text-text-dark placeholder-text-dark/40 focus:border-vzla-blue focus:ring-1 focus:ring-vzla-blue/20 focus:outline-none transition-all"
+              placeholder="🔍 Busca tu centro de salud..."
+              autocomplete="off"
+            />
+            <!-- Dropdown de resultados -->
+            <ul 
+              id="medical-center-dropdown"
+              class="hidden absolute z-30 w-full mt-1 bg-white border border-border-subtle rounded-xl shadow-lg max-h-60 overflow-y-auto divide-y divide-slate-50 outline-none"
+            >
+            </ul>
+          </div>
+
+          <!-- Caja de centro seleccionado -->
+          <div id="medical-center-selected" class="hidden items-center justify-between gap-3 bg-slate-50 border border-border-subtle rounded-xl px-4 py-3 shrink-0">
+            <span id="medical-center-selected-name" class="text-sm font-semibold text-text-dark"></span>
+            <button type="button" id="medical-center-clear" class="text-sm text-slate-500 hover:text-slate-800 font-semibold whitespace-nowrap bg-white border border-border-subtle rounded-lg px-3 py-1.5 transition-colors focus:ring-2 focus:ring-slate-200 outline-none cursor-pointer">
+              Cambiar
+            </button>
+          </div>
+
+          <!-- Input manual (aparece si eligen "Escribir manualmente") -->
+          <input 
             type="text"
-            id="manualMedicalCenter"
-            name="manualMedicalCenter"
-            required
-            class="w-full h-12 px-4 bg-white border border-border-subtle rounded-xl text-base text-text-dark placeholder-text-dark/40 focus:border-vzla-blue focus:ring-1 focus:ring-vzla-blue/20 focus:outline-none transition-all"
+            id="medical-center-manual"
+            class="hidden w-full h-12 px-4 bg-white border border-border-subtle rounded-xl text-base text-text-dark placeholder-text-dark/40 focus:border-vzla-blue focus:ring-1 focus:ring-vzla-blue/20 focus:outline-none transition-all"
             placeholder="Ej: Hospital Domingo Luciani"
           />
-          <p class="text-xs text-text-dark/50 font-sans">Escribe el nombre completo del hospital o centro médico</p>
+          
+          <!-- ID del centro seleccionado (oculto) -->
+          <input type="hidden" id="selected-center-id" />
+
+          <p class="text-xs text-text-dark/50 font-sans">Escribe para buscar en el catálogo o selecciona la opción de escritura manual.</p>
         </div>
 
         <!-- Aviso de Verificación -->
@@ -197,8 +226,9 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
-  import { createMedicalAccessRequest, type ApiError } from '../lib/api';
+  import { createMedicalAccessRequest, searchMedicalCenters, type ApiError } from '../lib/api';
   import type { ICreateAccessRequestDto } from '@shared/core/auth/access-requests/interfaces';
+  import type { IMedicalCenter } from '@shared/core/config/medical-centers/interfaces';
 
   const form = document.getElementById('access-request-form') as HTMLFormElement;
   const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
@@ -207,17 +237,180 @@ import Layout from '../layouts/Layout.astro';
   const errorMessage = document.getElementById('error-message') as HTMLDivElement;
   const errorText = document.getElementById('error-text') as HTMLParagraphElement;
 
+  // ==================== CENTRO DE SALUD COMBOBOX LÓGICA ====================
+  const centerSearch = document.getElementById('medical-center-search') as HTMLInputElement;
+  const centerDropdown = document.getElementById('medical-center-dropdown') as HTMLUListElement;
+  const centerCombobox = document.getElementById('medical-center-combobox') as HTMLElement;
+  const centerSelected = document.getElementById('medical-center-selected') as HTMLElement;
+  const centerSelectedName = document.getElementById('medical-center-selected-name') as HTMLElement;
+  const centerClearBtn = document.getElementById('medical-center-clear') as HTMLButtonElement;
+  const centerManual = document.getElementById('medical-center-manual') as HTMLInputElement;
+  const selectedCenterId = document.getElementById('selected-center-id') as HTMLInputElement;
+  const MANUAL_OPTION = '__manual__';
+
+  let centerSearchTimeout: number;
+
+  function escapeHtml(value: string): string {
+    return (value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function renderCenterDropdown(centers: IMedicalCenter[]) {
+    const manualItem = `
+      <li>
+        <button type="button" data-center-id="${MANUAL_OPTION}" class="center-option w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors font-bold text-vzla-blue border-b border-slate-100 cursor-pointer">
+          ✏️ Escribir manualmente...
+        </button>
+      </li>
+    `;
+
+    const items = centers
+      .map((c) => {
+        const sub = [c.state, c.municipality].filter(Boolean).join(', ');
+        return `
+        <li>
+          <button type="button" data-center-id="${c.id}" data-center-name="${escapeHtml(c.name)}" class="center-option w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 cursor-pointer">
+            <span class="block font-bold text-slate-900">${escapeHtml(c.name)}</span>
+            ${sub ? `<span class="block text-xs font-medium text-slate-500 mt-0.5">${escapeHtml(sub)}</span>` : ''}
+          </button>
+        </li>
+      `;
+      })
+      .join('');
+
+    const emptyMsg =
+      centers.length === 0
+        ? '<li class="px-4 py-3 text-slate-500 text-sm">Sin coincidencias en el catálogo.</li>'
+        : '';
+
+    centerDropdown.innerHTML = manualItem + items + emptyMsg;
+    centerDropdown.classList.remove('hidden');
+
+    centerDropdown.querySelectorAll('.center-option').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const el = e.currentTarget as HTMLElement;
+        const id = el.getAttribute('data-center-id');
+        if (id === MANUAL_OPTION) {
+          selectManualEntry();
+        } else if (id) {
+          selectCenter(parseInt(id), el.getAttribute('data-center-name') || '');
+        }
+      });
+    });
+  }
+
+  async function fetchCenters(query: string) {
+    try {
+      // Pasamos true como segundo argumento para indicarle al API que no requiere autenticación
+      const centers = await searchMedicalCenters(query, true);
+      renderCenterDropdown(centers);
+    } catch (error) {
+      console.error('Error al buscar centros:', error);
+      renderCenterDropdown([]);
+    }
+  }
+
+  function selectCenter(id: number, name: string) {
+    selectedCenterId.value = String(id);
+    centerSelectedName.textContent = name || 'Centro seleccionado';
+    centerSelected.classList.remove('hidden');
+    centerSelected.classList.add('flex');
+    centerDropdown.classList.add('hidden');
+    centerSearch.classList.add('hidden');
+    centerSearch.value = '';
+    centerManual.classList.add('hidden');
+    centerManual.value = '';
+  }
+
+  function selectManualEntry() {
+    selectedCenterId.value = '';
+    centerDropdown.classList.add('hidden');
+    centerSearch.classList.add('hidden');
+    centerSelected.classList.add('hidden');
+    centerSelected.classList.remove('flex');
+    centerManual.classList.remove('hidden');
+    centerManual.value = centerSearch.value.trim();
+    centerManual.focus();
+  }
+
+  function resetCenterPicker() {
+    selectedCenterId.value = '';
+    centerSelected.classList.add('hidden');
+    centerSelected.classList.remove('flex');
+    centerManual.classList.add('hidden');
+    centerManual.value = '';
+    centerSearch.classList.remove('hidden');
+    centerSearch.value = '';
+    centerDropdown.classList.add('hidden');
+    centerDropdown.innerHTML = '';
+  }
+
+  if (centerSearch) {
+    centerSearch.addEventListener('input', () => {
+      clearTimeout(centerSearchTimeout);
+      const value = centerSearch.value.trim();
+      centerSearchTimeout = window.setTimeout(() => {
+        fetchCenters(value);
+      }, 300);
+    });
+
+    centerSearch.addEventListener('focus', () => {
+      fetchCenters(centerSearch.value.trim());
+    });
+  }
+
+  if (centerClearBtn) {
+    centerClearBtn.addEventListener('click', () => {
+      resetCenterPicker();
+      centerSearch.focus();
+      fetchCenters('');
+    });
+  }
+
+  if (centerManual) {
+    centerManual.addEventListener('input', () => {
+      if (centerManual.value.trim() === '') {
+        resetCenterPicker();
+        centerSearch.focus();
+        fetchCenters('');
+      }
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (centerCombobox && !centerCombobox.contains(e.target as Node)) {
+      centerDropdown.classList.add('hidden');
+    }
+  });
+
+  // ==================== FORM SUBMIT HANDLER ====================
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // Deshabilitar botón
-      submitBtn.disabled = true;
-      submitText.textContent = 'Enviando...';
-      
       // Ocultar mensajes previos
       successMessage.classList.add('hidden');
       errorMessage.classList.add('hidden');
+
+      const centerIdStr = selectedCenterId.value;
+      const centerManualVal = centerManual.value.trim();
+      const centerId = centerIdStr ? parseInt(centerIdStr) : undefined;
+
+      // Validación del centro de salud
+      if (!centerId && !centerManualVal) {
+        errorText.textContent = 'Por favor selecciona un centro de salud del catálogo o escribe uno manualmente.';
+        errorMessage.classList.remove('hidden');
+        errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      // Deshabilitar botón
+      submitBtn.disabled = true;
+      submitText.textContent = 'Enviando...';
 
       try {
         // Obtener datos del formulario
@@ -228,7 +421,7 @@ import Layout from '../layouts/Layout.astro';
           email: formData.get('email') as string,
           phoneNumber: formData.get('phoneNumber') as string,
           position: formData.get('position') as string,
-          manualMedicalCenter: formData.get('manualMedicalCenter') as string,
+          ...(centerId ? { medicalCenterId: centerId } : { manualMedicalCenter: centerManualVal }),
         };
 
         // Enviar al API

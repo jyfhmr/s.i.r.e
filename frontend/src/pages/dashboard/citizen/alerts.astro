@@ -35,46 +35,55 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 		<div class="bg-white border border-border-subtle rounded-xl p-6 shadow-sm">
 			<h3 class="font-display font-bold text-lg text-text-dark mb-4">Agregar Nueva Alerta</h3>
 			
-			<form id="add-alert-form" class="space-y-4">
+			<form id="add-alert-form" class="space-y-5">
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					<div class="space-y-2">
-						<label for="alert-dni" class="block text-sm font-display font-semibold text-text-dark">
-							Cédula <span class="text-error-text">*</span>
+						<label for="alert-dni" class="block text-sm font-semibold text-slate-900">
+							Cédula <span class="text-red-500" aria-hidden="true">*</span>
 						</label>
 						<input 
-							type="text"
+							type="tel"
 							id="alert-dni"
+							inputmode="numeric"
+							pattern="[0-9]*"
 							required
-							class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+							class="w-full h-14 px-4 bg-white border-2 border-slate-200 hover:border-slate-300 rounded-xl text-base focus:border-vzla-blue focus:ring-4 focus:ring-vzla-blue/15 outline-none transition-all"
 							placeholder="Ej: 12345678"
 						/>
-						<p class="text-xs text-text-dark/50">Solo números, sin puntos ni guiones</p>
+						<p class="text-xs text-slate-500">Solo números, sin puntos ni guiones</p>
 					</div>
 
 					<div class="space-y-2">
-						<label for="alert-alias" class="block text-sm font-display font-semibold text-text-dark">
-							Alias / Relación (opcional)
+						<label for="alert-alias" class="block text-sm font-semibold text-slate-900">
+							Alias / Relación <span class="text-xs text-slate-500 font-normal">(opcional)</span>
 						</label>
 						<input 
 							type="text"
 							id="alert-alias"
-							class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+							class="w-full h-14 px-4 bg-white border-2 border-slate-200 hover:border-slate-300 rounded-xl text-base focus:border-vzla-blue focus:ring-4 focus:ring-vzla-blue/15 outline-none transition-all"
 							placeholder="Ej: Mamá, Hermano Pedro"
 							maxlength="50"
 						/>
-						<p class="text-xs text-text-dark/50">Para identificar fácilmente</p>
+						<p class="text-xs text-slate-500">Para identificar fácilmente</p>
 					</div>
 				</div>
 
-				<div id="form-error" class="hidden bg-error-light border border-error-border text-error-text text-sm rounded-lg p-3"></div>
-				<div id="form-success" class="hidden bg-success-light border border-success-border text-success-text text-sm rounded-lg p-3"></div>
+				<div id="form-error" class="hidden bg-red-50 border-2 border-red-200 text-red-700 font-semibold text-sm rounded-xl p-4 flex gap-2 items-start" role="alert">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+					<span id="form-error-msg"></span>
+				</div>
+				<div id="form-success" class="hidden bg-green-50 border-2 border-green-200 text-green-700 font-semibold text-sm rounded-xl p-4 flex gap-2 items-start" role="alert">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+					<span id="form-success-msg"></span>
+				</div>
 
 				<button 
 					type="submit"
 					id="btn-add-alert"
-					class="h-11 px-6 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-xl transition-all shadow-xs"
+					class="h-14 px-6 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-semibold text-base rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 w-full sm:w-auto focus:ring-4 focus:ring-vzla-blue/30 outline-none cursor-pointer"
 				>
-					+ Agregar a Mi Lista
+					<span id="add-alert-spinner" class="hidden animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+					<span id="add-alert-btn-text">+ Agregar a Mi Lista</span>
 				</button>
 			</form>
 		</div>
@@ -83,7 +92,7 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 		<div class="bg-white border border-border-subtle rounded-xl shadow-sm">
 			<div class="p-4 border-b border-border-subtle flex items-center justify-between">
 				<h3 class="font-display font-bold text-lg text-text-dark">Mi Lista de Seguimiento</h3>
-				<span id="alerts-count" class="text-sm font-display font-semibold text-vzla-blue">0 / 15</span>
+				<span id="alerts-count" class="text-sm font-display font-semibold text-vzla-blue" aria-live="polite">0 / 15</span>
 			</div>
 
 			<!-- Loading -->
@@ -107,6 +116,46 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 			</div>
 		</div>
 	</div>
+
+	<!-- Modal de Confirmación de Eliminación -->
+	<div id="confirm-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all">
+		<div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+			<div class="flex items-center gap-3 text-red-600">
+				<div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+						<line x1="12" y1="9" x2="12" y2="13"></line>
+						<line x1="12" y1="17" x2="12.01" y2="17"></line>
+					</svg>
+				</div>
+				<h4 class="font-display font-bold text-lg text-slate-900">¿Eliminar alerta?</h4>
+			</div>
+			<p class="text-sm text-slate-500 leading-relaxed font-medium">
+				¿Estás seguro de que deseas eliminar la alerta para <strong id="delete-alert-info" class="text-slate-800"></strong> de tu lista de seguimiento? Dejarás de recibir notificaciones por correo sobre esta persona.
+			</p>
+
+			<!-- Alerta de Error -->
+			<div id="delete-confirm-error" class="hidden bg-red-50 border-2 border-red-200 text-red-700 font-semibold text-xs rounded-xl p-3" role="alert">
+			</div>
+
+			<div class="flex gap-3 pt-2">
+				<button 
+					type="button" 
+					id="btn-confirm-cancel" 
+					class="flex-1 h-12 bg-white border-2 border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-semibold transition-all focus:ring-4 focus:ring-slate-100 outline-none cursor-pointer"
+				>
+					Cancelar
+				</button>
+				<button 
+					type="button" 
+					id="btn-confirm-delete" 
+					class="flex-1 h-12 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-all focus:ring-4 focus:ring-red-100 outline-none cursor-pointer"
+				>
+					Eliminar
+				</button>
+			</div>
+		</div>
+	</div>
 </DashboardLayout>
 
 <script>
@@ -120,12 +169,21 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 	const emptyEl = document.getElementById('alerts-empty') as HTMLElement;
 	const alertsCount = document.getElementById('alerts-count') as HTMLElement;
 	const addAlertForm = document.getElementById('add-alert-form') as HTMLFormElement;
+	
 	const formError = document.getElementById('form-error') as HTMLElement;
+	const formErrorMsg = document.getElementById('form-error-msg') as HTMLElement;
 	const formSuccess = document.getElementById('form-success') as HTMLElement;
+	const formSuccessMsg = document.getElementById('form-success-msg') as HTMLElement;
+	
 	const btnAddAlert = document.getElementById('btn-add-alert') as HTMLButtonElement;
+
+	const confirmModal = document.getElementById('confirm-modal') as HTMLElement;
+	const btnConfirmCancel = document.getElementById('btn-confirm-cancel') as HTMLButtonElement;
+	const btnConfirmDelete = document.getElementById('btn-confirm-delete') as HTMLButtonElement;
 
 	// ==================== STATE ====================
 	let alerts: IWatchListItem[] = [];
+	let watchListIdToDelete: number | null = null;
 
 	// ==================== CARGAR ALERTAS ====================
 	async function loadAlerts() {
@@ -148,13 +206,17 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 				listEl.classList.remove('hidden');
 			}
 
-			// Deshabilitar botón si llegó al límite
+			// Deshabilitar botón si llegó al límite y ocultar spinners residuales
+			const btnText = document.getElementById('add-alert-btn-text');
+			const addSpinner = document.getElementById('add-alert-spinner');
+			if (addSpinner) addSpinner.classList.add('hidden');
+
 			if (alerts.length >= MAX_ALERTS_PER_USER) {
 				btnAddAlert.disabled = true;
-				btnAddAlert.textContent = `Límite Alcanzado (${MAX_ALERTS_PER_USER})`;
+				if (btnText) btnText.textContent = `Límite Alcanzado (${MAX_ALERTS_PER_USER})`;
 			} else {
 				btnAddAlert.disabled = false;
-				btnAddAlert.textContent = '+ Agregar a Mi Lista';
+				if (btnText) btnText.textContent = '+ Agregar a Mi Lista';
 			}
 		} catch (error) {
 			console.error('Error al cargar alertas:', error);
@@ -175,18 +237,20 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 			});
 
 			const div = document.createElement('div');
-			div.className = 'p-5 hover:bg-bg-light/50 transition-colors flex items-center justify-between gap-4';
+			div.className = 'p-5 hover:bg-bg-light/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4';
 			div.innerHTML = `
 				<div class="flex-1 min-w-0">
 					<div class="flex items-center gap-3 mb-1">
-						<span class="font-mono text-base font-semibold text-text-dark">${alert.watchedDni}</span>
-						${alert.alias ? `<span class="px-2.5 py-0.5 bg-vzla-blue/10 text-vzla-blue text-xs font-display font-bold rounded-full">${alert.alias}</span>` : ''}
+						<span class="font-mono text-lg font-semibold text-text-dark">${alert.watchedDni}</span>
+						${alert.alias ? `<span class="px-2.5 py-0.5 bg-vzla-blue/10 text-vzla-blue text-sm font-display font-bold rounded-full">${escapeHtml(alert.alias)}</span>` : ''}
 					</div>
-					<p class="text-xs text-text-dark/50">Agregado el ${createdDate}</p>
+					<p class="text-sm text-text-dark/50">Agregado el ${createdDate}</p>
 				</div>
 				<button 
-					class="btn-delete-alert h-9 px-4 border border-error-border text-error-text hover:bg-error-light rounded-lg text-sm font-display font-semibold transition-colors"
+					class="btn-delete-alert h-12 px-5 border border-error-border text-error-text hover:bg-error-light rounded-xl text-sm font-display font-bold transition-colors w-full sm:w-auto"
 					data-alert-id="${alert.id}"
+					data-alert-dni="${alert.watchedDni}"
+					data-alert-alias="${escapeHtml(alert.alias || '')}"
 				>
 					Eliminar
 				</button>
@@ -194,20 +258,36 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 			listEl.appendChild(div);
 		});
 
-		// Event listeners para eliminar
-		document.querySelectorAll('.btn-delete-alert').forEach(btn => {
-			btn.addEventListener('click', async (e) => {
-				const id = (e.currentTarget as HTMLElement).getAttribute('data-alert-id');
-				if (!id) return;
+		// Escapar HTML básico de utilidad
+		function escapeHtml(value: string): string {
+			return (value || '')
+				.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#39;');
+		}
 
-				if (confirm('¿Estás seguro de eliminar esta alerta?')) {
-					try {
-						await deleteAlert(parseInt(id));
-						loadAlerts(); // Recargar lista
-					} catch (error: any) {
-						alert(`Error al eliminar: ${error.message || 'Error desconocido'}`);
-					}
+		// Event listeners para eliminar (abre modal de confirmación)
+		document.querySelectorAll('.btn-delete-alert').forEach(btn => {
+			btn.addEventListener('click', (e) => {
+				const el = e.currentTarget as HTMLElement;
+				const id = el.getAttribute('data-alert-id');
+				if (!id) return;
+				watchListIdToDelete = parseInt(id);
+				
+				const dni = el.getAttribute('data-alert-dni') || '';
+				const alias = el.getAttribute('data-alert-alias') || '';
+				
+				const infoEl = document.getElementById('delete-alert-info');
+				if (infoEl) {
+					infoEl.textContent = alias ? `${dni} (${alias})` : dni;
 				}
+
+				const errorDiv = document.getElementById('delete-confirm-error');
+				if (errorDiv) errorDiv.classList.add('hidden');
+
+				confirmModal.classList.remove('hidden');
 			});
 		});
 	}
@@ -223,21 +303,21 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 		const alias = (document.getElementById('alert-alias') as HTMLInputElement).value.trim();
 
 		if (!dni) {
-			formError.textContent = 'Por favor ingresa una cédula válida';
+			formErrorMsg.textContent = 'Por favor ingresa una cédula válida';
 			formError.classList.remove('hidden');
 			return;
 		}
 
 		// Verificar límite
 		if (alerts.length >= MAX_ALERTS_PER_USER) {
-			formError.textContent = `Has alcanzado el límite de ${MAX_ALERTS_PER_USER} alertas`;
+			formErrorMsg.textContent = `Has alcanzado el límite de ${MAX_ALERTS_PER_USER} alertas`;
 			formError.classList.remove('hidden');
 			return;
 		}
 
 		// Verificar duplicado
 		if (alerts.some(a => a.watchedDni === dni)) {
-			formError.textContent = 'Ya tienes una alerta configurada para esta cédula';
+			formErrorMsg.textContent = 'Ya tienes una alerta configurada para esta cédula';
 			formError.classList.remove('hidden');
 			return;
 		}
@@ -249,23 +329,62 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 
 		try {
 			btnAddAlert.disabled = true;
-			btnAddAlert.textContent = 'Agregando...';
+			const addSpinner = document.getElementById('add-alert-spinner');
+			const addBtnText = document.getElementById('add-alert-btn-text');
+			if (addSpinner) addSpinner.classList.remove('hidden');
+			if (addBtnText) addBtnText.textContent = 'Agregando...';
 
 			await createAlert(dto);
 
-			formSuccess.textContent = '✓ Alerta agregada exitosamente';
+			formSuccessMsg.textContent = 'Alerta agregada exitosamente.';
 			formSuccess.classList.remove('hidden');
 			addAlertForm.reset();
 
+			// Recargar la lista inmediatamente para dar feedback instantáneo y resetear el botón
+			loadAlerts();
+
+			// Ocultar mensaje de éxito tras 2 segundos
 			setTimeout(() => {
 				formSuccess.classList.add('hidden');
-				loadAlerts(); // Recargar lista
 			}, 2000);
 		} catch (error: any) {
-			formError.textContent = error.message || 'Error al agregar la alerta';
+			formErrorMsg.textContent = error.message || 'Error al agregar la alerta';
 			formError.classList.remove('hidden');
 			btnAddAlert.disabled = false;
-			btnAddAlert.textContent = '+ Agregar a Mi Lista';
+			const addSpinner = document.getElementById('add-alert-spinner');
+			const addBtnText = document.getElementById('add-alert-btn-text');
+			if (addSpinner) addSpinner.classList.add('hidden');
+			if (addBtnText) addBtnText.textContent = '+ Agregar a Mi Lista';
+		}
+	});
+
+	// Confirm modal logic
+	btnConfirmCancel.addEventListener('click', () => {
+		confirmModal.classList.add('hidden');
+		watchListIdToDelete = null;
+	});
+
+	btnConfirmDelete.addEventListener('click', async () => {
+		if (watchListIdToDelete === null) return;
+		const errorDiv = document.getElementById('delete-confirm-error');
+		try {
+			btnConfirmDelete.disabled = true;
+			btnConfirmDelete.textContent = 'Eliminando...';
+			if (errorDiv) errorDiv.classList.add('hidden');
+			
+			await deleteAlert(watchListIdToDelete);
+			
+			confirmModal.classList.add('hidden');
+			watchListIdToDelete = null;
+			loadAlerts(); // Recargar lista
+		} catch (error: any) {
+			if (errorDiv) {
+				errorDiv.textContent = '⚠️ ' + (error.message || 'Error de red o servidor al eliminar.');
+				errorDiv.classList.remove('hidden');
+			}
+		} finally {
+			btnConfirmDelete.disabled = false;
+			btnConfirmDelete.textContent = 'Eliminar';
 		}
 	});
 

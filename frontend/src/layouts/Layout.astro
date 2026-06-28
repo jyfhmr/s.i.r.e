@@ -35,17 +35,34 @@ const isContactoActive = pathname.startsWith('/contact');
 		<!-- Cabecera simple y accesible -->
 		<header class="border-b border-border-subtle bg-white/70 backdrop-blur-md sticky top-0 z-50">
 			<div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-				<!-- Logo de solo texto -->
-				<a href="/" class="flex items-center gap-2 group no-underline text-inherit">
-					<span class="font-display font-bold text-xl md:text-2xl tracking-tight text-vzla-blue hover:text-vzla-blue-hover transition-colors">
-						S.I.R.E.
-					</span>
-				</a>
 				
-				<!-- Navegación depurada -->
-				<nav class="h-16 flex items-center gap-2 sm:gap-3 md:gap-6 font-display font-semibold text-sm md:text-base">
-					<!-- Links de página (se colapsan en móvil para no desbordar) -->
-					<div class="hidden md:flex items-center gap-4 md:gap-6 h-16">
+				<!-- Logo y Hamburguesa (Agrupados a la izquierda) -->
+				<div class="flex items-center gap-3">
+					<!-- Botón Menú Hamburguesa Móvil (Visible solo en mobile, a la izquierda del logo) -->
+					<button 
+						id="mobile-menu-toggle"
+						class="flex md:hidden w-10 h-10 items-center justify-center rounded-lg hover:bg-bg-light border border-border-subtle text-text-dark cursor-pointer transition-colors focus:outline-none"
+						aria-label="Abrir menú de navegación"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<line x1="3" y1="12" x2="21" y2="12"></line>
+							<line x1="3" y1="6" x2="21" y2="6"></line>
+							<line x1="3" y1="18" x2="21" y2="18"></line>
+						</svg>
+					</button>
+
+					<!-- Logo de solo texto -->
+					<a href="/" class="flex items-center gap-2 group no-underline text-inherit">
+						<span class="font-display font-bold text-xl md:text-2xl tracking-tight text-vzla-blue hover:text-vzla-blue-hover transition-colors">
+							S.I.R.E.
+						</span>
+					</a>
+				</div>
+				
+				<!-- Navegación depurada y Acciones de sesión -->
+				<div class="flex items-center gap-4">
+					<!-- Links de página (desktop) -->
+					<nav class="hidden md:flex items-center gap-6 h-16 font-display font-semibold text-sm md:text-base">
 						<a 
 							href="/" 
 							class={`h-16 flex items-center text-text-dark/70 hover:text-vzla-blue border-b-2 no-underline transition-all ${isBuscarActive ? 'border-vzla-blue text-vzla-blue' : 'border-transparent hover:border-vzla-blue/30'}`}
@@ -64,23 +81,24 @@ const isContactoActive = pathname.startsWith('/contact');
 						>
 							Contacto
 						</a>
-					</div>
-					
+					</nav>
+
 					<!-- Enlaces públicos de sesión (se ocultan si está logueado) -->
-					<a href="/login" id="nav-login-link" class="px-3 sm:px-4 py-2 border border-vzla-blue/20 hover:border-vzla-blue/40 text-vzla-blue bg-vzla-blue/5 hover:bg-vzla-blue/10 rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs whitespace-nowrap">
-						Iniciar Sesión
-					</a>
-					<a href="/register" id="nav-register-btn" class="px-3 sm:px-4 py-2 bg-vzla-blue hover:bg-vzla-blue-hover text-white rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs whitespace-nowrap">
-						Registrarse
-					</a>
+					<div id="nav-guest-container" class="flex items-center gap-2 sm:gap-3">
+						<a href="/login" id="nav-login-link" class="px-3 sm:px-4 py-2 border border-vzla-blue/20 hover:border-vzla-blue/40 text-vzla-blue bg-vzla-blue/5 hover:bg-vzla-blue/10 rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs whitespace-nowrap">
+							Iniciar Sesión
+						</a>
+						<a href="/register" id="nav-register-btn" class="px-3 sm:px-4 py-2 bg-vzla-blue hover:bg-vzla-blue-hover text-white rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs whitespace-nowrap">
+							Registrarse
+						</a>
+					</div>
 
-
-					<!-- Contenedor dinámico para usuario logueado -->
-					<div id="nav-user-container" class="hidden flex items-center gap-2 sm:gap-3 md:gap-4 font-sans text-xs md:text-sm">
+					<!-- Contenedor dinámico para usuario logueado (Con separación mejorada y estilo Premium) -->
+					<div id="nav-user-container" class="hidden flex items-center gap-3 sm:gap-4 font-sans text-xs md:text-sm">
 						<span id="nav-user-greeting" class="hidden sm:inline text-text-dark/80 font-bold"></span>
 						<a 
 							href="/dashboard" 
-							class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-vzla-blue hover:bg-vzla-blue-hover text-white rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs whitespace-nowrap"
+							class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-vzla-blue hover:bg-vzla-blue-hover text-white rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-xs hover:shadow-md whitespace-nowrap"
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 								<rect x="3" y="3" width="7" height="7"></rect>
@@ -92,15 +110,122 @@ const isContactoActive = pathname.startsWith('/contact');
 						</a>
 						<button 
 							id="nav-logout-btn" 
-							class="text-xs text-rose-600 hover:underline cursor-pointer border border-rose-600/20 bg-rose-600/5 px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap"
+							class="px-3 py-2 text-xs text-rose-600 hover:text-white border border-rose-200 hover:border-rose-600 bg-rose-50/50 hover:bg-rose-600 rounded-xl font-bold cursor-pointer transition-all whitespace-nowrap"
 						>
 							Salir
 						</button>
 					</div>
-
-				</nav>
+				</div>
 			</div>
 		</header>
+
+		<!-- Mobile menu drawer overlay (z-50) -->
+		<div id="mobile-menu-overlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex justify-start transition-all duration-200">
+			<!-- Panel drawer (Slides in from the left matching the dashboard sidebar style) -->
+			<aside id="mobile-menu-panel" class="w-64 max-w-full bg-white h-full shadow-2xl flex flex-col justify-between transform -translate-x-full transition-transform duration-300">
+				<div class="flex-grow flex flex-col">
+					<!-- Cabecera panel -->
+					<div class="h-16 border-b border-border-subtle flex items-center justify-between px-6">
+						<a href="/" class="flex items-center gap-2 group no-underline text-inherit">
+							<span class="w-2 h-2 rounded-full bg-vzla-blue animate-pulse"></span>
+							<span class="font-display font-bold text-xl text-text-dark">S.I.R.E.</span>
+						</a>
+						<button 
+							id="mobile-menu-close"
+							class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-bg-light text-text-dark transition-colors focus:outline-none"
+							aria-label="Cerrar menú de navegación"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<line x1="18" y1="6" x2="6" y2="18"></line>
+								<line x1="6" y1="6" x2="18" y2="18"></line>
+							</svg>
+						</button>
+					</div>
+
+					<!-- Links principales -->
+					<nav class="flex-grow overflow-y-auto py-4 px-3 space-y-1">
+						<a 
+							href="/" 
+							class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-display font-semibold transition-all no-underline ${
+								isBuscarActive 
+									? 'bg-vzla-blue text-white' 
+									: 'text-text-dark/70 hover:bg-bg-light hover:text-vzla-blue'
+							}`}
+						>
+							<span class="w-1.5 h-1.5 rounded-full ${isBuscarActive ? 'bg-white' : 'bg-vzla-blue/40'}"></span>
+							Buscar Familiar
+						</a>
+						<a 
+							href="/info" 
+							class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-display font-semibold transition-all no-underline ${
+								isInfoActive 
+									? 'bg-vzla-blue text-white' 
+									: 'text-text-dark/70 hover:bg-bg-light hover:text-vzla-blue'
+							}`}
+						>
+							<span class="w-1.5 h-1.5 rounded-full ${isInfoActive ? 'bg-white' : 'bg-vzla-blue/40'}"></span>
+							Información
+						</a>
+						<a 
+							href="/contact" 
+							class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-display font-semibold transition-all no-underline ${
+								isContactoActive 
+									? 'bg-vzla-blue text-white' 
+									: 'text-text-dark/70 hover:bg-bg-light hover:text-vzla-blue'
+							}`}
+						>
+							<span class="w-1.5 h-1.5 rounded-full ${isContactoActive ? 'bg-white' : 'bg-vzla-blue/40'}"></span>
+							Contacto
+						</a>
+					</nav>
+				</div>
+
+				<!-- Sección de Sesión móvil -->
+				<div class="border-t border-border-subtle p-4">
+					<!-- Usuario No Logueado en móvil -->
+					<div id="mobile-nav-guest-container" class="flex flex-col gap-2">
+						<a href="/login" class="w-full h-11 flex items-center justify-center border border-vzla-blue text-vzla-blue font-bold rounded-xl text-sm transition-all no-underline hover:bg-vzla-blue/5">
+							Iniciar Sesión
+						</a>
+						<a href="/register" class="w-full h-11 flex items-center justify-center bg-vzla-blue text-white font-bold rounded-xl text-sm transition-all hover:bg-vzla-blue-hover no-underline">
+							Registrarse
+						</a>
+					</div>
+
+					<!-- Usuario Logueado en móvil -->
+					<div id="mobile-nav-user-container" class="hidden flex flex-col gap-3">
+						<div class="flex items-center gap-3 rounded-xl p-2 -m-2">
+							<div class="w-10 h-10 rounded-full bg-vzla-blue/10 flex items-center justify-center text-vzla-blue font-display font-bold text-sm">
+								<span id="mobile-user-initial">U</span>
+							</div>
+							<div class="flex-grow min-w-0">
+								<p id="mobile-user-name" class="font-display font-semibold text-sm text-text-dark truncate">Usuario</p>
+								<p class="text-xs text-text-dark/50 truncate">Sesión Activa</p>
+							</div>
+						</div>
+						
+						<a 
+							href="/dashboard" 
+							class="w-full h-11 flex items-center justify-center gap-2 bg-vzla-blue text-white font-bold rounded-xl text-sm hover:bg-vzla-blue-hover transition-all no-underline"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<rect x="3" y="3" width="7" height="7"></rect>
+								<rect x="14" y="3" width="7" height="7"></rect>
+								<rect x="14" y="14" width="7" height="7"></rect>
+								<rect x="3" y="14" width="7" height="7"></rect>
+							</svg>
+							Ir a mi Panel
+						</a>
+						<button 
+							id="mobile-nav-logout-btn" 
+							class="w-full h-11 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl text-sm font-bold transition-all cursor-pointer"
+						>
+							Cerrar Sesión
+						</button>
+					</div>
+				</div>
+			</aside>
+		</div>
 
 		<!-- Contenido principal -->
 		<main class="flex-grow max-w-4xl w-full mx-auto px-4 py-8 md:py-12">
@@ -121,26 +246,83 @@ const isContactoActive = pathname.startsWith('/contact');
 			</div>
 		</footer>
 
-		<!-- Script de control dinámico del Menú Público -->
+		<!-- Script de control dinámico del Menú Público y Mobile Drawer -->
 		<script>
 			import { getSession, logout } from '../lib/auth';
 
 			if (typeof window !== 'undefined') {
-				const loginLink = document.getElementById('nav-login-link');
-				const registerBtn = document.getElementById('nav-register-btn');
+				const guestContainer = document.getElementById('nav-guest-container');
 				const userContainer = document.getElementById('nav-user-container');
 				const userGreeting = document.getElementById('nav-user-greeting');
 				const logoutBtn = document.getElementById('nav-logout-btn');
+
+				// Selectores de menú móvil
+				const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+				const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+				const mobileMenuPanel = document.getElementById('mobile-menu-panel');
+				const mobileMenuClose = document.getElementById('mobile-menu-close');
+
+				const mobileGuestContainer = document.getElementById('mobile-nav-guest-container');
+				const mobileUserContainer = document.getElementById('mobile-nav-user-container');
+				const mobileUserName = document.getElementById('mobile-user-name');
+				const mobileUserInitial = document.getElementById('mobile-user-initial');
+				const mobileLogoutBtn = document.getElementById('mobile-nav-logout-btn');
+
+				function openMobileMenu() {
+					if (mobileMenuOverlay && mobileMenuPanel) {
+						mobileMenuOverlay.classList.remove('hidden');
+						// Forzar reflow para animación
+						void mobileMenuOverlay.offsetWidth;
+						mobileMenuPanel.classList.remove('-translate-x-full');
+					}
+				}
+
+				function closeMobileMenu() {
+					if (mobileMenuOverlay && mobileMenuPanel) {
+						mobileMenuPanel.classList.add('-translate-x-full');
+						setTimeout(() => {
+							mobileMenuOverlay.classList.add('hidden');
+						}, 300);
+					}
+				}
+
+				if (mobileMenuToggle) {
+					mobileMenuToggle.addEventListener('click', openMobileMenu);
+				}
+
+				if (mobileMenuClose) {
+					mobileMenuClose.addEventListener('click', closeMobileMenu);
+				}
+
+				if (mobileMenuOverlay) {
+					mobileMenuOverlay.addEventListener('click', (e) => {
+						if (e.target === mobileMenuOverlay) {
+							closeMobileMenu();
+						}
+					});
+				}
+
+				// Cerrar con Escape
+				window.addEventListener('keydown', (e) => {
+					if (e.key === 'Escape' && mobileMenuOverlay && !mobileMenuOverlay.classList.contains('hidden')) {
+						closeMobileMenu();
+					}
+				});
 
 				// Detectar sesión real (JWT)
 				const session = getSession();
 
 				if (session) {
-					// Ocultar botones de acceso
-					if (loginLink) loginLink.classList.add('hidden');
-					if (registerBtn) registerBtn.classList.add('hidden');
+					// Ocultar botones de acceso en desktop
+					if (guestContainer) guestContainer.classList.add('hidden');
+
+					// Ocultar botones de acceso en móvil y mostrar panel de usuario
+					if (mobileGuestContainer) mobileGuestContainer.classList.add('hidden');
+					if (mobileUserContainer) mobileUserContainer.classList.remove('hidden');
+					if (mobileUserName) mobileUserName.textContent = session.name;
+					if (mobileUserInitial) mobileUserInitial.textContent = session.name.charAt(0).toUpperCase();
 					
-					// Mostrar saludo y botón de logout
+					// Mostrar saludo y botón de logout en desktop
 					if (userContainer && userGreeting) {
 						userGreeting.innerHTML = `
 							<a href="/dashboard" class="text-text-dark hover:text-vzla-blue transition-colors no-underline font-bold">
@@ -153,6 +335,12 @@ const isContactoActive = pathname.startsWith('/contact');
 
 				if (logoutBtn) {
 					logoutBtn.addEventListener('click', () => {
+						logout();
+					});
+				}
+
+				if (mobileLogoutBtn) {
+					mobileLogoutBtn.addEventListener('click', () => {
 						logout();
 					});
 				}

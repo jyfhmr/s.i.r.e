@@ -23,6 +23,74 @@ import SearchForm from '../components/SearchForm.astro';
         de los hospitales públicos durante emergencias masivas.
       </p>
 
+      <!-- Formulario de Búsqueda - CU 2 (Ubicación prioritaria en Hero) -->
+      <div class="w-full max-w-2xl mx-auto pt-2">
+        <SearchForm />
+      </div>
+
+      <!-- Contenedor dinámico de resultados (Justo debajo del buscador) -->
+      <section id="results-section" class="w-full max-w-2xl mx-auto text-left hidden" aria-live="polite">
+        <!-- Loading -->
+        <div id="results-loading" class="text-center py-12 hidden">
+          <div class="inline-flex items-center gap-3 text-vzla-blue justify-center w-full">
+            <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="font-display font-semibold text-lg">Buscando en la base de datos...</span>
+          </div>
+        </div>
+
+        <!-- Tarjeta de paciente (inyectada dinámicamente) -->
+        <div id="patient-card-holder" class="animate-fade-in"></div>
+
+        <!-- No encontrado -->
+        <div id="results-not-found" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm text-center space-y-5 hidden">
+          <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-vzla-blue/10 text-vzla-blue">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <h3 class="font-display font-bold text-xl text-text-dark">Sin resultados en este momento</h3>
+          <p id="not-found-message" class="font-sans text-base text-text-dark/70 max-w-lg mx-auto leading-relaxed">
+            No hemos encontrado información sobre esta persona en nuestros registros hasta el momento.
+          </p>
+          
+          <!-- CTA: Configurar alerta -->
+          <div class="bg-bg-light border border-border-subtle rounded-xl p-5 max-w-md mx-auto">
+            <p class="font-display font-semibold text-base text-text-dark mb-3">
+              ¿Quieres enterarte inmediatamente si esta persona ingresa a algún hospital?
+            </p>
+            <a 
+              href="/register" 
+              class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-xl transition-all shadow-xs no-underline"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"></path>
+              </svg>
+              Configurar Alerta por Correo
+            </a>
+            <p class="text-xs text-text-dark/50 mt-3">
+              Recibirás un email automático cuando el personal médico registre a esta persona
+            </p>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div id="results-error" class="bg-error-light border border-error-border rounded-2xl p-6 md:p-8 text-center space-y-4 hidden">
+          <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-error-text/10 text-error-text">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h3 class="font-display font-bold text-xl text-error-text">Error de conexión</h3>
+          <p id="error-message" class="font-sans text-base text-text-dark/70 max-w-lg mx-auto"></p>
+        </div>
+      </section>
+
       <div class="bg-white border border-border-subtle rounded-2xl p-6 shadow-sm text-left max-w-2xl mx-auto">
         <h2 class="font-display font-bold text-lg text-text-dark mb-3 flex items-center gap-2">
           <span class="w-1.5 h-1.5 rounded-full bg-vzla-blue"></span>
@@ -44,70 +112,6 @@ Busca el paradero de un ser querido por su cédula o crea una Alerta de Seguimie
             </p>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- Formulario de Búsqueda - CU 2 -->
-    <section class="max-w-3xl mx-auto">
-      <SearchForm />
-    </section>
-
-    <!-- Contenedor dinámico de resultados -->
-    <section id="results-section" class="max-w-3xl mx-auto hidden">
-      <!-- Loading -->
-      <div id="results-loading" class="text-center py-12 hidden">
-        <div class="inline-flex items-center gap-3 text-vzla-blue">
-          <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <span class="font-display font-semibold text-lg">Buscando en la base de datos...</span>
-        </div>
-      </div>
-
-      <!-- Tarjeta de paciente (inyectada dinámicamente) -->
-      <div id="patient-card-holder" class="animate-fade-in"></div>
-
-      <!-- No encontrado -->
-      <div id="results-not-found" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm text-center space-y-5 hidden">
-        <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-vzla-blue/10 text-vzla-blue">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-        </div>
-        <h3 class="font-display font-bold text-xl text-text-dark">Sin resultados en este momento</h3>
-        <p id="not-found-message" class="font-sans text-base text-text-dark/70 max-w-lg mx-auto leading-relaxed">
-          No hemos encontrado información sobre esta persona en nuestros registros hasta el momento.
-        </p>
-        
-        <!-- CTA: Configurar alerta -->
-        <div class="bg-bg-light border border-border-subtle rounded-xl p-5 max-w-md mx-auto">
-          <p class="font-display font-semibold text-base text-text-dark mb-3">
-            ¿Quieres enterarte inmediatamente si esta persona ingresa a algún hospital?
-          </p>
-          <a 
-            href="/register" 
-            class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-xl transition-all shadow-xs no-underline"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"></path>
-            </svg>
-            Configurar Alerta por Correo
-          </a>
-          <p class="text-xs text-text-dark/50 mt-3">
-            Recibirás un email automático cuando el personal médico registre a esta persona
-          </p>
-        </div>
-      </div>
-
-      <!-- Error -->
-      <div id="results-error" class="bg-error-light border border-error-border rounded-2xl p-6 md:p-8 text-center space-y-4 hidden">
-        <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-error-text/10 text-error-text">
-          ⚠️
-        </div>
-        <h3 class="font-display font-bold text-xl text-error-text">Error de conexión</h3>
-        <p id="error-message" class="font-sans text-base text-text-dark/70 max-w-lg mx-auto"></p>
       </div>
     </section>
 
@@ -212,6 +216,11 @@ Busca el paradero de un ser querido por su cédula o crea una Alerta de Seguimie
       searchVal = params.get('search') || '';
     }
     
+    // Sanitizar de entrada (eliminar letras de nacionalidad, puntos y espacios)
+    if (searchVal) {
+      searchVal = searchVal.replace(/[vVeE\.\-\s]/g, '').trim();
+    }
+    
     const resultsSection = document.getElementById('results-section');
     const loadingDiv = document.getElementById('results-loading');
     const cardHolder = document.getElementById('patient-card-holder');
@@ -303,6 +312,15 @@ Busca el paradero de un ser querido por su cédula o crea una Alerta de Seguimie
         errorMessageEl.textContent = apiError.message || 'Ocurrió un error inesperado';
       }
       errorDiv.classList.remove('hidden');
+    } finally {
+      // Restablecer el estado del botón de búsqueda
+      const searchBtn = document.getElementById('search-btn') as HTMLButtonElement;
+      const spinner = document.getElementById('search-spinner');
+      const btnText = document.getElementById('search-btn-text');
+      
+      if (searchBtn) searchBtn.disabled = false;
+      if (spinner) spinner.classList.add('hidden');
+      if (btnText) btnText.textContent = 'Buscar Familiar';
     }
   }
 
@@ -314,7 +332,12 @@ Busca el paradero de un ser querido por su cédula o crea una Alerta de Seguimie
       searchForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const searchInput = document.getElementById('search') as HTMLInputElement;
-        const searchValue = searchInput?.value?.trim() || '';
+        const rawValue = searchInput?.value || '';
+        const searchValue = rawValue.replace(/[vVeE\.\-\s]/g, '').trim();
+        
+        if (searchInput && rawValue !== searchValue) {
+          searchInput.value = searchValue;
+        }
         
         if (searchValue) {
           // Actualizar URL sin recargar la página
@@ -334,20 +357,6 @@ Busca el paradero de un ser querido por su cédula o crea una Alerta de Seguimie
 </script>
 
 <style>
-  .animate-fade-in {
-    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
   @keyframes spin {
     to {
       transform: rotate(360deg);

@@ -41,8 +41,27 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 
 		<!-- Tabla de Pacientes -->
 		<div class="bg-white border border-border-subtle rounded-xl shadow-sm overflow-hidden">
-			<div class="p-4 border-b border-border-subtle">
-				<h3 class="font-display font-bold text-lg text-text-dark">Lista de Pacientes</h3>
+			<div class="p-4 border-b border-border-subtle flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+				<h3 id="patients-list-title" class="font-display font-bold text-lg text-text-dark">Lista de Pacientes</h3>
+				
+				<!-- Filtro por Estado (Triage Chips) -->
+				<div class="flex flex-wrap gap-2 text-xs" id="triage-filter-container">
+					<button type="button" data-filter="ALL" class="triage-filter-btn px-3 py-1.5 rounded-full font-bold bg-vzla-blue text-white transition-all cursor-pointer">
+						Todos
+					</button>
+					<button type="button" data-filter="ESTABLE" class="triage-filter-btn px-3 py-1.5 rounded-full font-bold bg-bg-light text-text-dark/70 hover:bg-slate-200 transition-all cursor-pointer">
+						Estable
+					</button>
+					<button type="button" data-filter="CRÍTICO" class="triage-filter-btn px-3 py-1.5 rounded-full font-bold bg-bg-light text-text-dark/70 hover:bg-slate-200 transition-all cursor-pointer">
+						Crítico
+					</button>
+					<button type="button" data-filter="CONTACTAR_INMEDIATO" class="triage-filter-btn px-3 py-1.5 rounded-full font-bold bg-bg-light text-text-dark/70 hover:bg-slate-200 transition-all cursor-pointer">
+						Contactar
+					</button>
+					<button type="button" data-filter="DESAPARECIDO" class="triage-filter-btn px-3 py-1.5 rounded-full font-bold bg-bg-light text-text-dark/70 hover:bg-slate-200 transition-all cursor-pointer">
+						Desaparecido
+					</button>
+				</div>
 			</div>
 
 			<!-- Loading -->
@@ -51,21 +70,27 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 				<p class="text-sm text-text-dark/60 mt-3">Cargando pacientes...</p>
 			</div>
 
-			<!-- Tabla -->
-			<div id="patients-table-container" class="hidden overflow-x-auto">
-				<table class="w-full">
-					<thead class="bg-bg-light border-b border-border-subtle">
-						<tr class="text-left text-xs font-display font-bold text-text-dark/70 uppercase tracking-wider">
-							<th class="px-4 py-3">Cédula</th>
-							<th class="px-4 py-3">Nombre Completo</th>
-							<th class="px-4 py-3">Estado</th>
-							<th class="px-4 py-3">Centro / Ubicación</th>
-							<th class="px-4 py-3">Última Act.</th>
-							<th class="px-4 py-3 text-right">Acciones</th>
-						</tr>
-					</thead>
-					<tbody id="patients-tbody" class="divide-y divide-border-subtle"></tbody>
-				</table>
+			<!-- Tabla / Tarjetas Container -->
+			<div id="patients-table-container" class="hidden">
+				<!-- Tabla (Desktop) -->
+				<div class="hidden md:block overflow-x-auto">
+					<table class="w-full">
+						<thead class="bg-bg-light border-b border-border-subtle">
+							<tr class="text-left text-xs font-display font-bold text-text-dark/70 uppercase tracking-wider">
+								<th class="px-4 py-3">Cédula</th>
+								<th class="px-4 py-3">Nombre Completo</th>
+								<th class="px-4 py-3">Estado</th>
+								<th class="px-4 py-3">Centro / Ubicación</th>
+								<th class="px-4 py-3">Última Act.</th>
+								<th class="px-4 py-3 text-right">Acciones</th>
+							</tr>
+						</thead>
+						<tbody id="patients-tbody" class="divide-y divide-border-subtle"></tbody>
+					</table>
+				</div>
+
+				<!-- Vista Tarjetas / Widgets (Móvil) -->
+				<div id="patients-cards-container" class="md:hidden p-4 space-y-4"></div>
 			</div>
 
 			<!-- Empty State -->
@@ -80,6 +105,29 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 				</div>
 				<p class="font-display font-semibold text-text-dark">No has registrado pacientes aún</p>
 				<p class="text-sm text-text-dark/60">Haz clic en "Registrar Paciente" para comenzar</p>
+			</div>
+
+			<!-- Error State -->
+			<div id="patients-error" class="hidden p-12 text-center space-y-4">
+				<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-error-light text-error-text border border-error-border">
+					<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="10"></circle>
+						<line x1="12" y1="8" x2="12" y2="12"></line>
+						<line x1="12" y1="16" x2="12.01" y2="16"></line>
+					</svg>
+				</div>
+				<p class="font-display font-semibold text-text-dark">Error al cargar pacientes</p>
+				<p class="text-sm text-text-dark/60 max-w-md mx-auto">No pudimos conectar con el servidor. Por favor verifica tu conexión a internet.</p>
+				<button 
+					type="button" 
+					id="btn-retry-patients" 
+					class="h-10 px-6 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-xl transition-all cursor-pointer inline-flex items-center gap-2"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+					</svg>
+					Reintentar
+				</button>
 			</div>
 
 			<!-- Paginación -->
@@ -98,11 +146,11 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 	</div>
 
 	<!-- Modal Upsert Paciente -->
-	<div id="patient-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-		<div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-			<div class="sticky top-0 bg-white border-b border-border-subtle p-6 flex items-center justify-between">
-				<h3 id="modal-title" class="font-display font-bold text-xl text-text-dark">Registrar Nuevo Paciente</h3>
-				<button id="modal-close" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-bg-light transition-colors">
+	<div id="patient-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all">
+		<div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+			<div class="bg-white border-b border-slate-100 p-5 sm:p-6 flex items-center justify-between z-10 shrink-0">
+				<h3 id="modal-title" class="font-display font-bold text-xl text-slate-900">Registrar Nuevo Paciente</h3>
+				<button type="button" id="modal-close" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 transition-colors">
 					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="18" y1="6" x2="6" y2="18"></line>
 						<line x1="6" y1="6" x2="18" y2="18"></line>
@@ -110,128 +158,160 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 				</button>
 			</div>
 
-			<form id="patient-form" class="p-6 space-y-5">
-				<!-- Cédula -->
+			<form id="patient-form" class="flex flex-col flex-1 overflow-hidden">
+				<div class="p-5 sm:p-8 space-y-6 overflow-y-auto flex-1">
+					<!-- Cédula -->
 				<div class="space-y-2">
-					<label for="patient-dni" class="block text-sm font-display font-bold text-text-dark">
-						Cédula de Identidad <span class="text-error-text">*</span>
+					<label for="patient-dni" class="block text-sm font-semibold text-slate-900">
+						Cédula de Identidad <span class="text-red-500" aria-hidden="true">*</span>
 					</label>
-					<div class="flex gap-2">
+					<div class="flex flex-col sm:flex-row gap-3">
 						<input 
 							type="text"
+							inputmode="numeric"
 							id="patient-dni"
 							required
-							class="flex-1 h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+							class="w-full sm:flex-1 h-14 px-4 bg-white border-2 border-slate-200 hover:border-slate-300 rounded-xl text-base text-slate-900 placeholder:text-slate-400 focus:border-vzla-blue focus:ring-4 focus:ring-vzla-blue/15 outline-none transition-all shrink-0"
 							placeholder="Ej: 12345678"
 						/>
 						<button 
 							type="button"
 							id="btn-lookup-dni"
-							class="h-11 px-4 border border-vzla-blue/30 text-vzla-blue bg-vzla-blue/5 hover:bg-vzla-blue/10 rounded-lg font-display font-semibold text-sm transition-colors whitespace-nowrap"
+							class="w-full sm:w-auto h-14 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 border-2 border-transparent rounded-xl font-semibold text-sm transition-all whitespace-nowrap flex items-center justify-center gap-2 focus:border-slate-300 focus:ring-4 focus:ring-slate-200 outline-none shrink-0"
 						>
-							Buscar
+							<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+							Buscar Datos
 						</button>
 					</div>
-					<p id="dni-lookup-hint" class="text-xs text-text-dark/50">Ingresa la cédula y pulsa "Buscar" para autocompletar los datos si ya existe.</p>
+					<p id="dni-lookup-hint" class="text-xs font-medium text-slate-500 pt-1">Pulsa "Buscar Datos" para autocompletar si ya existe.</p>
 				</div>
-
 
 				<!-- Nombre Completo -->
 				<div class="space-y-2">
-					<label for="patient-name" class="block text-sm font-display font-bold text-text-dark">
-						Nombre Completo <span class="text-error-text">*</span>
+					<label for="patient-name" class="block text-sm font-semibold text-slate-900">
+						Nombre Completo <span class="text-red-500" aria-hidden="true">*</span>
 					</label>
 					<input 
 						type="text"
 						id="patient-name"
 						required
-						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+						class="w-full h-14 px-4 bg-white border-2 border-slate-200 hover:border-slate-300 rounded-xl text-base text-slate-900 placeholder:text-slate-400 focus:border-vzla-blue focus:ring-4 focus:ring-vzla-blue/15 outline-none transition-all shrink-0"
 						placeholder="Ej: Juan Alberto Pérez"
 					/>
 				</div>
 
 				<!-- Estado -->
 				<div class="space-y-2">
-					<label for="patient-status" class="block text-sm font-display font-bold text-text-dark">
-						Estado del Paciente <span class="text-error-text">*</span>
+					<label for="patient-status" class="block text-sm font-semibold text-slate-900">
+						Estado del Paciente <span class="text-red-500" aria-hidden="true">*</span>
 					</label>
-					<select 
-						id="patient-status"
-						required
-						class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
-					>
-						<option value="">Seleccionar estado...</option>
-						<option value="ESTABLE">Estable</option>
-						<option value="CRÍTICO">Crítico</option>
-						<option value="CONTACTAR_INMEDIATO">Contactar Inmediato</option>
-						<option value="DESAPARECIDO">Desaparecido</option>
-					</select>
+					<div class="relative">
+						<select 
+							id="patient-status"
+							required
+							class="w-full h-14 px-4 pr-10 bg-white border-2 border-slate-200 hover:border-slate-300 rounded-xl text-base text-slate-900 focus:border-vzla-blue focus:ring-4 focus:ring-vzla-blue/15 outline-none transition-all appearance-none cursor-pointer shrink-0"
+						>
+							<option value="">Seleccionar estado...</option>
+							<option value="ESTABLE">Estable</option>
+							<option value="CRÍTICO">Crítico</option>
+							<option value="CONTACTAR_INMEDIATO">Contactar Inmediato</option>
+							<option value="DESAPARECIDO">Desaparecido</option>
+						</select>
+						<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+						</div>
+					</div>
 				</div>
 
-				<!-- Centro de Salud: combobox con búsqueda (ILike) o escritura manual -->
+				<!-- Centro de Salud -->
 				<div class="space-y-2">
-					<label for="medical-center-search" class="block text-sm font-display font-bold text-text-dark">
-						Centro de Salud
+					<label for="medical-center-search" class="block text-sm font-semibold text-slate-900">
+						Centro de Salud / Ubicación
 					</label>
 
-					<!-- Combobox: input de búsqueda + dropdown de resultados -->
+					<!-- Combobox -->
 					<div id="medical-center-combobox" class="relative">
 						<input 
 							type="text"
 							id="medical-center-search"
 							autocomplete="off"
-							class="w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
-							placeholder="Escribe el nombre del centro de salud..."
+							role="combobox"
+							aria-autocomplete="list"
+							aria-expanded="false"
+							aria-controls="medical-center-dropdown"
+							class="w-full h-14 px-4 bg-white border-2 border-slate-200 hover:border-slate-300 rounded-xl text-base text-slate-900 placeholder:text-slate-400 focus:border-vzla-blue focus:ring-4 focus:ring-vzla-blue/15 outline-none transition-all shrink-0"
+							placeholder="Buscar catálogo o escribir centro..."
 						/>
 						<ul 
 							id="medical-center-dropdown"
-							class="hidden absolute z-20 mt-1 w-full max-h-60 overflow-y-auto bg-white border border-border-subtle rounded-lg shadow-lg text-sm"
+							role="listbox"
+							aria-label="Centros de salud sugeridos"
+							class="hidden absolute z-20 mt-2 w-full max-h-60 overflow-y-auto bg-white border-2 border-slate-100 rounded-xl shadow-lg shadow-slate-200/50 text-sm"
 						></ul>
 					</div>
 
-					<!-- Centro seleccionado del catálogo -->
-					<div id="medical-center-selected" class="hidden items-center justify-between gap-2 bg-vzla-blue/5 border border-vzla-blue/20 rounded-lg px-3 py-2.5">
-						<span id="medical-center-selected-name" class="text-sm font-display font-semibold text-text-dark"></span>
-						<button type="button" id="medical-center-clear" class="text-xs text-vzla-blue hover:underline font-display font-semibold whitespace-nowrap">
+					<!-- Centro seleccionado -->
+					<div id="medical-center-selected" class="hidden items-center justify-between gap-3 bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 shrink-0">
+						<span id="medical-center-selected-name" class="text-sm font-semibold text-slate-900"></span>
+						<button type="button" id="medical-center-clear" class="text-sm text-slate-500 hover:text-slate-800 font-semibold whitespace-nowrap bg-white border border-slate-200 rounded-lg px-3 py-1.5 transition-colors focus:ring-2 focus:ring-slate-200 outline-none">
 							Cambiar
 						</button>
 					</div>
 
-					<!-- Input de escritura manual -->
+					<!-- Input manual -->
 					<input 
 						type="text"
 						id="medical-center-manual"
 						autocomplete="off"
-						class="hidden w-full h-11 px-4 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
-						placeholder="Escribe el nombre del centro o ubicación..."
+						class="hidden w-full h-14 px-4 bg-white border-2 border-slate-200 hover:border-slate-300 rounded-xl text-base text-slate-900 placeholder:text-slate-400 focus:border-vzla-blue focus:ring-4 focus:ring-vzla-blue/15 outline-none transition-all shrink-0"
+						placeholder="Escribe el nombre o ubicación exacta..."
 					/>
-					<p class="text-xs text-text-dark/50">Escribe para buscar en el catálogo o elige "Escribir manualmente".</p>
 				</div>
 
-				<!-- ID del centro seleccionado (oculto) -->
 				<input type="hidden" id="selected-center-id" value="" />
 
-
-
 				<!-- Mensajes -->
-				<div id="form-error" class="hidden bg-error-light border border-error-border text-error-text text-sm rounded-lg p-3"></div>
-				<div id="form-success" class="hidden bg-success-light border border-success-border text-success-text text-sm rounded-lg p-3"></div>
+				<div id="form-error" class="hidden bg-red-50 border-2 border-red-200 text-red-700 font-semibold text-sm rounded-xl p-4 flex gap-2 items-start shrink-0" role="alert">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+					<span id="form-error-msg"></span>
+				</div>
+				<div id="form-success" class="hidden bg-green-50 border-2 border-green-200 text-green-700 font-semibold text-sm rounded-xl p-4 flex gap-2 items-start shrink-0" role="alert">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+					<span id="form-success-msg"></span>
+				</div>
 
-				<!-- Botones -->
-				<div class="flex gap-3 pt-2">
+				</div>
+
+				<!-- Botones (Sticky / Fixed at bottom of modal) -->
+				<div class="p-4 sm:p-6 border-t border-slate-100 bg-slate-50 flex flex-col-reverse sm:flex-row gap-3 shrink-0">
 					<button 
 						type="button"
 						id="modal-cancel"
-						class="flex-1 h-11 border border-border-subtle rounded-lg text-sm font-display font-semibold hover:bg-bg-light transition-colors"
+						class="w-full sm:flex-1 h-14 bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-base font-semibold transition-all focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none shrink-0 cursor-pointer"
 					>
 						Cancelar
 					</button>
 					<button 
 						type="submit"
-						id="modal-submit"
-						class="flex-1 h-11 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-lg transition-all"
+						id="modal-submit-another"
+						class="w-full sm:flex-[1.5] h-14 bg-white hover:bg-slate-50 text-vzla-blue border-2 border-vzla-blue hover:border-vzla-blue-hover rounded-xl text-base font-semibold transition-all flex items-center justify-center gap-2 focus:ring-4 focus:ring-vzla-blue/20 outline-none shrink-0 cursor-pointer"
 					>
-						Guardar Paciente
+						<svg id="modal-spinner-another" class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
+						<span id="modal-btn-text-another">Guardar y Registrar Otro</span>
+					</button>
+					<button 
+						type="submit"
+						id="modal-submit"
+						class="w-full sm:flex-[1.5] h-14 bg-vzla-blue hover:bg-vzla-blue-hover text-white rounded-xl text-base font-semibold transition-all flex items-center justify-center gap-2 focus:ring-4 focus:ring-vzla-blue/30 outline-none shrink-0 cursor-pointer"
+					>
+						<svg id="modal-spinner" class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
+						<span id="modal-btn-text">Guardar Paciente</span>
 					</button>
 				</div>
 			</form>
@@ -248,18 +328,39 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 	import type { PatientStatus } from '@shared/common';
 	import type { IMedicalCenter } from '@shared/core/config/medical-centers/interfaces';
 
+	// Safe Base64 encoding/decoding helper functions to prevent quotes/special chars breaking HTML attributes (XSS-safe)
+	function encodePatientData(patient: IPatient): string {
+		try {
+			return btoa(encodeURIComponent(JSON.stringify(patient)));
+		} catch (e) {
+			console.error('Error encoding patient data:', e);
+			return '';
+		}
+	}
+
+	function decodePatientData(data: string): IPatient | null {
+		try {
+			return JSON.parse(decodeURIComponent(atob(data)));
+		} catch (e) {
+			console.error('Error decoding patient data:', e);
+		}
+	}
 	// ==================== STATE ====================
 	let currentPage = 1;
-	const rowsPerPage = 10;
+	const rowsPerPage = 15;
 	let totalPatients = 0;
 	let patients: IPatient[] = [];
 	let searchTimeout: number;
+	let registerAnother = false;
+	let selectedStatusFilter: string | null = null;
 
 	// ==================== ELEMENTOS ====================
+	const listTitleEl = document.getElementById('patients-list-title') as HTMLElement;
 	const loadingEl = document.getElementById('patients-loading') as HTMLElement;
 	const tableContainer = document.getElementById('patients-table-container') as HTMLElement;
 	const emptyEl = document.getElementById('patients-empty') as HTMLElement;
 	const tbody = document.getElementById('patients-tbody') as HTMLTableSectionElement;
+	const cardsContainer = document.getElementById('patients-cards-container') as HTMLElement;
 	const paginationEl = document.getElementById('patients-pagination') as HTMLElement;
 	const paginationInfo = document.getElementById('pagination-info') as HTMLElement;
 	const btnPrev = document.getElementById('btn-prev') as HTMLButtonElement;
@@ -271,6 +372,10 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 	const modalCancel = document.getElementById('modal-cancel') as HTMLElement;
 	const patientForm = document.getElementById('patient-form') as HTMLFormElement;
 
+	const btnSubmitAnother = document.getElementById('modal-submit-another') as HTMLButtonElement;
+	const modalSpinnerAnother = document.getElementById('modal-spinner-another');
+	const modalBtnTextAnother = document.getElementById('modal-btn-text-another');
+
 	const btnNewPatient = document.getElementById('btn-new-patient') as HTMLButtonElement;
 	const searchForm = document.getElementById('search-form') as HTMLFormElement;
 	const searchResult = document.getElementById('search-result') as HTMLElement;
@@ -281,14 +386,43 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 			loadingEl.classList.remove('hidden');
 			tableContainer.classList.add('hidden');
 			emptyEl.classList.add('hidden');
+			paginationEl.classList.add('hidden');
+			
+			const errorEl = document.getElementById('patients-error') as HTMLElement;
+			if (errorEl) errorEl.classList.add('hidden');
 
-			const response = await findAllPatients({ page: currentPage, rows: rowsPerPage });
+			const queryParams: any = { page: currentPage, rows: rowsPerPage };
+			if (selectedStatusFilter) {
+				queryParams.status = selectedStatusFilter;
+			}
+
+			const response = await findAllPatients(queryParams);
 			patients = response.data;
 			totalPatients = response.total;
+
+			if (listTitleEl) {
+				listTitleEl.textContent = selectedStatusFilter 
+					? `Lista de Pacientes (${totalPatients} filtrados)` 
+					: `Lista de Pacientes (${totalPatients})`;
+			}
 
 			if (patients.length === 0 && currentPage === 1) {
 				// Sin pacientes
 				loadingEl.classList.add('hidden');
+				
+				// Personalizar el Empty State según si hay filtro activo
+				const emptyTitle = emptyEl.querySelector('p.font-display') as HTMLElement;
+				const emptySub = emptyEl.querySelector('p.text-sm') as HTMLElement;
+				if (emptyTitle && emptySub) {
+					if (selectedStatusFilter) {
+						emptyTitle.textContent = 'No hay pacientes con este estado';
+						emptySub.textContent = 'No tienes pacientes registrados con el estado de triaje seleccionado.';
+					} else {
+						emptyTitle.textContent = 'No has registrado pacientes aún';
+						emptySub.textContent = 'Haz clic en "Registrar Paciente" para comenzar';
+					}
+				}
+				
 				emptyEl.classList.remove('hidden');
 			} else {
 				// Renderizar tabla
@@ -301,12 +435,18 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 		} catch (error) {
 			console.error('Error al cargar pacientes:', error);
 			loadingEl.classList.add('hidden');
-			emptyEl.classList.remove('hidden');
+			tableContainer.classList.add('hidden');
+			emptyEl.classList.add('hidden');
+			paginationEl.classList.add('hidden');
+			
+			const errorEl = document.getElementById('patients-error') as HTMLElement;
+			if (errorEl) errorEl.classList.remove('hidden');
 		}
 	}
 
 	function renderTable() {
 		tbody.innerHTML = '';
+		cardsContainer.innerHTML = '';
 
 		patients.forEach(patient => {
 			const config = getStatusConfig(patient.currentStatus as PatientStatus);
@@ -319,6 +459,7 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 				minute: '2-digit'
 			});
 
+			// 1. Desktop: Fila de tabla
 			const tr = document.createElement('tr');
 			tr.className = 'hover:bg-bg-light transition-colors';
 			tr.innerHTML = `
@@ -335,22 +476,60 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 				<td class="px-4 py-3 text-right">
 					<button 
 						class="btn-edit-patient text-sm text-vzla-blue hover:underline font-display font-semibold"
-						data-patient='${JSON.stringify(patient)}'
+						data-patient="${encodePatientData(patient)}"
 					>
 						Actualizar
 					</button>
 				</td>
 			`;
 			tbody.appendChild(tr);
+
+			// 2. Móvil: Tarjeta / Widget
+			const card = document.createElement('div');
+			let borderLClass = 'border-l-4 border-l-slate-300';
+			if (patient.currentStatus === 'ESTABLE') borderLClass = 'border-l-4 border-l-emerald-500';
+			else if (patient.currentStatus === 'CRÍTICO' || patient.currentStatus === 'CRITICO') borderLClass = 'border-l-4 border-l-rose-500';
+			else if (patient.currentStatus === 'CONTACTAR_INMEDIATO') borderLClass = 'border-l-4 border-l-amber-500';
+			else if (patient.currentStatus === 'DESAPARECIDO') borderLClass = 'border-l-4 border-l-sky-500';
+
+			card.className = `bg-white border border-border-subtle rounded-xl p-4 space-y-3 shadow-sm hover:border-slate-300 transition-colors ${borderLClass}`;
+			card.innerHTML = `
+				<div class="space-y-2">
+					<div class="flex justify-between items-center gap-2">
+						<h4 class="font-display font-bold text-base text-text-dark leading-tight">${patient.fullName}</h4>
+						<span class="text-xs text-text-dark/50 font-mono shrink-0">C.I. ${patient.dni}</span>
+					</div>
+					<div class="flex">
+						<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${config.bgClass}">
+							<span class="w-1.5 h-1.5 rounded-full ${config.badgeClass}"></span>
+							${config.label}
+						</span>
+					</div>
+				</div>
+				<div class="text-xs text-text-dark/80 space-y-1.5 pt-1">
+					<p><span class="font-semibold text-text-dark/60">Ubicación:</span> ${location}</p>
+					<p><span class="font-semibold text-text-dark/60">Última act.:</span> ${lastUpdated}</p>
+				</div>
+				<div class="pt-3 border-t border-slate-100 flex justify-end">
+					<button 
+						class="btn-edit-patient text-sm text-vzla-blue hover:underline font-display font-semibold flex items-center gap-1"
+						data-patient="${encodePatientData(patient)}"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"></path></svg>
+						Actualizar Paciente
+					</button>
+				</div>
+			`;
+			cardsContainer.appendChild(card);
 		});
 
-		// Event listeners para editar
+		// Event listeners (para ambos layouts)
 		document.querySelectorAll('.btn-edit-patient').forEach(btn => {
 			btn.addEventListener('click', (e) => {
 				const data = (e.currentTarget as HTMLElement).getAttribute('data-patient');
 				if (data) {
-					const patient = JSON.parse(data) as IPatient;
-					openModal(patient);
+					const patient = decodePatientData(data);
+					if (patient) openModal(patient);
 				}
 			});
 		});
@@ -407,7 +586,7 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 							</span>
 						</div>
 						<p class="text-sm text-text-dark/80"><strong>Ubicación:</strong> ${location}</p>
-						<button class="btn-update-found h-9 px-4 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-xs rounded-lg transition-all" data-patient='${JSON.stringify(patient)}'>
+						<button class="btn-update-found h-9 px-4 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-xs rounded-lg transition-all" data-patient="${encodePatientData(patient)}">
 							Actualizar Este Paciente
 						</button>
 					</div>
@@ -416,7 +595,10 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 				const btnUpdate = searchResult.querySelector('.btn-update-found') as HTMLElement;
 				btnUpdate?.addEventListener('click', () => {
 					const data = btnUpdate.getAttribute('data-patient');
-					if (data) openModal(JSON.parse(data));
+					if (data) {
+						const patientObj = decodePatientData(data);
+						if (patientObj) openModal(patientObj);
+					}
 				});
 			} else {
 				searchResult.innerHTML = '<p class="text-sm text-error-text">No se encontró ningún paciente con esa cédula.</p>';
@@ -428,6 +610,10 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 
 	// ==================== MODAL ====================
 	function openModal(patient?: IPatient) {
+		const submitBtn = document.getElementById('modal-submit') as HTMLButtonElement;
+		const modalSpinner = document.getElementById('modal-spinner');
+		const modalBtnText = document.getElementById('modal-btn-text');
+
 		if (patient) {
 			modalTitle.textContent = 'Actualizar Paciente';
 			(document.getElementById('patient-dni') as HTMLInputElement).value = patient.dni;
@@ -440,20 +626,41 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 				patient.currentMedicalCenter?.name,
 				patient.manualLocation,
 			);
-			setDniHint('Editando un paciente existente.', 'muted');
+			setDniHint('Editando un paciente existente.', 'success');
+			if (btnSubmitAnother) btnSubmitAnother.classList.add('hidden');
 		} else {
 			modalTitle.textContent = 'Registrar Nuevo Paciente';
 			patientForm.reset();
 			(document.getElementById('patient-dni') as HTMLInputElement).readOnly = false;
-			(document.getElementById('selected-center-id') as HTMLInputElement).value = '';
-			setCenterValue();
-			setDniHint('Ingresa la cédula y pulsa "Buscar" para autocompletar los datos si ya existe.', 'muted');
+			
+			// Cargar el último centro de salud utilizado si existe en localStorage
+			const lastCenterId = localStorage.getItem('sire_last_center_id');
+			const lastCenterName = localStorage.getItem('sire_last_center_name');
+			const lastCenterManual = localStorage.getItem('sire_last_center_manual');
+
+			if (lastCenterId) {
+				setCenterValue(parseInt(lastCenterId), lastCenterName || 'Centro seleccionado');
+			} else if (lastCenterManual) {
+				setCenterValue(undefined, undefined, lastCenterManual);
+			} else {
+				setCenterValue();
+			}
+
+			setDniHint('Ingresa la cédula y pulsa "Buscar Datos" para autocompletar si ya existe.', 'muted');
+			if (btnSubmitAnother) btnSubmitAnother.classList.remove('hidden');
 		}
 
-		// Asegurar que el botón de guardar siempre arranque en su estado por defecto
-		const submitBtn = document.getElementById('modal-submit') as HTMLButtonElement;
+		// Asegurar que los botones de guardar siempre arranquen en su estado por defecto
 		submitBtn.disabled = false;
-		submitBtn.textContent = 'Guardar Paciente';
+		if (modalSpinner) modalSpinner.classList.add('hidden');
+		if (modalBtnText) modalBtnText.textContent = 'Guardar Paciente';
+
+		if (btnSubmitAnother) {
+			btnSubmitAnother.disabled = false;
+			if (modalSpinnerAnother) modalSpinnerAnother.classList.add('hidden');
+			if (modalBtnTextAnother) modalBtnTextAnother.textContent = 'Guardar y Registrar Otro';
+		}
+		
 		(document.getElementById('form-error') as HTMLElement).classList.add('hidden');
 		(document.getElementById('form-success') as HTMLElement).classList.add('hidden');
 
@@ -472,6 +679,32 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 	modalClose.addEventListener('click', closeModal);
 	modalCancel.addEventListener('click', closeModal);
 
+	// Controlar qué botón originó el submit
+	const submitBtnElement = document.getElementById('modal-submit') as HTMLButtonElement;
+	if (submitBtnElement) {
+		submitBtnElement.addEventListener('click', () => {
+			registerAnother = false;
+		});
+	}
+	if (btnSubmitAnother) {
+		btnSubmitAnother.addEventListener('click', () => {
+			registerAnother = true;
+		});
+	}
+
+	// Cerrar modal al pulsar Escape o hacer click fuera del contenedor
+	window.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+			closeModal();
+		}
+	});
+
+	modal.addEventListener('click', (e) => {
+		if (e.target === modal) {
+			closeModal();
+		}
+	});
+
 	// ==================== CENTRO DE SALUD (combobox con búsqueda ILike o manual) ====================
 	const centerSearch = document.getElementById('medical-center-search') as HTMLInputElement;
 	const centerDropdown = document.getElementById('medical-center-dropdown') as HTMLUListElement;
@@ -484,6 +717,8 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 	const MANUAL_OPTION = '__manual__';
 
 	let centerSearchTimeout: number;
+	let optionButtons: HTMLButtonElement[] = [];
+	let activeOptionIndex = -1;
 
 	// Escapa texto para inyectarlo de forma segura en HTML/atributos
 	function escapeHtml(value: string): string {
@@ -495,24 +730,43 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 			.replace(/'/g, '&#39;');
 	}
 
+	function highlightOption(index: number) {
+		// Quitar destaque anterior
+		optionButtons.forEach(btn => {
+			btn.classList.remove('bg-slate-150', 'bg-slate-100');
+			btn.removeAttribute('aria-selected');
+		});
+
+		activeOptionIndex = index;
+		if (activeOptionIndex >= 0 && activeOptionIndex < optionButtons.length) {
+			const btn = optionButtons[activeOptionIndex];
+			btn.classList.add('bg-slate-100');
+			btn.setAttribute('aria-selected', 'true');
+			btn.scrollIntoView({ block: 'nearest' });
+			centerSearch.setAttribute('aria-activedescendant', btn.id);
+		} else {
+			centerSearch.removeAttribute('aria-activedescendant');
+		}
+	}
+
 	// Renderiza el dropdown: "Escribir manualmente" como PRIMERA opción + resultados
 	function renderCenterDropdown(centers: IMedicalCenter[]) {
 		const manualItem = `
 			<li>
-				<button type="button" data-center-id="${MANUAL_OPTION}" class="center-option w-full text-left px-4 py-2.5 hover:bg-bg-light transition-colors font-display font-semibold text-vzla-blue border-b border-border-subtle">
+				<button type="button" id="center-option-manual" role="option" data-center-id="${MANUAL_OPTION}" class="center-option w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors font-bold text-vzla-blue border-b border-slate-100">
 					✏️ Escribir manualmente...
 				</button>
 			</li>
 		`;
 
 		const items = centers
-			.map((c) => {
+			.map((c, idx) => {
 				const sub = [c.state, c.municipality].filter(Boolean).join(', ');
 				return `
 				<li>
-					<button type="button" data-center-id="${c.id}" data-center-name="${escapeHtml(c.name)}" class="center-option w-full text-left px-4 py-2.5 hover:bg-bg-light transition-colors">
-						<span class="block font-display font-semibold text-text-dark">${escapeHtml(c.name)}</span>
-						${sub ? `<span class="block text-xs text-text-dark/50">${escapeHtml(sub)}</span>` : ''}
+					<button type="button" id="center-option-${idx}" role="option" data-center-id="${c.id}" data-center-name="${escapeHtml(c.name)}" class="center-option w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
+						<span class="block font-bold text-slate-900">${escapeHtml(c.name)}</span>
+						${sub ? `<span class="block text-xs font-medium text-slate-500 mt-0.5">${escapeHtml(sub)}</span>` : ''}
 					</button>
 				</li>
 			`;
@@ -521,13 +775,17 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 
 		const emptyMsg =
 			centers.length === 0
-				? '<li class="px-4 py-2.5 text-text-dark/50">Sin coincidencias en el catálogo.</li>'
+				? '<li class="px-4 py-3 text-slate-500 text-sm">Sin coincidencias en el catálogo.</li>'
 				: '';
 
 		centerDropdown.innerHTML = manualItem + items + emptyMsg;
 		centerDropdown.classList.remove('hidden');
+		centerSearch.setAttribute('aria-expanded', 'true');
 
-		centerDropdown.querySelectorAll('.center-option').forEach((btn) => {
+		optionButtons = Array.from(centerDropdown.querySelectorAll('.center-option'));
+		activeOptionIndex = -1;
+
+		optionButtons.forEach((btn, index) => {
 			btn.addEventListener('click', (e) => {
 				const el = e.currentTarget as HTMLElement;
 				const id = el.getAttribute('data-center-id');
@@ -536,6 +794,10 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 				} else if (id) {
 					selectCenter(parseInt(id), el.getAttribute('data-center-name') || '');
 				}
+			});
+
+			btn.addEventListener('mouseenter', () => {
+				highlightOption(index);
 			});
 		});
 	}
@@ -558,6 +820,8 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 		centerSelected.classList.remove('hidden');
 		centerSelected.classList.add('flex');
 		centerDropdown.classList.add('hidden');
+		centerSearch.setAttribute('aria-expanded', 'false');
+		centerSearch.removeAttribute('aria-activedescendant');
 		centerSearch.classList.add('hidden');
 		centerSearch.value = '';
 		centerManual.classList.add('hidden');
@@ -568,6 +832,8 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 	function selectManualEntry() {
 		selectedCenterId.value = '';
 		centerDropdown.classList.add('hidden');
+		centerSearch.setAttribute('aria-expanded', 'false');
+		centerSearch.removeAttribute('aria-activedescendant');
 		centerSearch.classList.add('hidden');
 		centerSelected.classList.add('hidden');
 		centerSelected.classList.remove('flex');
@@ -586,8 +852,48 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 		centerSearch.classList.remove('hidden');
 		centerSearch.value = '';
 		centerDropdown.classList.add('hidden');
+		centerSearch.setAttribute('aria-expanded', 'false');
+		centerSearch.removeAttribute('aria-activedescendant');
 		centerDropdown.innerHTML = '';
 	}
+
+	// Soporte de navegación por teclado para el combobox
+	centerSearch.addEventListener('keydown', (e) => {
+		const isOpen = !centerDropdown.classList.contains('hidden');
+		
+		if (e.key === 'ArrowDown') {
+			if (!isOpen) {
+				e.preventDefault();
+				fetchCenters(centerSearch.value.trim());
+			} else if (optionButtons.length > 0) {
+				e.preventDefault();
+				let nextIndex = activeOptionIndex + 1;
+				if (nextIndex >= optionButtons.length) nextIndex = 0; // Rotación circular
+				highlightOption(nextIndex);
+			}
+		} else if (e.key === 'ArrowUp') {
+			if (isOpen && optionButtons.length > 0) {
+				e.preventDefault();
+				let prevIndex = activeOptionIndex - 1;
+				if (prevIndex < 0) prevIndex = optionButtons.length - 1; // Rotación circular
+				highlightOption(prevIndex);
+			}
+		} else if (e.key === 'Enter') {
+			if (isOpen && activeOptionIndex >= 0 && activeOptionIndex < optionButtons.length) {
+				e.preventDefault();
+				e.stopPropagation();
+				optionButtons[activeOptionIndex].click();
+			}
+		} else if (e.key === 'Escape') {
+			if (isOpen) {
+				e.preventDefault();
+				e.stopPropagation();
+				centerDropdown.classList.add('hidden');
+				centerSearch.setAttribute('aria-expanded', 'false');
+				centerSearch.removeAttribute('aria-activedescendant');
+			}
+		}
+	});
 
 	// Búsqueda con debouncing (evita saturar el backend)
 	centerSearch.addEventListener('input', () => {
@@ -610,10 +916,21 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 		fetchCenters('');
 	});
 
+	// Si el usuario borra todo lo escrito en modo manual, regresa al buscador del catálogo
+	centerManual.addEventListener('input', () => {
+		if (centerManual.value.trim() === '') {
+			resetCenterPicker();
+			centerSearch.focus();
+			fetchCenters('');
+		}
+	});
+
 	// Cerrar el dropdown al hacer click fuera del combobox
 	document.addEventListener('click', (e) => {
 		if (centerCombobox && !centerCombobox.contains(e.target as Node)) {
 			centerDropdown.classList.add('hidden');
+			centerSearch.setAttribute('aria-expanded', 'false');
+			centerSearch.removeAttribute('aria-activedescendant');
 		}
 	});
 
@@ -700,13 +1017,17 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 	});
 
 	// Submit del formulario
-
 	patientForm.addEventListener('submit', async (e) => {
 		e.preventDefault();
 
 		const formError = document.getElementById('form-error') as HTMLElement;
+		const formErrorMsg = document.getElementById('form-error-msg') as HTMLElement;
 		const formSuccess = document.getElementById('form-success') as HTMLElement;
+		const formSuccessMsg = document.getElementById('form-success-msg') as HTMLElement;
+		
 		const submitBtn = document.getElementById('modal-submit') as HTMLButtonElement;
+		const modalSpinner = document.getElementById('modal-spinner');
+		const modalBtnText = document.getElementById('modal-btn-text');
 
 		formError.classList.add('hidden');
 		formSuccess.classList.add('hidden');
@@ -714,39 +1035,127 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 		const dni = (document.getElementById('patient-dni') as HTMLInputElement).value.trim();
 		const fullName = (document.getElementById('patient-name') as HTMLInputElement).value.trim();
 		const status = (document.getElementById('patient-status') as HTMLSelectElement).value as PatientStatus;
+		
 		const dto: IUpsertPatientDto = {
 			dni,
 			fullName,
 			status,
-			...getCenterDto(),
 		};
 
+		const centerId = (document.getElementById('selected-center-id') as HTMLInputElement).value;
+		const centerManual = (document.getElementById('medical-center-manual') as HTMLInputElement).value.trim();
+
+		if (centerId && centerId !== MANUAL_OPTION) {
+			dto.medicalCenterId = parseInt(centerId);
+		} else if (centerManual) {
+			dto.manualLocation = centerManual;
+		}
+
+		// Determinar qué botón usar para spinner/deshabilitar
+		const activeSubmitBtn = registerAnother ? btnSubmitAnother : submitBtn;
+		const activeSpinner = registerAnother ? modalSpinnerAnother : modalSpinner;
+		const activeBtnText = registerAnother ? modalBtnTextAnother : modalBtnText;
+		const originalText = registerAnother ? 'Guardar y Registrar Otro' : 'Guardar Paciente';
 
 		try {
-			submitBtn.disabled = true;
-			submitBtn.textContent = 'Guardando...';
+			if (submitBtn) submitBtn.disabled = true;
+			if (btnSubmitAnother) btnSubmitAnother.disabled = true;
+			if (activeSpinner) activeSpinner.classList.remove('hidden');
+			if (activeBtnText) activeBtnText.textContent = 'Guardando...';
 
 			await upsertPatient(dto);
 
-			formSuccess.textContent = 'Paciente guardado exitosamente';
+			// Persistir el último centro utilizado en localStorage
+			if (centerId && centerId !== MANUAL_OPTION) {
+				const centerName = document.getElementById('medical-center-selected-name')?.textContent || '';
+				localStorage.setItem('sire_last_center_id', centerId);
+				localStorage.setItem('sire_last_center_name', centerName);
+				localStorage.removeItem('sire_last_center_manual');
+			} else if (centerManual) {
+				localStorage.setItem('sire_last_center_manual', centerManual);
+				localStorage.removeItem('sire_last_center_id');
+				localStorage.removeItem('sire_last_center_name');
+			}
+
+			// Éxito
+			formSuccessMsg.textContent = 'Paciente registrado exitosamente.';
 			formSuccess.classList.remove('hidden');
 
-			setTimeout(() => {
-				// Restaurar el botón a su estado por defecto tras el guardado exitoso
-				submitBtn.disabled = false;
-				submitBtn.textContent = 'Guardar Paciente';
-				closeModal();
-				loadPatients(); // Recargar lista
-				searchResult.classList.add('hidden'); // Ocultar resultado de búsqueda
-			}, 1500);
+			if (registerAnother) {
+				// Cargar pacientes en background
+				loadPatients();
+				
+				// Limpiar campos de paciente pero mantener el centro de salud
+				const dniInput = document.getElementById('patient-dni') as HTMLInputElement;
+				const nameInput = document.getElementById('patient-name') as HTMLInputElement;
+				const statusSelect = document.getElementById('patient-status') as HTMLSelectElement;
+				if (dniInput) {
+					dniInput.value = '';
+					dniInput.focus();
+				}
+				if (nameInput) nameInput.value = '';
+				if (statusSelect) statusSelect.value = '';
+				setDniHint('Ingresa la cédula y pulsa "Buscar Datos" para autocompletar si ya existe.', 'muted');
+				
+				// Ocultar mensaje de éxito después de 1.5s
+				setTimeout(() => {
+					formSuccess.classList.add('hidden');
+				}, 1500);
+			} else {
+				// Cierre rápido
+				setTimeout(() => {
+					closeModal();
+					loadPatients();
+					searchResult.classList.add('hidden');
+				}, 600);
+			}
 
 		} catch (error: any) {
-			formError.textContent = error.message || 'Error al guardar el paciente';
+			console.error('Error al guardar paciente:', error);
+			formErrorMsg.textContent = error.message || 'Error al guardar el paciente';
 			formError.classList.remove('hidden');
-			submitBtn.disabled = false;
-			submitBtn.textContent = 'Guardar Paciente';
+		} finally {
+			if (submitBtn) submitBtn.disabled = false;
+			if (btnSubmitAnother) btnSubmitAnother.disabled = false;
+			if (activeSpinner) activeSpinner.classList.add('hidden');
+			if (activeBtnText) activeBtnText.textContent = originalText;
 		}
 	});
+
+	// ==================== FILTROS DE TRIAJE ====================
+	const filterButtons = document.querySelectorAll('.triage-filter-btn');
+	filterButtons.forEach(btn => {
+		btn.addEventListener('click', (e) => {
+			const el = e.currentTarget as HTMLButtonElement;
+			const filterValue = el.getAttribute('data-filter');
+			
+			selectedStatusFilter = filterValue === 'ALL' ? null : filterValue;
+			currentPage = 1; // Reiniciar paginación al cambiar de filtro
+			
+			// Actualizar estilos activos de los botones
+			filterButtons.forEach(b => {
+				const bf = b.getAttribute('data-filter');
+				b.className = 'triage-filter-btn px-3 py-1.5 rounded-full font-bold transition-all cursor-pointer ';
+				if (bf === filterValue) {
+					// Botón Activo
+					b.classList.add('bg-vzla-blue', 'text-white');
+				} else {
+					// Botón Inactivo
+					b.classList.add('bg-bg-light', 'text-text-dark/70', 'hover:bg-slate-200');
+				}
+			});
+
+			loadPatients();
+		});
+	});
+
+	// Botón Reintentar carga
+	const btnRetryPatients = document.getElementById('btn-retry-patients');
+	if (btnRetryPatients) {
+		btnRetryPatients.addEventListener('click', () => {
+			loadPatients();
+		});
+	}
 
 	// ==================== INICIALIZACIÓN ====================
 	loadPatients();

@@ -22,20 +22,28 @@ import Layout from '../layouts/Layout.astro';
             type="email" 
             id="login-email" 
             required 
-            class="w-full h-11 px-3 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
+            class="w-full h-14 px-4 bg-white border border-border-subtle rounded-xl text-base focus:border-vzla-blue focus:ring-1 focus:ring-vzla-blue/20 focus:outline-none transition-all"
             placeholder="correo@ejemplo.com"
           />
         </div>
 
         <div class="space-y-1.5">
           <label for="login-password" class="block text-sm font-semibold text-text-dark/70">Contraseña</label>
-          <input 
-            type="password" 
-            id="login-password" 
-            required 
-            class="w-full h-11 px-3 bg-white border border-border-subtle rounded-lg text-sm focus:border-vzla-blue focus:outline-none transition-colors"
-            placeholder="••••••••"
-          />
+          <div class="relative">
+            <input 
+              type="password" 
+              id="login-password" 
+              required 
+              class="w-full h-14 pl-4 pr-12 bg-white border border-border-subtle rounded-xl text-base focus:border-vzla-blue focus:ring-1 focus:ring-vzla-blue/20 focus:outline-none transition-all"
+              placeholder="••••••••"
+            />
+            <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 px-4 flex items-center text-text-dark/50 hover:text-vzla-blue focus:outline-none" aria-label="Mostrar contraseña">
+              <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Alerta de Error -->
@@ -45,9 +53,13 @@ import Layout from '../layouts/Layout.astro';
 
         <button 
           type="submit" 
-          class="w-full h-11 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-lg cursor-pointer transition-colors shadow-xs"
+          class="w-full h-14 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-base rounded-xl cursor-pointer transition-all shadow-xs flex items-center justify-center gap-2"
         >
-          Ingresar al Sistema
+          <svg id="login-spinner" class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span id="login-btn-text">Ingresar al Sistema</span>
         </button>
       </form>
 
@@ -72,6 +84,26 @@ import Layout from '../layouts/Layout.astro';
     const loginForm = document.getElementById('form-user-login') as HTMLFormElement;
     const loginError = document.getElementById('login-error') as HTMLElement;
     const submitBtn = loginForm?.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const btnText = document.getElementById('login-btn-text') as HTMLElement;
+    const spinner = document.getElementById('login-spinner') as HTMLElement;
+
+    // Toggle password
+    const toggleBtn = document.getElementById('toggle-password');
+    const pwdInput = document.getElementById('login-password') as HTMLInputElement;
+    const eyeIcon = document.getElementById('eye-icon');
+    
+    if (toggleBtn && pwdInput && eyeIcon) {
+      toggleBtn.addEventListener('click', () => {
+        const type = pwdInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        pwdInput.setAttribute('type', type);
+        
+        if (type === 'text') {
+          eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+        } else {
+          eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+        }
+      });
+    }
 
     // Mostrar mensaje si viene de sesión expirada
     const params = new URLSearchParams(window.location.search);
@@ -96,7 +128,8 @@ import Layout from '../layouts/Layout.astro';
 
         // Deshabilitar botón
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Iniciando sesión...';
+        if (btnText) btnText.textContent = 'Iniciando sesión...';
+        if (spinner) spinner.classList.remove('hidden');
         loginError.classList.add('hidden');
 
         try {
@@ -112,25 +145,12 @@ import Layout from '../layouts/Layout.astro';
           
           // Re-habilitar botón
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Ingresar al Sistema';
+          if (btnText) btnText.textContent = 'Ingresar al Sistema';
+          if (spinner) spinner.classList.add('hidden');
         }
       });
     }
   }
 </script>
 
-<style>
-  .animate-fade-in {
-    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-</style>
+

@@ -381,11 +381,13 @@ export async function findAllMedicalCenters(
  */
 export async function searchMedicalCenters(
   query: string,
+  skipAuth?: boolean,
 ): Promise<IMedicalCenter[]> {
   return authFetch(
     `${MEDICAL_CENTER_ROUTES.BASE}/${MEDICAL_CENTER_ROUTES.SEARCH}?q=${encodeURIComponent(query)}`,
     {
       method: "GET",
+      skipAuth,
     },
   );
 }
