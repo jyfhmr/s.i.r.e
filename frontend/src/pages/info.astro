@@ -8,7 +8,7 @@ import Layout from '../layouts/Layout.astro';
     <div class="text-center space-y-2">
       <h1 class="font-display font-bold text-3xl md:text-4xl text-text-dark">Sobre la plataforma</h1>
       <p class="font-sans text-base md:text-lg text-text-dark/65">
-        Conoce el origen, funcionamiento y la tecnología detrás de S.I.R.E.
+        Origen, propósito y funcionalidades de S.I.R.E. tras los terremotos del 24 de junio de 2026.
       </p>
     </div>
 
@@ -19,27 +19,46 @@ import Layout from '../layouts/Layout.astro';
           ¿Qué es S.I.R.E.?
         </h2>
         <p class="font-sans text-text-dark/75 leading-relaxed">
-          El **Sistema de Información y Registro de Emergencias (S.I.R.E.)** es un proyecto de código abierto e iniciativa cívica creado para optimizar el flujo de información durante contingencias, sismos, desastres climáticos o incidentes de gran escala en Venezuela.
+          El <strong>Sistema de Información y Registro de Emergencias (S.I.R.E.)</strong> nace como respuesta a los <strong>terremotos del 24 de junio de 2026</strong> que afectaron a Venezuela. Es una plataforma de código abierto que centraliza la información de pacientes hospitalizados para que los familiares puedan encontrar a sus allegados.
         </p>
         <p class="font-sans text-text-dark/75 leading-relaxed">
-          Su meta principal es reemplazar las listas de papel pegadas en las entradas de las salas de emergencias y los estados de difusión informal por un portal digital rápido, accesible y centralizado.
+          Diariamente, el equipo de S.I.R.E. revisa las listas publicadas por los hospitales y las incorpora al sistema. Así, en un solo sitio web puedes buscar por cédula y saber dónde está tu familiar.
         </p>
       </section>
 
-      <section class="space-y-3 pt-4 border-t border-border-subtle/50">
+      <section class="space-y-4 pt-4 border-t border-border-subtle/50">
         <h2 class="font-display font-bold text-xl text-vzla-blue">
-          ¿Cómo funciona el registro de datos?
+          Tres funcionalidades principales
         </h2>
-        <p class="font-sans text-text-dark/75 leading-relaxed">
-          El personal médico autorizado (hospitales públicos e institutos de salud privados) registra de forma inmediata el ingreso de cada paciente en la base de datos interna de S.I.R.E. al momento del triage clínico. 
-        </p>
-        <div class="bg-bg-light p-4 rounded-xl border border-border-subtle space-y-2">
-          <p class="text-sm font-semibold text-vzla-blue">El flujo de información sigue tres pasos sencillos:</p>
-          <ul class="list-decimal list-inside text-sm text-text-dark/70 space-y-1.5">
-            <li><strong>Ingreso y Diagnóstico:</strong> Se registra la cédula, el nombre y el diagnóstico clínico preliminar del paciente.</li>
-            <li><strong>Actualización del Estado:</strong> A medida que el paciente evoluciona o es trasladado, el estado se actualiza en el sistema.</li>
-            <li><strong>Consulta Ciudadana:</strong> El familiar busca el número de cédula y obtiene la ubicación y estado del paciente de forma instantánea.</li>
-          </ul>
+        
+        <div class="bg-bg-light p-4 rounded-xl border border-border-subtle space-y-3">
+          <div class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-8 h-8 rounded-full bg-vzla-blue/10 text-vzla-blue flex items-center justify-center font-display font-bold text-sm">1</span>
+            <div>
+              <h3 class="font-display font-bold text-base text-text-dark">Búsqueda por cédula</h3>
+              <p class="text-sm text-text-dark/70 font-sans leading-relaxed">
+                Recopilamos las listas publicadas por los hospitales de forma separada y las juntamos en un solo sitio. Puedes buscar por cédula y ver dónde está tu allegado.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-8 h-8 rounded-full bg-vzla-blue/10 text-vzla-blue flex items-center justify-center font-display font-bold text-sm">2</span>
+            <div>
+              <h3 class="font-display font-bold text-base text-text-dark">Alertas de seguimiento</h3>
+              <p class="text-sm text-text-dark/70 font-sans leading-relaxed">
+                Habilita una alerta para que el sistema te avise si una cédula es registrada o actualizada en el sistema. Para crear una alerta debes crear una cuenta ciudadana.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-8 h-8 rounded-full bg-vzla-blue/10 text-vzla-blue flex items-center justify-center font-display font-bold text-sm">3</span>
+            <div>
+              <h3 class="font-display font-bold text-base text-text-dark">Registro médico colaborativo</h3>
+              <p class="text-sm text-text-dark/70 font-sans leading-relaxed">
+                Como médico puedes crear una cuenta y registrar pacientes que ves en tus guardias para colaborar. Llenas un formulario y el equipo de S.I.R.E. te habilita la cuenta.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -48,10 +67,11 @@ import Layout from '../layouts/Layout.astro';
           Privacidad y Seguridad
         </h2>
         <p class="font-sans text-text-dark/75 leading-relaxed">
-          La privacidad de los pacientes es un derecho fundamental. Por ello, S.I.R.E. no permite listados públicos abiertos de pacientes ni búsquedas por nombres genéricos. La única forma de consultar la información de un paciente es ingresando su **número de cédula o pasaporte exacto**, previniendo la exposición pública innecesaria de datos médicos.
+          La privacidad de los pacientes es un derecho fundamental. Por ello, S.I.R.E. no permite listados públicos abiertos de pacientes ni búsquedas por nombres genéricos. La única forma de consultar la información de un paciente es ingresando su <strong>número de cédula o pasaporte exacto</strong>, previniendo la exposición pública innecesaria de datos médicos.
         </p>
       </section>
     </div>
+
 
     <!-- Botón de regreso -->
     <div class="text-center pt-2">

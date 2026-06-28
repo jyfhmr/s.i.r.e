@@ -10,6 +10,8 @@ const pathname = Astro.url.pathname;
 const isBuscarActive = pathname === '/' || pathname === '/index.html';
 const isInfoActive = pathname.startsWith('/info');
 const isContactoActive = pathname.startsWith('/contact');
+const isDevDocsActive = pathname.startsWith('/dev-docs');
+
 ---
 
 <!doctype html>
@@ -81,7 +83,14 @@ const isContactoActive = pathname.startsWith('/contact');
 						>
 							Contacto
 						</a>
+						<a 
+							href="/dev-docs" 
+							class={`h-16 flex items-center text-text-dark/70 hover:text-vzla-blue border-b-2 no-underline transition-all ${isDevDocsActive ? 'border-vzla-blue text-vzla-blue' : 'border-transparent hover:border-vzla-blue/30'}`}
+						>
+							Dev Docs
+						</a>
 					</nav>
+
 
 					<!-- Enlaces públicos de sesión (se ocultan si está logueado) -->
 					<div id="nav-guest-container" class="flex items-center gap-2 sm:gap-3">
@@ -177,7 +186,19 @@ const isContactoActive = pathname.startsWith('/contact');
 							<span class="w-1.5 h-1.5 rounded-full ${isContactoActive ? 'bg-white' : 'bg-vzla-blue/40'}"></span>
 							Contacto
 						</a>
+						<a 
+							href="/dev-docs" 
+							class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-display font-semibold transition-all no-underline ${
+								isDevDocsActive 
+									? 'bg-vzla-blue text-white' 
+									: 'text-text-dark/70 hover:bg-bg-light hover:text-vzla-blue'
+							}`}
+						>
+							<span class="w-1.5 h-1.5 rounded-full ${isDevDocsActive ? 'bg-white' : 'bg-vzla-blue/40'}"></span>
+							Dev Docs
+						</a>
 					</nav>
+
 				</div>
 
 				<!-- Sección de Sesión móvil -->
