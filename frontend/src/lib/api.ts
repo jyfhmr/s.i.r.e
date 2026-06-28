@@ -61,6 +61,18 @@ export interface ApiError {
   isRateLimit?: boolean;
 }
 
+/** Resultado de la importación masiva de pacientes */
+export interface BulkImportResult {
+  total: number;
+  created: number;
+  updated: number;
+  errors: Array<{
+    dni: string;
+    fullName: string;
+    error: string;
+  }>;
+}
+
 // ==================== HELPERS PRIVADOS ====================
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -342,6 +354,26 @@ export async function getPatientHistory(
 ): Promise<IPatientStatusLog[]> {
   return authFetch(`${PATIENT_ROUTES.BASE}/${patientId}/history`, {
     method: "GET",
+  });
+}
+
+/**
+ * Importación masiva de pacientes (solo DIOS)
+ * Endpoint: POST /api/medical/patients/admin/bulk-import
+ * @param patients - Array de pacientes a importar
+ */
+export async function bulkImportPatients(
+  patients: {
+    dni: string;
+    fullName: string;
+    status: PatientStatus;
+    medicalCenterId?: number;
+    manualLocation?: string;
+  }[],
+): Promise<BulkImportResult> {
+  return authFetch(`${PATIENT_ROUTES.BASE}/${PATIENT_ROUTES.BULK_IMPORT}`, {
+    method: "POST",
+    body: JSON.stringify({ patients }),
   });
 }
 

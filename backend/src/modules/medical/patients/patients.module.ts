@@ -7,6 +7,7 @@ import { HelpersService } from '@/helpers/helpers.service';
 
 // Use Cases
 import { PatientUpsertUseCase } from './use-cases/patient-upsert.use-case';
+import { PatientBulkImportUseCase } from './use-cases/patient-bulk-import.use-case';
 
 // Services
 import { PatientFindAllService } from './services/patient-find-all.service';
@@ -23,6 +24,7 @@ import { PatientExportService } from './services/patient-export.service';
 
     // Use Cases
     PatientUpsertUseCase,
+    PatientBulkImportUseCase,
 
     // Services
     PatientFindAllService,

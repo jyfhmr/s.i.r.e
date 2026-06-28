@@ -14,6 +14,7 @@ export const SUB_PAGES = {
   USERS: "Usuarios",
   PROFILES: "Perfiles",
   PAGES: "Páginas",
+  PATIENTS_IMPORT: "Importar Pacientes",
 } as const;
 
 // Tipos para autocompletado
@@ -33,6 +34,7 @@ export const PERMISSIONS_BY_ROLE: Record<
       SUB_PAGES.PROFILES,
       SUB_PAGES.PAGES,
       SUB_PAGES.MY_ALERTS, // DIOS también puede probar el módulo de Alertas
+      SUB_PAGES.PATIENTS_IMPORT, // Importación masiva de pacientes
     ],
   },
 

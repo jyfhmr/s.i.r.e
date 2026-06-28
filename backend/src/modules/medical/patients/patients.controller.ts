@@ -12,7 +12,9 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { UpsertPatientDto } from './dto/upsert-patient.dto';
+import { BulkImportPatientDto } from './dto/bulk-import-patient.dto';
 import { PatientUpsertUseCase } from './use-cases/patient-upsert.use-case';
+import { PatientBulkImportUseCase } from './use-cases/patient-bulk-import.use-case';
 import { PatientFindAllService } from './services/patient-find-all.service';
 import { PatientSearchByDniService } from './services/patient-search-by-dni.service';
 import { PatientFindHistoryService } from './services/patient-find-history.service';
@@ -27,6 +29,7 @@ import { ROLES } from '@shared/common';
 export class PatientsController {
   constructor(
     private readonly upsertUseCase: PatientUpsertUseCase,
+    private readonly bulkImportUseCase: PatientBulkImportUseCase,
     private readonly findAllService: PatientFindAllService,
     private readonly searchByDniService: PatientSearchByDniService,
     private readonly findHistoryService: PatientFindHistoryService,
@@ -68,5 +71,12 @@ export class PatientsController {
     query.export = true;
     const { data } = await this.findAllService.execute(query, req.user.sub);
     await this.exportService.execute(data, res);
+  }
+
+  // IMPORTACIÓN MASIVA: Solo DIOS
+  @Roles(ROLES.DIOS)
+  @Post(PATIENT_ROUTES.BULK_IMPORT)
+  bulkImport(@Body() dto: BulkImportPatientDto, @Request() req: any) {
+    return this.bulkImportUseCase.execute(dto.patients, req.user.sub);
   }
 }

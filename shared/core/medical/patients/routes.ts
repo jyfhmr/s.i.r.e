@@ -6,4 +6,5 @@ export const PATIENT_ROUTES = {
   UPSERT: "", // POST /medical/patients (crear o actualizar - inteligente)
   EXPORT: "export", // GET /medical/patients/export
   HISTORY: ":id/history", // GET /medical/patients/:id/history (bitácora completa)
+  BULK_IMPORT: "admin/bulk-import", // POST /medical/patients/admin/bulk-import (solo DIOS)
 } as const;

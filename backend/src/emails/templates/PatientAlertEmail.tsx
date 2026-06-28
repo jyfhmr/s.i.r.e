@@ -37,9 +37,6 @@ export default function PatientAlertEmail({
           <Hr style={hr} />
 
           <Text style={infoText}>
-            <strong>Estado:</strong> {status}
-          </Text>
-          <Text style={infoText}>
             <strong>Ubicación:</strong> {location}
           </Text>
 

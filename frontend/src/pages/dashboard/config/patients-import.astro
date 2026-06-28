@@ -1,0 +1,225 @@
+---
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Importar Pacientes - S.I.R.E.">
+	<div class="space-y-6">
+		<!-- Header -->
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+			<div>
+				<h2 class="font-display font-bold text-2xl md:text-3xl text-text-dark">Importar Pacientes</h2>
+				<p class="text-sm text-text-dark/60 mt-1">Inserta un JSON con pacientes para importarlos masivamente al sistema</p>
+			</div>
+		</div>
+
+		<!-- Panel: Pegar JSON -->
+		<div class="bg-white border border-border-subtle rounded-xl shadow-sm overflow-hidden">
+			<div class="p-4 border-b border-border-subtle flex items-center justify-between">
+				<h3 class="font-display font-bold text-lg text-text-dark">JSON de Pacientes</h3>
+				<button
+					id="btn-show-example"
+					class="h-9 px-3 bg-bg-light hover:bg-border-subtle text-text-dark/70 font-display font-semibold text-xs rounded-lg transition-all"
+				>
+					Ver ejemplo
+				</button>
+			</div>
+
+			<div class="p-4 space-y-4">
+				<!-- Ejemplo (oculto por defecto) -->
+				<div id="example-container" class="hidden bg-bg-light border border-border-subtle rounded-lg p-4">
+					<p class="text-xs font-display font-semibold text-text-dark/60 mb-2">Estructura JSON esperada:</p>
+					<pre class="text-xs font-mono text-text-dark/80 whitespace-pre-wrap overflow-x-auto"><code>[
+  &#123;
+    "dni": "31075359",
+    "fullName": "María Oñales",
+    "status": "ESTABLE",
+    "manualLocation": "Accidente Clarines - Boca de Uchire"
+  &#125;,
+  &#123;
+    "dni": "22434382",
+    "fullName": "Andrés Samuel",
+    "status": "CRÍTICO",
+    "manualLocation": "Accidente Clarines - Boca de Uchire",
+    "medicalCenterId": 1
+  &#125;
+]</code></pre>
+					<div class="mt-3 text-xs text-text-dark/50 space-y-1">
+						<p><strong>Campos obligatorios:</strong> <code class="text-vzla-blue">dni</code>, <code class="text-vzla-blue">fullName</code>, <code class="text-vzla-blue">status</code></p>
+				<p><strong>Status válidos:</strong> <code>ESTABLE</code>, <code>CRÍTICO</code>, <code>CONTACTAR_INMEDIATO</code>, <code>NO ESPECIFICADO</code>, <code>DESAPARECIDO</code></p>
+						<p><strong>Opcionales:</strong> <code class="text-vzla-blue">medicalCenterId</code> (número), <code class="text-vzla-blue">manualLocation</code> (texto)</p>
+					</div>
+				</div>
+
+				<!-- Textarea -->
+				<textarea
+					id="json-input"
+					class="w-full min-h-[300px] p-4 bg-bg-light border border-border-subtle rounded-lg font-mono text-sm text-text-dark placeholder:text-text-dark/30 resize-y focus:outline-none focus:ring-2 focus:ring-vzla-blue/30 focus:border-vzla-blue transition-all"
+					placeholder='Pega aquí el array JSON de pacientes...&#10;&#10;Ejemplo:&#10;[&#10;  {&#10;    "dni": "12345678",&#10;    "fullName": "Nombre Apellido",&#10;    "status": "ESTABLE",&#10;    "manualLocation": "Ubicación opcional"&#10;  }&#10;]'
+				></textarea>
+
+				<!-- Botón Importar -->
+				<div class="flex items-center gap-3">
+					<button
+						id="btn-import"
+						class="h-12 px-8 bg-vzla-blue hover:bg-vzla-blue-hover text-white font-display font-bold text-sm rounded-xl transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						Importar Pacientes
+					</button>
+					<span id="import-status" class="text-sm font-display text-text-dark/50">Listo</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Panel: Resultados -->
+		<div id="results-container" class="hidden bg-white border border-border-subtle rounded-xl shadow-sm overflow-hidden">
+			<div class="p-4 border-b border-border-subtle">
+				<h3 class="font-display font-bold text-lg text-text-dark">Resultado de la Importación</h3>
+			</div>
+
+			<div class="p-4 space-y-4">
+				<!-- Resumen numérico -->
+				<div id="results-summary" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+					<div class="bg-bg-light rounded-xl p-4 text-center">
+						<p class="text-3xl font-display font-bold text-text-dark" id="result-total">0</p>
+						<p class="text-xs font-display font-semibold text-text-dark/60 mt-1">Total</p>
+					</div>
+					<div class="bg-green-50 rounded-xl p-4 text-center">
+						<p class="text-3xl font-display font-bold text-green-700" id="result-created">0</p>
+						<p class="text-xs font-display font-semibold text-green-600 mt-1">Creados</p>
+					</div>
+					<div class="bg-blue-50 rounded-xl p-4 text-center">
+						<p class="text-3xl font-display font-bold text-blue-700" id="result-updated">0</p>
+						<p class="text-xs font-display font-semibold text-blue-600 mt-1">Actualizados</p>
+					</div>
+					<div class="bg-red-50 rounded-xl p-4 text-center">
+						<p class="text-3xl font-display font-bold text-red-700" id="result-errors">0</p>
+						<p class="text-xs font-display font-semibold text-red-600 mt-1">Errores</p>
+					</div>
+				</div>
+
+				<!-- Tabla de errores -->
+				<div id="errors-table-container" class="hidden">
+					<h4 class="font-display font-bold text-sm text-text-dark mb-2">Detalle de Errores</h4>
+					<div class="overflow-x-auto">
+						<table class="w-full">
+							<thead class="bg-bg-light border-b border-border-subtle">
+								<tr class="text-left text-xs font-display font-bold text-text-dark/70 uppercase tracking-wider">
+									<th class="px-4 py-3">DNI</th>
+									<th class="px-4 py-3">Nombre</th>
+									<th class="px-4 py-3">Error</th>
+								</tr>
+							</thead>
+							<tbody id="errors-tbody" class="divide-y divide-border-subtle"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		import { bulkImportPatients, type BulkImportResult } from '../../../lib/api';
+
+		const jsonInput = document.getElementById('json-input') as HTMLTextAreaElement;
+		const btnImport = document.getElementById('btn-import') as HTMLButtonElement;
+		const importStatus = document.getElementById('import-status') as HTMLSpanElement;
+		const resultsContainer = document.getElementById('results-container') as HTMLDivElement;
+		const errorsContainer = document.getElementById('errors-table-container') as HTMLDivElement;
+		const errorsTbody = document.getElementById('errors-tbody') as HTMLTableSectionElement;
+		const btnShowExample = document.getElementById('btn-show-example') as HTMLButtonElement;
+		const exampleContainer = document.getElementById('example-container') as HTMLDivElement;
+
+		// Elementos del resumen
+		const resultTotal = document.getElementById('result-total') as HTMLParagraphElement;
+		const resultCreated = document.getElementById('result-created') as HTMLParagraphElement;
+		const resultUpdated = document.getElementById('result-updated') as HTMLParagraphElement;
+		const resultErrors = document.getElementById('result-errors') as HTMLParagraphElement;
+
+		// Mostrar/ocultar ejemplo
+		btnShowExample.addEventListener('click', () => {
+			exampleContainer.classList.toggle('hidden');
+		});
+
+		// Importar pacientes
+		btnImport.addEventListener('click', async () => {
+			// Validar JSON
+			const raw = jsonInput.value.trim();
+			if (!raw) {
+				setStatus('⚠️ Debes pegar un JSON válido', true);
+				return;
+			}
+
+			let patients: any[];
+			try {
+				patients = JSON.parse(raw);
+				if (!Array.isArray(patients)) {
+					throw new Error('El JSON debe ser un array');
+				}
+			} catch (e: any) {
+				setStatus(`❌ JSON inválido: ${e.message}`, true);
+				return;
+			}
+
+			// Validar que cada elemento tenga los campos mínimos
+			for (let i = 0; i < patients.length; i++) {
+				const p = patients[i];
+				if (!p.dni || !p.fullName || !p.status) {
+					setStatus(`❌ Paciente #${i + 1}: faltan campos obligatorios (dni, fullName, status)`, true);
+					return;
+				}
+			}
+
+			// Deshabilitar botón mientras se procesa
+			btnImport.disabled = true;
+			btnImport.textContent = 'Importando...';
+			setStatus('⏳ Importando pacientes...', false);
+
+			try {
+				const result: BulkImportResult = await bulkImportPatients(patients);
+
+				// Mostrar resultados
+				resultTotal.textContent = String(result.total);
+				resultCreated.textContent = String(result.created);
+				resultUpdated.textContent = String(result.updated);
+				resultErrors.textContent = String(result.errors.length);
+
+				// Mostrar errores si los hay
+				if (result.errors.length > 0) {
+					errorsTbody.innerHTML = result.errors
+						.map(
+							(e) => `
+								<tr class="hover:bg-red-50/50 transition-colors">
+									<td class="px-4 py-3 font-mono text-sm text-red-700 font-semibold">${e.dni}</td>
+									<td class="px-4 py-3 text-sm text-text-dark">${e.fullName}</td>
+									<td class="px-4 py-3 text-sm text-red-600">${e.error}</td>
+								</tr>
+							`,
+						)
+						.join('');
+					errorsContainer.classList.remove('hidden');
+				} else {
+					errorsContainer.classList.add('hidden');
+				}
+
+				resultsContainer.classList.remove('hidden');
+				resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+				if (result.errors.length > 0) {
+					setStatus(`⚠️ Importación completada con ${result.errors.length} error(es)`, true);
+				} else {
+					setStatus(`✅ ${result.created} creados, ${result.updated} actualizados — sin errores.`, false);
+				}
+			} catch (error: any) {
+				setStatus(`❌ Error del servidor: ${error.message || 'Error desconocido'}`, true);
+			} finally {
+				btnImport.disabled = false;
+				btnImport.textContent = 'Importar Pacientes';
+			}
+		});
+
+		function setStatus(message: string, isError: boolean) {
+			importStatus.textContent = message;
+			importStatus.style.color = isError ? '#dc2626' : '#6b7280';
+		}
+	</script>
+</DashboardLayout>

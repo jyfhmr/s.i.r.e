@@ -26,6 +26,7 @@ export class PagesSeeder implements Seeder {
       { name: SUB_PAGES.USERS, route: '/dashboard/config/users' },
       { name: SUB_PAGES.PROFILES, route: '/dashboard/config/profiles' },
       { name: SUB_PAGES.PAGES, route: '/dashboard/config/pages' },
+      { name: SUB_PAGES.PATIENTS_IMPORT, route: '/dashboard/config/patients-import' },
     ]);
 
     // 3. CREAR SUB-PÁGINAS DE CIUDADANO (para usuarios comunes)
