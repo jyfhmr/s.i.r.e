@@ -139,6 +139,29 @@ export async function searchPatientByDni(
   }
 }
 
+// ==================== CONTADOR PÚBLICO DE PACIENTES ====================
+
+/**
+ * Obtiene el número total de pacientes registrados en el sistema
+ * Endpoint: GET /api/search/count
+ */
+export async function getPatientCount(): Promise<{ total: number }> {
+  try {
+    const url = `${API_BASE_URL}/${PUBLIC_SEARCH_ROUTES.BASE}/${PUBLIC_SEARCH_ROUTES.COUNT}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return handleResponse<{ total: number }>(response);
+  } catch (error) {
+    // Si falla, devolvemos 0 silenciosamente (no crítico)
+    return { total: 0 };
+  }
+}
+
 // ==================== SOLICITUD DE ACCESO MÉDICO (CU 4) ====================
 
 /**

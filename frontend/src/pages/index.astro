@@ -23,6 +23,14 @@ import SearchForm from '../components/SearchForm.astro';
         de los hospitales públicos durante emergencias masivas.
       </p>
 
+      <!-- Contador de personas registradas -->
+      <div id="patient-counter" class="w-full max-w-xs mx-auto bg-white/70 backdrop-blur-sm border border-vzla-blue/20 rounded-xl px-5 py-3 shadow-sm">
+        <p class="font-sans text-sm text-text-dark/60 text-center flex items-center justify-center gap-2">
+          <span id="counter-number" class="font-display font-bold text-vzla-blue text-lg">—</span>
+          <span>afectados registradoss</span>
+        </p>
+      </div>
+
       <!-- Formulario de Búsqueda - CU 2 (Ubicación prioritaria en Hero) -->
       <div class="w-full max-w-2xl mx-auto pt-2">
         <SearchForm />
@@ -180,7 +188,7 @@ Busca el paradero de un ser querido por su cédula o crea una Alerta de Seguimie
 
 <!-- Script de Búsqueda Real conectado al API -->
 <script>
-  import { searchPatientByDni, type ApiError } from '../lib/api';
+  import { searchPatientByDni, getPatientCount, type ApiError } from '../lib/api';
   import { getStatusConfig, getRegistrationSourceInfo } from '../lib/patient-status';
   import { PatientStatus, RegistrationSource } from '@shared/common';
 
@@ -327,6 +335,16 @@ Busca el paradero de un ser querido por su cédula o crea una Alerta de Seguimie
 
   // Ejecutar al cargar la página
   if (typeof window !== 'undefined') {
+    // Cargar contador de personas registradas
+    getPatientCount().then(data => {
+      const el = document.getElementById('counter-number');
+      if (el && data?.total !== undefined) {
+        el.textContent = data.total.toLocaleString('es-VE');
+      }
+    }).catch(() => {
+      // Silencio — el contador no es crítico
+    });
+
     // Interceptar el submit del formulario para evitar scroll al tope
     const searchForm = document.querySelector('form[method="GET"]') as HTMLFormElement;
     if (searchForm) {

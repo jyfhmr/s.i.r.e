@@ -8,6 +8,15 @@ import { Throttle } from '@nestjs/throttler';
 export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
+  // Endpoint PÚBLICO - Contador total de pacientes registrados
+  // DEBE ir ANTES que :dni para que Express no capture 'count' como parámetro
+  @Public()
+  @Throttle({ default: { limit: 30, ttl: 60000 } })
+  @Get(PUBLIC_SEARCH_ROUTES.COUNT)
+  getCount() {
+    return this.searchService.getCount();
+  }
+
   // Endpoint PÚBLICO - Sin autenticación
   // Throttle MUY estricto para evitar scraping masivo
   @Public()

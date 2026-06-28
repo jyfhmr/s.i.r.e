@@ -43,4 +43,13 @@ export class SearchService {
       },
     };
   }
+
+  /**
+   * Obtiene el total de pacientes registrados en el sistema
+   * Endpoint público sencillo para mostrar un contador en la página de inicio
+   */
+  async getCount(): Promise<{ total: number }> {
+    const total = await this.patientRepository.count();
+    return { total };
+  }
 }
