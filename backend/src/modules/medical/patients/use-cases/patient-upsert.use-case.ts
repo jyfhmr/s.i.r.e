@@ -7,6 +7,7 @@ import { PatientStatusLog } from '../entities/patient-status-log.entity';
 import { UpsertPatientDto } from '../dto/upsert-patient.dto';
 import { User } from '@/modules/config/users/entities/user.entity';
 import { MedicalCenter } from '@/modules/config/medical-centers/entities/medical-center.entity';
+import { RegistrationSource } from '@shared/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -49,6 +50,7 @@ export class PatientUpsertUseCase {
 
       if (isNewPatient) {
         // ESCENARIO A: Crear nuevo paciente
+        // Se hardcodea MEDICAL_STAFF porque en este flujo solo personal médico crea pacientes
         patient = queryRunner.manager.create(Patient, {
           dni: dto.dni,
           fullName: dto.fullName,
@@ -57,11 +59,13 @@ export class PatientUpsertUseCase {
           manualLocation: dto.manualLocation || null,
           lastUpdatedBy: currentUserId,
           lastUpdatedAt: new Date(),
+          registrationSource: RegistrationSource.MEDICAL_STAFF,
         });
 
         await queryRunner.manager.save(patient);
       } else {
         // ESCENARIO B: Actualizar paciente existente
+        // NOTA: No se toca registrationSource para preservar el valor original
         patient.currentStatus = dto.status;
         patient.currentMedicalCenterId = dto.medicalCenterId || null;
         patient.manualLocation = dto.manualLocation || null;

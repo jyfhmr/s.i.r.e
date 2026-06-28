@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { IPatient } from '@shared/core/medical/patients/interfaces';
-import { PatientStatus } from '@shared/common';
+import { PatientStatus, RegistrationSource } from '@shared/common';
 import { MedicalCenter } from '@/modules/config/medical-centers/entities/medical-center.entity';
 import { User } from '@/modules/config/users/entities/user.entity';
 import { PatientStatusLog } from './patient-status-log.entity';
@@ -53,6 +53,19 @@ export class Patient implements IPatient {
 
   @Column({ nullable: true })
   lastUpdatedAt?: Date;
+
+  /**
+   * Fuente del registro del paciente
+   * - MEDICAL_STAFF: Registrado por personal médico en el sistema
+   * - PUBLIC_LIST: Recopilado de listado público de hospital
+   * - null: Valor por defecto (comportamiento legacy)
+   */
+  @Column({
+    type: 'enum',
+    enum: RegistrationSource,
+    nullable: true,
+  })
+  registrationSource?: RegistrationSource;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -39,6 +39,7 @@ export class SearchService {
           patient.manualLocation ||
           'Ubicación no especificada',
         lastUpdated: patient.lastUpdatedAt || patient.createdAt,
+        registrationSource: patient.registrationSource || undefined,
       },
     };
   }

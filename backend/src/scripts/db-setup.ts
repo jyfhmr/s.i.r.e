@@ -5,6 +5,7 @@ import { dbdatasource } from '../database/data.source';
 import UserSeeder from '@/database/seeds/1716776942560-users.seeder';
 import { PagesSeeder } from '@/database/seeds/1716777747675-pages.seeder';
 import MedicalCentersSeeder from '@/database/seeds/medical-centers.seeder';
+import PatientSeeder1 from '@/database/seeds/patient-seeder-1.seeder';
 
 async function setupDatabase() {
   console.log('🚀 Iniciando la configuración de la base de datos...\n');
@@ -37,7 +38,7 @@ async function setupDatabase() {
     console.log('🌱 Ejecutando Seeders y Factories...');
 
     await runSeeders(dataSource, {
-      seeds: [UserSeeder, PagesSeeder, MedicalCentersSeeder],
+      seeds: [UserSeeder, PagesSeeder, MedicalCentersSeeder, PatientSeeder1],
       factories: [],
     });
 

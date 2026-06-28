@@ -1,4 +1,4 @@
-import { PatientStatus } from "@shared/common";
+import { PatientStatus, RegistrationSource } from "@shared/common";
 
 // ================= INTERFACES DE ENTIDAD =================
 
@@ -13,6 +13,7 @@ export interface IPatient {
   lastUpdatedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
+  registrationSource?: RegistrationSource; // Fuente del registro (médico o lista pública)
 }
 
 export interface IPatientStatusLog {
@@ -33,6 +34,7 @@ export interface IUpsertPatientDto {
   status: PatientStatus;
   medicalCenterId?: number; // Opcional
   manualLocation?: string; // Opcional - usado si medicalCenterId no se proporciona
+  registrationSource?: RegistrationSource; // Opcional - fuente del registro
 }
 
 export interface IPatientPublicResponse {
@@ -43,6 +45,7 @@ export interface IPatientPublicResponse {
     status: PatientStatus;
     location: string; // Nombre del centro o ubicación manual
     lastUpdated: Date;
+    registrationSource?: RegistrationSource; // Fuente del registro (para UI público)
   };
 }
 

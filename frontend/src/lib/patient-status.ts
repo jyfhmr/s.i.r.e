@@ -1,10 +1,9 @@
 /**
- * Configuración de estados de pacientes
- * Mapeo único de los 4 estados reales del enum PatientStatus (@shared/common)
- * a sus representaciones visuales y textos empáticos
+ * Configuración de estados de pacientes para vista pública
+ * Por privacidad, solo mostramos "Localizado" sin detalles médicos
  */
 
-import { PatientStatus } from "@shared/common";
+import { PatientStatus, RegistrationSource } from "@shared/common";
 
 export interface StatusConfig {
   label: string;
@@ -15,31 +14,29 @@ export interface StatusConfig {
 
 /**
  * Mapa de configuración para cada estado de paciente
- * Alineado con el enum real del backend
+ * En la vista pública, todos los pacientes localizados se muestran como "Localizado"
+ * para proteger la privacidad médica.
  */
 export const PATIENT_STATUS_CONFIG: Record<PatientStatus, StatusConfig> = {
   [PatientStatus.ESTABLE]: {
-    label: "Localizado - Estable",
+    label: "Localizado",
     bgClass: "bg-success-light text-success-text border-success-border",
     badgeClass: "bg-emerald-500",
-    description:
-      "La persona se encuentra bien, fuera de peligro inmediato. Está recibiendo atención médica de rutina.",
+    description: "",
   },
 
   [PatientStatus.CRITICO]: {
-    label: "Localizado - Situación Crítica",
-    bgClass: "bg-error-light text-error-text border-error-border",
-    badgeClass: "bg-rose-500",
-    description:
-      "Bajo cuidado médico intensivo. Se solicita a los familiares directos contactar urgentemente con el centro de salud.",
+    label: "Localizado",
+    bgClass: "bg-success-light text-success-text border-success-border",
+    badgeClass: "bg-emerald-500",
+    description: "",
   },
 
   [PatientStatus.CONTACTAR_INMEDIATO]: {
-    label: "Localizado - Contactar Inmediatamente",
-    bgClass: "bg-alert-light text-alert-text border-alert-border",
-    badgeClass: "bg-amber-500",
-    description:
-      "Es necesario el contacto urgente de familiares directos. Por favor dirigirse al centro de salud indicado a la brevedad.",
+    label: "Localizado",
+    bgClass: "bg-success-light text-success-text border-success-border",
+    badgeClass: "bg-emerald-500",
+    description: "",
   },
 
   [PatientStatus.DESAPARECIDO]: {
@@ -48,6 +45,13 @@ export const PATIENT_STATUS_CONFIG: Record<PatientStatus, StatusConfig> = {
     badgeClass: "bg-sky-500",
     description:
       "Esta persona está siendo buscada activamente. Si tiene información sobre su paradero, contacte a las autoridades.",
+  },
+
+  [PatientStatus.NO_ESPECIFICADO]: {
+    label: "Localizado",
+    bgClass: "bg-success-light text-success-text border-success-border",
+    badgeClass: "bg-emerald-500",
+    description: "",
   },
 };
 
@@ -60,4 +64,26 @@ export function getStatusConfig(status: PatientStatus): StatusConfig {
     PATIENT_STATUS_CONFIG[status] ||
     PATIENT_STATUS_CONFIG[PatientStatus.ESTABLE]
   );
+}
+
+/**
+ * Obtiene el texto descriptivo de la fuente de registro
+ */
+export function getRegistrationSourceInfo(source?: RegistrationSource): {
+  icon: string;
+  label: string;
+} {
+  switch (source) {
+    case RegistrationSource.PUBLIC_LIST:
+      return {
+        icon: "📋",
+        label: "Recopilado de lista hospitalaria pública",
+      };
+    case RegistrationSource.MEDICAL_STAFF:
+    default:
+      return {
+        icon: "🏥",
+        label: "Registrado por personal médico en el sistema",
+      };
+  }
 }
