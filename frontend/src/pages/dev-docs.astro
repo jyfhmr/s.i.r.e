@@ -1,11 +1,156 @@
 ---
 import Layout from '../layouts/Layout.astro';
+
+const code1 = `{
+  "found": true,
+  "message": "Hemos encontrado informaci\u00f3n sobre esta persona.",
+  "data": {
+    "fullName": "Mar\u00eda P\u00e9rez",
+    "status": "ESTABLE",
+    "location": "Hospital Universitario de Caracas",
+    "lastUpdated": "2026-06-28T14:30:00.000Z",
+    "registrationSource": "PUBLIC_LIST"
+  }
+}`;
+
+const code2 = `{
+  "found": false,
+  "message": "No hemos encontrado informaci\u00f3n sobre esta persona en nuestros registros hasta el momento. Si deseas recibir una notificaci\u00f3n inmediata cuando aparezca, puedes configurar una alerta."
+}`;
+
+const code3 = `interface IPatientPublicResponse {
+  found: boolean;
+  message: string;
+  data?: {
+    fullName: string;
+    status: PatientStatus;
+    location: string;
+    lastUpdated: Date;
+    registrationSource?: RegistrationSource;
+  };
+}`;
+
+const code4 = `{
+  "total": 15234
+}`;
+
+const code5 = `{
+  "data": [
+    {
+      "dni": "12345678",
+      "fullName": "Mar\u00eda P\u00e9rez",
+      "location": "Hospital Universitario de Caracas",
+      "lastUpdated": "2026-06-28T14:30:00.000Z",
+      "registrationSource": "PUBLIC_LIST"
+    }
+  ],
+  "total": 15234,
+  "page": 1,
+  "rows": 20
+}`;
+
+const code6 = `[
+  {
+    "id": 1,
+    "name": "Hospital Universitario de Caracas",
+    "state": "Distrito Capital",
+    "municipality": "Libertador",
+    "address": "Av. La Universidad, Parroquia San Jos\u00e9",
+    "isActive": true,
+    "createdAt": "2026-06-24T10:00:00.000Z",
+    "updatedAt": "2026-06-28T12:00:00.000Z"
+  }
+]`;
+
+const code7 = `{
+  "id": 1,
+  "name": "Hospital Universitario de Caracas",
+  "state": "Distrito Capital",
+  "municipality": "Libertador",
+  "address": "Av. La Universidad, Parroquia San Jos\u00e9",
+  "isActive": true,
+  "createdAt": "2026-06-24T10:00:00.000Z",
+  "updatedAt": "2026-06-28T12:00:00.000Z"
+}`;
+
+const code8 = `{
+  "statusCode": 404,
+  "message": "Centro M\u00e9dico no encontrado"
+}`;
+
+const code9 = `{
+  "totalPatients": 15234,
+  "totalMedicalCenters": 47,
+  "patientsByStatus": [
+    { "status": "ESTABLE", "count": 5230 },
+    { "status": "CR\u00cdTICO", "count": 1890 },
+    { "status": "DESAPARECIDO", "count": 7200 },
+    { "status": "CONTACTAR_INMEDIATO", "count": 456 },
+    { "status": "NO ESPECIFICADO", "count": 458 }
+  ],
+  "lastUpdated": "2026-06-29T10:00:00.000Z"
+}`;
+
+const code10 = `{
+  "name": "Juan L\u00f3pez",
+  "email": "juan@ejemplo.com",
+  "message": "Tengo acceso a las listas del Hospital de Los Teques y quiero colaborar."
+}`;
+
+const code11 = `{
+  "success": true,
+  "message": "Mensaje enviado correctamente"
+}`;
+
+const code12 = `{
+  "fullName": "Dr. Juan L\u00f3pez",
+  "dni": "87654321",
+  "email": "dr.lopez@hospital.com",
+  "phoneNumber": "0412-1234567",
+  "position": "M\u00e9dico",
+  "medicalCenterId": 1,
+  "manualMedicalCenter": "Hospital de Los Teques (si no est\u00e1 en cat\u00e1logo)"
+}`;
+
+const code13 = `{
+  "success": true,
+  "message": "Solicitud enviada correctamente. El equipo de S.I.R.E. revisar\u00e1 tu solicitud."
+}`;
+
+const code14 = `enum PatientStatus {
+  ESTABLE            = "ESTABLE",
+  CR\u00cdTICO            = "CR\u00cdTICO",
+  CONTACTAR_INMEDIATO = "CONTACTAR_INMEDIATO",
+  DESAPARECIDO       = "DESAPARECIDO",
+  NO_ESPECIFICADO    = "NO ESPECIFICADO"
+}`;
+
+const code15 = `enum RegistrationSource {
+  MEDICAL_STAFF = "MEDICAL_STAFF",
+  PUBLIC_LIST   = "PUBLIC_LIST"
+}`;
+
+const code16 = `const ROLES = {
+  DIOS: 1,
+  MEDICO: 2,
+  USUARIO_COMUN: 3,
+} as const;`;
+
+const code17 = `{
+  "statusCode": 400,
+  "message": [
+    {
+      "property": "email",
+      "constraints": { "isEmail": "email must be an email" }
+    }
+  ]
+}`;
 ---
 
 <Layout title="Documentación para Desarrolladores - S.I.R.E.">
-  <div class="max-w-2xl mx-auto space-y-8 animate-fade-in">
-    <!-- Título de la sección -->
-    <div class="text-center space-y-2">
+  <div class="max-w-4xl mx-auto space-y-8 animate-fade-in px-4 pb-16">
+    <!-- Título -->
+    <div class="text-center space-y-2 pt-8">
       <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-vzla-blue/10 mb-2">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-vzla-blue">
           <polyline points="16 18 22 12 16 6"></polyline>
@@ -14,31 +159,478 @@ import Layout from '../layouts/Layout.astro';
       </div>
       <h1 class="font-display font-bold text-3xl md:text-4xl text-text-dark">Documentación para Desarrolladores</h1>
       <p class="font-sans text-base md:text-lg text-text-dark/65">
-        Guía técnica, API y contribución al proyecto S.I.R.E.
+        API pública, arquitectura y guía de contribución al proyecto S.I.R.E.
       </p>
     </div>
 
-    <!-- Placeholder -->
-    <div class="bg-white border border-border-subtle rounded-2xl p-8 md:p-10 shadow-sm text-center space-y-4">
-      <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-bg-light text-vzla-blue">
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-          <line x1="8" y1="21" x2="16" y2="21"></line>
-          <line x1="12" y1="17" x2="12" y2="21"></line>
-        </svg>
-      </div>
-      <h2 class="font-display font-bold text-2xl text-text-dark">Próximamente</h2>
-      <p class="font-sans text-base text-text-dark/70 max-w-md mx-auto leading-relaxed">
-        Estamos preparando la documentación técnica para desarrolladores. 
-        Aquí encontrarás información sobre la API, la arquitectura del proyecto y cómo contribuir.
-      </p>
-      <p class="font-sans text-sm text-text-dark/50">
-        Mientras tanto, revisa el <code class="bg-bg-light px-2 py-0.5 rounded text-vzla-blue font-mono text-xs">README.md</code> del proyecto.
-      </p>
+    <!-- Índice de navegación rápida -->
+    <div class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm">
+      <h2 class="font-display font-bold text-xl text-text-dark mb-4">📑 Índice</h2>
+      <ul class="space-y-2 text-sm font-sans">
+        <li><a href="#intro" class="text-vzla-blue hover:text-vzla-blue-hover underline underline-offset-2">1. Introducción</a></li>
+        <li><a href="#base-url" class="text-vzla-blue hover:text-vzla-blue-hover underline underline-offset-2">2. Base URL y autenticación</a></li>
+        <li><a href="#rate-limiting" class="text-vzla-blue hover:text-vzla-blue-hover underline underline-offset-2">3. Rate Limiting</a></li>
+        <li><a href="#endpoints-publicos" class="text-vzla-blue hover:text-vzla-blue-hover underline underline-offset-2">4. Endpoints Públicos</a>
+          <ul class="ml-5 mt-1 space-y-1 text-text-dark/70">
+            <li><a href="#ep-search-dni" class="text-vzla-blue/80 hover:text-vzla-blue underline underline-offset-2">4.1 GET /api/search/:dni</a></li>
+            <li><a href="#ep-search-count" class="text-vzla-blue/80 hover:text-vzla-blue underline underline-offset-2">4.2 GET /api/search/count</a></li>
+            <li><a href="#ep-public-patients" class="text-vzla-blue/80 hover:text-vzla-blue underline underline-offset-2">4.3 GET /api/public/patients</a></li>
+            <li><a href="#ep-public-medical-centers" class="text-vzla-blue/80 hover:text-vzla-blue underline underline-offset-2">4.4 GET /api/public/medical-centers</a></li>
+            <li><a href="#ep-public-medical-center" class="text-vzla-blue/80 hover:text-vzla-blue underline underline-offset-2">4.5 GET /api/public/medical-centers/:id</a></li>
+            <li><a href="#ep-public-stats" class="text-vzla-blue/80 hover:text-vzla-blue underline underline-offset-2">4.6 GET /api/public/stats</a></li>
+            <li><a href="#ep-contact" class="text-vzla-blue/80 hover:text-vzla-blue underline underline-offset-2">4.7 POST /api/contact</a></li>
+            <li><a href="#ep-access-request" class="text-vzla-blue/80 hover:text-vzla-blue underline underline-offset-2">4.8 POST /api/auth/access-requests</a></li>
+          </ul>
+        </li>
+        <li><a href="#enums" class="text-vzla-blue hover:text-vzla-blue-hover underline underline-offset-2">5. Tipos compartidos (Enums)</a></li>
+        <li><a href="#codigos-error" class="text-vzla-blue hover:text-vzla-blue-hover underline underline-offset-2">6. Códigos de error</a></li>
+        <li><a href="#endpoints-internos" class="text-vzla-blue hover:text-vzla-blue-hover underline underline-offset-2">7. Endpoints internos (con autenticación)</a></li>
+        <li><a href="#contribuir" class="text-vzla-blue hover:text-vzla-blue-hover underline underline-offset-2">8. Cómo contribuir</a></li>
+      </ul>
     </div>
+
+    <!-- 1. INTRODUCCIÓN -->
+    <section id="intro" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+      <h2 class="font-display font-bold text-2xl text-text-dark flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-vzla-blue/10 flex items-center justify-center text-vzla-blue text-sm font-bold">1</span>
+        Introducción
+      </h2>
+      <p class="font-sans text-base text-text-dark/80 leading-relaxed">
+        <strong>S.I.R.E.</strong> expone una API REST que permite a otros sistemas consumir sus datos de forma pública y gratuita. 
+        Esta documentación está dirigida a desarrolladores que quieran integrar sus propias iniciativas —mapas de desaparecidos, 
+        centros de acopio, portales de búsqueda, etc.— con la base de datos centralizada de pacientes hospitalizados.
+      </p>
+      <div class="bg-vzla-blue/5 border border-vzla-blue/10 rounded-xl p-4 text-sm font-sans text-text-dark/70">
+        <p class="font-semibold text-vzla-blue mb-1">🎯 ¿Para quién es esta API?</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>Desarrolladores de portales de búsqueda de desaparecidos</li>
+          <li>Sistemas de centros de acopio y ayuda humanitaria</li>
+          <li>Aplicaciones de mapas y visualización de datos de emergencia</li>
+          <li>Cualquier proyecto que necesite información centralizada de pacientes hospitalizados</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 2. BASE URL Y AUTENTICACIÓN -->
+    <section id="base-url" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+      <h2 class="font-display font-bold text-2xl text-text-dark flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-vzla-blue/10 flex items-center justify-center text-vzla-blue text-sm font-bold">2</span>
+        Base URL y autenticación
+      </h2>
+      <div class="space-y-3">
+        <div>
+          <p class="font-sans text-sm text-text-dark/60 mb-1">Producción:</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-sm overflow-x-auto"><code>https://sire.example.com/api</code></pre>
+        </div>
+        <div>
+          <p class="font-sans text-sm text-text-dark/60 mb-1">Desarrollo local:</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-sm overflow-x-auto"><code>http://localhost:3000/api</code></pre>
+        </div>
+        <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-sm font-sans">
+          <p class="font-semibold text-green-700 mb-1">✅ Los endpoints públicos NO requieren autenticación</p>
+          <p class="text-green-600">Puedes consumirlos directamente desde el cliente con <code class="bg-green-100 px-1.5 py-0.5 rounded text-xs">fetch()</code> o cualquier cliente HTTP.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. RATE LIMITING -->
+    <section id="rate-limiting" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+      <h2 class="font-display font-bold text-2xl text-text-dark flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-vzla-blue/10 flex items-center justify-center text-vzla-blue text-sm font-bold">3</span>
+        Rate Limiting
+      </h2>
+      <p class="font-sans text-base text-text-dark/80 leading-relaxed">
+        Para garantizar la disponibilidad del servicio, los endpoints públicos tienen límites de peticiones por IP. 
+        Si se excede el límite, la API responderá con <strong class="text-red-500">HTTP 429 Too Many Requests</strong>.
+      </p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm font-sans border-collapse">
+          <thead>
+            <tr class="bg-bg-light border-b border-border-subtle">
+              <th class="text-left py-2 px-3 font-semibold text-text-dark">Endpoint</th>
+              <th class="text-left py-2 px-3 font-semibold text-text-dark">Límite</th>
+              <th class="text-left py-2 px-3 font-semibold text-text-dark">Ventana</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border-subtle">
+            <tr><td class="py-2 px-3 font-mono text-xs">GET /api/search/:dni</td><td class="py-2 px-3">10</td><td class="py-2 px-3">1 minuto</td></tr>
+            <tr><td class="py-2 px-3 font-mono text-xs">GET /api/search/count</td><td class="py-2 px-3">30</td><td class="py-2 px-3">1 minuto</td></tr>
+            <tr><td class="py-2 px-3 font-mono text-xs">GET /api/public/patients</td><td class="py-2 px-3">20</td><td class="py-2 px-3">1 minuto</td></tr>
+            <tr><td class="py-2 px-3 font-mono text-xs">GET /api/public/medical-centers</td><td class="py-2 px-3">30</td><td class="py-2 px-3">1 minuto</td></tr>
+            <tr><td class="py-2 px-3 font-mono text-xs">GET /api/public/stats</td><td class="py-2 px-3">30</td><td class="py-2 px-3">1 minuto</td></tr>
+            <tr><td class="py-2 px-3 font-mono text-xs">POST /api/contact</td><td class="py-2 px-3">3</td><td class="py-2 px-3">1 minuto</td></tr>
+            <tr><td class="py-2 px-3 font-mono text-xs">POST /api/auth/access-requests</td><td class="py-2 px-3">3</td><td class="py-2 px-3">1 minuto</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 4. ENDPOINTS PÚBLICOS -->
+    <section id="endpoints-publicos" class="space-y-6">
+      <h2 class="font-display font-bold text-2xl text-text-dark flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-vzla-blue/10 flex items-center justify-center text-vzla-blue text-sm font-bold">4</span>
+        Endpoints Públicos
+      </h2>
+
+      <!-- 4.1 Buscar por cédula -->
+      <div id="ep-search-dni" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">GET</span>
+          <code class="font-mono text-sm bg-bg-light px-3 py-1.5 rounded-lg">/api/search/:dni</code>
+        </div>
+        <h3 class="font-display font-bold text-lg text-text-dark">Buscar paciente por cédula</h3>
+        <p class="font-sans text-sm text-text-dark/70">Busca si una persona está registrada en el sistema. No expone información sensible del personal de salud.</p>
+        
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Parámetros:</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm font-sans border-collapse">
+              <thead><tr class="bg-bg-light border-b border-border-subtle"><th class="text-left py-2 px-3 font-semibold">Nombre</th><th class="text-left py-2 px-3 font-semibold">Tipo</th><th class="text-left py-2 px-3 font-semibold">Descripción</th></tr></thead>
+              <tbody class="divide-y divide-border-subtle">
+                <tr><td class="py-2 px-3 font-mono text-xs">dni</td><td class="py-2 px-3">string</td><td class="py-2 px-3">Número de cédula (solo dígitos)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Ejemplo request:</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>GET /api/search/12345678</code></pre>
+        </div>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Response (encontrado):</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code1}</code></pre>
+        </div>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Response (no encontrado):</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code2}</code></pre>
+        </div>
+
+        <details class="text-sm font-sans">
+          <summary class="cursor-pointer text-vzla-blue font-medium">TypeScript: interfaz de respuesta</summary>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto mt-2"><code>{code3}</code></pre>
+        </details>
+      </div>
+
+      <!-- 4.2 Contador -->
+      <div id="ep-search-count" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">GET</span>
+          <code class="font-mono text-sm bg-bg-light px-3 py-1.5 rounded-lg">/api/search/count</code>
+        </div>
+        <h3 class="font-display font-bold text-lg text-text-dark">Contador de pacientes registrados</h3>
+        <p class="font-sans text-sm text-text-dark/70">Obtiene el número total de pacientes registrados en el sistema.</p>
+        
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Response:</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code4}</code></pre>
+        </div>
+      </div>
+
+      <!-- 4.3 Listado público de pacientes -->
+      <div id="ep-public-patients" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">GET</span>
+          <code class="font-mono text-sm bg-bg-light px-3 py-1.5 rounded-lg">/api/public/patients</code>
+        </div>
+        <h3 class="font-display font-bold text-lg text-text-dark">Listado paginado de pacientes</h3>
+        <p class="font-sans text-sm text-text-dark/70">
+          Lista todos los pacientes del sistema con paginación. 
+          <strong>No expone el estatus de salud</strong> por privacidad, pero sí la ubicación y fecha de última actualización.
+          Ideal para alimentar sistemas de búsqueda de desaparecidos, mapas, cruce de datos, etc.
+        </p>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Parámetros query:</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm font-sans border-collapse">
+              <thead><tr class="bg-bg-light border-b border-border-subtle"><th class="text-left py-2 px-3 font-semibold">Nombre</th><th class="text-left py-2 px-3 font-semibold">Tipo</th><th class="text-left py-2 px-3 font-semibold">Default</th><th class="text-left py-2 px-3 font-semibold">Descripción</th></tr></thead>
+              <tbody class="divide-y divide-border-subtle">
+                <tr><td class="py-2 px-3 font-mono text-xs">page</td><td class="py-2 px-3">number</td><td class="py-2 px-3">1</td><td class="py-2 px-3">Número de página</td></tr>
+                <tr><td class="py-2 px-3 font-mono text-xs">rows</td><td class="py-2 px-3">number</td><td class="py-2 px-3">50</td><td class="py-2 px-3">Registros por página (máx. 100)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Ejemplo request:</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>GET /api/public/patients?page=1&rows=20</code></pre>
+        </div>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Response:</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code5}</code></pre>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm font-sans">
+          <p class="font-semibold text-amber-700 mb-1">⚠️ Privacidad</p>
+          <p class="text-amber-600">Este endpoint no incluye el estatus de salud del paciente. Solo expone nombre, ubicación del centro, fecha de última actualización y fuente del registro.</p>
+        </div>
+      </div>
+
+      <!-- 4.4 Centros médicos (lista) -->
+      <div id="ep-public-medical-centers" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">GET</span>
+          <code class="font-mono text-sm bg-bg-light px-3 py-1.5 rounded-lg">/api/public/medical-centers</code>
+        </div>
+        <h3 class="font-display font-bold text-lg text-text-dark">Catálogo de centros médicos activos</h3>
+        <p class="font-sans text-sm text-text-dark/70">Lista todos los centros médicos activos en el sistema. Ideal para poblar dropdowns, mapas o cruzar datos con otros sistemas.</p>
+        
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Response:</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code6}</code></pre>
+        </div>
+      </div>
+
+      <!-- 4.5 Centro médico por ID -->
+      <div id="ep-public-medical-center" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">GET</span>
+          <code class="font-mono text-sm bg-bg-light px-3 py-1.5 rounded-lg">/api/public/medical-centers/:id</code>
+        </div>
+        <h3 class="font-display font-bold text-lg text-text-dark">Detalle de centro médico</h3>
+        <p class="font-sans text-sm text-text-dark/70">Obtiene la información detallada de un centro médico específico.</p>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Ejemplo request:</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>GET /api/public/medical-centers/1</code></pre>
+        </div>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Response:</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code7}</code></pre>
+        </div>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Error (404):</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code8}</code></pre>
+        </div>
+      </div>
+
+      <!-- 4.6 Estadísticas -->
+      <div id="ep-public-stats" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">GET</span>
+          <code class="font-mono text-sm bg-bg-light px-3 py-1.5 rounded-lg">/api/public/stats</code>
+        </div>
+        <h3 class="font-display font-bold text-lg text-text-dark">Estadísticas agregadas del sistema</h3>
+        <p class="font-sans text-sm text-text-dark/70">Muestra métricas globales: total de pacientes, centros activos y distribución por estatus.</p>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Response:</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code9}</code></pre>
+        </div>
+      </div>
+
+      <!-- 4.7 Contacto -->
+      <div id="ep-contact" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">POST</span>
+          <code class="font-mono text-sm bg-bg-light px-3 py-1.5 rounded-lg">/api/contact</code>
+        </div>
+        <h3 class="font-display font-bold text-lg text-text-dark">Enviar mensaje de contacto</h3>
+        <p class="font-sans text-sm text-text-dark/70">Envía un mensaje al equipo de S.I.R.E. a través del formulario de contacto público.</p>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Body (JSON):</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code10}</code></pre>
+        </div>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Response:</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code11}</code></pre>
+        </div>
+      </div>
+
+      <!-- 4.8 Solicitud de acceso médico -->
+      <div id="ep-access-request" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">POST</span>
+          <code class="font-mono text-sm bg-bg-light px-3 py-1.5 rounded-lg">/api/auth/access-requests</code>
+        </div>
+        <h3 class="font-display font-bold text-lg text-text-dark">Solicitar acceso como personal de salud</h3>
+        <p class="font-sans text-sm text-text-dark/70">Permite a médicos y personal de salud solicitar una cuenta para registrar pacientes en el sistema.</p>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Body (JSON):</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code12}</code></pre>
+        </div>
+
+        <div>
+          <p class="font-sans text-sm font-semibold text-text-dark mb-1">Response:</p>
+          <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code13}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. ENUMS / TIPOS COMPARTIDOS -->
+    <section id="enums" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+      <h2 class="font-display font-bold text-2xl text-text-dark flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-vzla-blue/10 flex items-center justify-center text-vzla-blue text-sm font-bold">5</span>
+        Tipos compartidos (Enums)
+      </h2>
+
+      <div>
+        <h3 class="font-display font-semibold text-lg text-text-dark mb-2">PatientStatus</h3>
+        <p class="font-sans text-sm text-text-dark/70 mb-2">Estados de salud de un paciente:</p>
+        <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code14}</code></pre>
+      </div>
+
+      <div>
+        <h3 class="font-display font-semibold text-lg text-text-dark mb-2">RegistrationSource</h3>
+        <p class="font-sans text-sm text-text-dark/70 mb-2">Fuente del registro del paciente:</p>
+        <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code15}</code></pre>
+      </div>
+
+      <div>
+        <h3 class="font-display font-semibold text-lg text-text-dark mb-2">Roles</h3>
+        <p class="font-sans text-sm text-text-dark/70 mb-2">Roles de usuario en el sistema:</p>
+        <pre class="bg-bg-light rounded-lg p-3 font-mono text-xs overflow-x-auto"><code>{code16}</code></pre>
+      </div>
+    </section>
+
+    <!-- 6. CÓDIGOS DE ERROR -->
+    <section id="codigos-error" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+      <h2 class="font-display font-bold text-2xl text-text-dark flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-vzla-blue/10 flex items-center justify-center text-vzla-blue text-sm font-bold">6</span>
+        Códigos de error
+      </h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm font-sans border-collapse">
+          <thead>
+            <tr class="bg-bg-light border-b border-border-subtle">
+              <th class="text-left py-2 px-3 font-semibold text-text-dark">Código</th>
+              <th class="text-left py-2 px-3 font-semibold text-text-dark">Significado</th>
+              <th class="text-left py-2 px-3 font-semibold text-text-dark">Qué hacer</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border-subtle">
+            <tr><td class="py-2 px-3 font-mono text-xs">200</td><td class="py-2 px-3">OK</td><td class="py-2 px-3">Todo bien</td></tr>
+            <tr><td class="py-2 px-3 font-mono text-xs">400</td><td class="py-2 px-3">Bad Request</td><td class="py-2 px-3">Revisa que los datos enviados sean válidos (formato, tipos, etc.)</td></tr>
+            <tr><td class="py-2 px-3 font-mono text-xs">404</td><td class="py-2 px-3">Not Found</td><td class="py-2 px-3">El recurso solicitado no existe</td></tr>
+            <tr><td class="py-2 px-3 font-mono text-xs">429</td><td class="py-2 px-3">Too Many Requests</td><td class="py-2 px-3">Espera antes de hacer más requests (rate limiting activo)</td></tr>
+            <tr><td class="py-2 px-3 font-mono text-xs">500</td><td class="py-2 px-3">Internal Server Error</td><td class="py-2 px-3">Error del servidor. Reporta el problema si persiste</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="bg-bg-light rounded-lg p-4">
+        <p class="font-sans text-sm font-semibold text-text-dark mb-1">Ejemplo de error de validación (400):</p>
+        <pre class="font-mono text-xs overflow-x-auto"><code>{code17}</code></pre>
+      </div>
+    </section>
+
+    <!-- 7. ENDPOINTS INTERNOS -->
+    <section id="endpoints-internos" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+      <h2 class="font-display font-bold text-2xl text-text-dark flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-vzla-blue/10 flex items-center justify-center text-vzla-blue text-sm font-bold">7</span>
+        Endpoints internos (con autenticación)
+      </h2>
+      <p class="font-sans text-sm text-text-dark/70">
+        Estos endpoints requieren autenticación (JWT) y permisos específicos. Se documentan aquí para 
+        desarrolladores que contribuyan al proyecto o tengan una cuenta autorizada.
+      </p>
+
+      <details class="text-sm font-sans">
+        <summary class="cursor-pointer text-vzla-blue font-medium">Ver tabla de endpoints internos</summary>
+        <div class="overflow-x-auto mt-3">
+          <table class="w-full text-sm font-sans border-collapse">
+            <thead>
+              <tr class="bg-bg-light border-b border-border-subtle">
+                <th class="text-left py-2 px-3 font-semibold">Método</th>
+                <th class="text-left py-2 px-3 font-semibold">Ruta</th>
+                <th class="text-left py-2 px-3 font-semibold">Roles</th>
+                <th class="text-left py-2 px-3 font-semibold">Descripción</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border-subtle">
+              <tr><td class="py-2 px-3 font-mono text-xs">POST</td><td class="py-2 px-3 font-mono text-xs">/api/medical/patients</td><td class="py-2 px-3">MEDICO</td><td class="py-2 px-3">Crear o actualizar paciente</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">GET</td><td class="py-2 px-3 font-mono text-xs">/api/medical/patients</td><td class="py-2 px-3">MEDICO</td><td class="py-2 px-3">Listar pacientes del médico (paginado)</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">GET</td><td class="py-2 px-3 font-mono text-xs">/api/medical/patients/search/:dni</td><td class="py-2 px-3">MEDICO, DIOS</td><td class="py-2 px-3">Buscador global por cédula</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">GET</td><td class="py-2 px-3 font-mono text-xs">/api/medical/patients/export</td><td class="py-2 px-3">MEDICO</td><td class="py-2 px-3">Exportar pacientes a Excel</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">GET</td><td class="py-2 px-3 font-mono text-xs">/api/medical/patients/:id/history</td><td class="py-2 px-3">MEDICO, DIOS</td><td class="py-2 px-3">Historial/bitácora del paciente</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">POST</td><td class="py-2 px-3 font-mono text-xs">/api/medical/patients/admin/bulk-import</td><td class="py-2 px-3">DIOS</td><td class="py-2 px-3">Importación masiva de pacientes</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">POST</td><td class="py-2 px-3 font-mono text-xs">/api/citizen/alerts</td><td class="py-2 px-3">Cualquier rol</td><td class="py-2 px-3">Crear alerta de seguimiento</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">GET</td><td class="py-2 px-3 font-mono text-xs">/api/citizen/alerts</td><td class="py-2 px-3">Cualquier rol</td><td class="py-2 px-3">Listar alertas del usuario</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">DELETE</td><td class="py-2 px-3 font-mono text-xs">/api/citizen/alerts/:id</td><td class="py-2 px-3">Cualquier rol</td><td class="py-2 px-3">Eliminar alerta</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">POST</td><td class="py-2 px-3 font-mono text-xs">/api/auth/register/citizen</td><td class="py-2 px-3">Público</td><td class="py-2 px-3">Registro de ciudadano</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">GET/POST</td><td class="py-2 px-3 font-mono text-xs">/api/config/medical-centers</td><td class="py-2 px-3">Permisos</td><td class="py-2 px-3">CRUD de centros médicos (panel admin)</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">GET/POST</td><td class="py-2 px-3 font-mono text-xs">/api/config/users</td><td class="py-2 px-3">Permisos</td><td class="py-2 px-3">CRUD de usuarios (panel admin)</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">GET/POST</td><td class="py-2 px-3 font-mono text-xs">/api/config/pages</td><td class="py-2 px-3">Permisos</td><td class="py-2 px-3">CRUD de páginas estáticas (panel admin)</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">GET/POST</td><td class="py-2 px-3 font-mono text-xs">/api/config/profiles</td><td class="py-2 px-3">Permisos</td><td class="py-2 px-3">CRUD de perfiles/roles (panel admin)</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">POST</td><td class="py-2 px-3 font-mono text-xs">/api/auth/access-requests/:id/approve</td><td class="py-2 px-3">DIOS</td><td class="py-2 px-3">Aprobar solicitud de acceso médico</td></tr>
+              <tr><td class="py-2 px-3 font-mono text-xs">POST</td><td class="py-2 px-3 font-mono text-xs">/api/auth/access-requests/:id/reject</td><td class="py-2 px-3">DIOS</td><td class="py-2 px-3">Rechazar solicitud de acceso médico</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- 8. CÓMO CONTRIBUIR -->
+    <section id="contribuir" class="bg-white border border-border-subtle rounded-2xl p-6 md:p-8 shadow-sm space-y-4">
+      <h2 class="font-display font-bold text-2xl text-text-dark flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-vzla-blue/10 flex items-center justify-center text-vzla-blue text-sm font-bold">8</span>
+        Cómo contribuir
+      </h2>
+
+      <div class="space-y-4">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-vzla-blue/10 flex items-center justify-center text-vzla-blue font-bold flex-shrink-0 mt-0.5">1</div>
+          <div>
+            <p class="font-sans font-semibold text-text-dark">Clona el repositorio</p>
+            <pre class="bg-bg-light rounded-lg p-2 font-mono text-xs overflow-x-auto mt-1"><code>git clone https://github.com/jyfhmr/s.i.r.e.git</code></pre>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-vzla-blue/10 flex items-center justify-center text-vzla-blue font-bold flex-shrink-0 mt-0.5">2</div>
+          <div>
+            <p class="font-sans font-semibold text-text-dark">Configura el backend</p>
+            <pre class="bg-bg-light rounded-lg p-2 font-mono text-xs overflow-x-auto mt-1"><code>cd backend
+npm install
+cp .env.example .env
+# Edita .env con tus credenciales MySQL locales
+npm run start:dev</code></pre>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-vzla-blue/10 flex items-center justify-center text-vzla-blue font-bold flex-shrink-0 mt-0.5">3</div>
+          <div>
+            <p class="font-sans font-semibold text-text-dark">Configura el frontend</p>
+            <pre class="bg-bg-light rounded-lg p-2 font-mono text-xs overflow-x-auto mt-1"><code>cd frontend
+npm install
+npm run dev</code></pre>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-vzla-blue/10 flex items-center justify-center text-vzla-blue font-bold flex-shrink-0 mt-0.5">4</div>
+          <div>
+            <p class="font-sans font-semibold text-text-dark">Arquitectura del proyecto</p>
+            <p class="font-sans text-sm text-text-dark/70 mt-1">
+              El proyecto está dividido en tres áreas:
+            </p>
+            <ul class="font-sans text-sm text-text-dark/70 list-disc list-inside mt-1 space-y-1">
+              <li><strong class="text-text-dark">/backend</strong> — API NestJS con TypeORM y MySQL</li>
+              <li><strong class="text-text-dark">/frontend</strong> — App Astro + Tailwind CSS</li>
+              <li><strong class="text-text-dark">/shared</strong> — Tipos, rutas e interfaces compartidas entre frontend y backend</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-vzla-blue/5 border border-vzla-blue/10 rounded-xl p-4 mt-4">
+        <p class="font-sans text-sm text-vzla-blue">
+          💡 <strong>Consejo:</strong> Si modificas o agregas un endpoint, actualiza tanto las rutas en 
+          <code class="bg-vzla-blue/10 px-1.5 py-0.5 rounded text-xs">/shared/core/*</code> como este 
+          documento de API. La fuente de verdad compartida permite que frontend y backend estén sincronizados.
+        </p>
+      </div>
+    </section>
 
     <!-- Botón de regreso -->
-    <div class="text-center pt-2">
+    <div class="text-center pt-4">
       <a 
         href="/" 
         class="inline-flex items-center gap-2 text-vzla-blue hover:text-vzla-blue-hover font-display font-semibold text-base transition-colors"
@@ -63,5 +655,18 @@ import Layout from '../layouts/Layout.astro';
       opacity: 1;
       transform: translateY(0);
     }
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  section[id] {
+    scroll-margin-top: 24px;
+  }
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
   }
 </style>

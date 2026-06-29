@@ -12,6 +12,9 @@ import { MedicalCentersModule } from './modules/config/medical-centers/medical-c
 import { PatientsModule } from './modules/medical/patients/patients.module';
 import { SearchModule } from './modules/public/search/search.module';
 import { ContactModule } from './modules/public/contact/contact.module';
+import { PublicPatientsModule } from './modules/public/patients/public-patients.module';
+import { PublicMedicalCentersModule } from './modules/public/medical-centers/public-medical-centers.module';
+import { PublicStatsModule } from './modules/public/stats/public-stats.module';
 import { AlertsModule } from './modules/citizen/alerts/alerts.module';
 import { AccessRequestsModule } from './modules/auth/access-requests/access-requests.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -72,6 +75,9 @@ import * as Joi from 'joi';
     PatientsModule,
     SearchModule,
     ContactModule,
+    PublicPatientsModule,
+    PublicMedicalCentersModule,
+    PublicStatsModule,
     AlertsModule,
     AccessRequestsModule,
     SocketModule,
