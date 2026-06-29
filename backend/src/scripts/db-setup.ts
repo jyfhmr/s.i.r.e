@@ -11,6 +11,7 @@ async function setupDatabase() {
   console.log('🚀 Iniciando la configuración de la base de datos...\n');
 
   try {
+    /* 
     // 1. Borrar la base de datos si existe
     console.log('🗑️  Eliminando la base de datos (si existe)...');
     await dropDatabase({
@@ -24,15 +25,16 @@ async function setupDatabase() {
       options: dbdatasource,
       initialDatabase: 'mysql',
     });
+    */
 
     // 3. Inicializar el DataSource
-    console.log('🔌 Conectando a la nueva base de datos...');
+    console.log('🔌 Conectando a la base de datos...');
     const dataSource = new DataSource(dbdatasource);
     await dataSource.initialize();
 
-    // 4. Sincronizar el esquema (Tablas)
-    console.log('🏗️  Sincronizando el esquema (Tablas)...');
-    await dataSource.synchronize();
+    // 4. Sincronizar el esquema (Tablas) - Limpiando primero
+    console.log('🏗️  Limpiando y sincronizando el esquema (Tablas)...');
+    await dataSource.synchronize(true); // true hace un DROP SCHEMA (borra tablas) y las vuelve a crear
 
     // 5. Correr los seeders
     console.log('🌱 Ejecutando Seeders y Factories...');

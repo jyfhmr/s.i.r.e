@@ -8,7 +8,7 @@ import { SeederOptions } from 'typeorm-extension';
 
 config();
 
-export const dbdatasource: DataSourceOptions & SeederOptions = {
+export const dbdatasource: any = {
   type: 'mysql',
   host: process.env.DB_HOST,
   port: +process.env.DB_PORT,
@@ -16,6 +16,8 @@ export const dbdatasource: DataSourceOptions & SeederOptions = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   synchronize: true,
+  charset: 'utf8mb4',
+  collation: 'utf8mb4_unicode_ci',
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
   migrations: ['src/database/migrations/**/*{.ts,.js}'],
   connectTimeout: 600000,
