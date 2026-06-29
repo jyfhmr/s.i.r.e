@@ -3,13 +3,54 @@ import Layout from '../layouts/Layout.astro';
 import SearchForm from '../components/SearchForm.astro';
 ---
 
-<Layout title="S.I.R.E. - Sistema de Información y Registro de Emergencias">
+<Layout 
+  title="S.I.R.E. - Sistema de Información y Registro de Emergencias (Venezuela)"
+  description="Buscador centralizado de pacientes y personas hospitalizadas en Venezuela tras los terremotos del 24 de junio de 2026. Localiza a tus allegados por su cédula de identidad."
+>
+  <!-- Marcado Estructurado JSON-LD (Schema.org) -->
+  <script type="application/ld+json" is:inline>
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://sire.gopharma.com.ve/#organization",
+          "name": "S.I.R.E. - Sistema de Información y Registro de Emergencias",
+          "url": "https://sire.gopharma.com.ve",
+          "logo": "https://sire.gopharma.com.ve/favicon.svg",
+          "description": "Plataforma ciudadana y de salud para la centralización y búsqueda de personas hospitalizadas en Venezuela tras terremotos y emergencias."
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://sire.gopharma.com.ve/#website",
+          "url": "https://sire.gopharma.com.ve",
+          "name": "S.I.R.E.",
+          "description": "Buscador de personas hospitalizadas tras emergencias en Venezuela",
+          "publisher": {
+            "@id": "https://sire.gopharma.com.ve/#organization"
+          },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://sire.gopharma.com.ve/?search={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+  </script>
+
   <div class="space-y-10">
     <!-- Hero Section -->
     <section class="text-center max-w-3xl mx-auto space-y-5">
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-vzla-blue/10 mb-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-vzla-blue">
-          <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-vzla-blue text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 mb-3" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="w-10 h-10">
+          <!-- Pin de localización en blanco para alto contraste -->
+          <path d="M16 2C10.5 2 6 6.5 6 12c0 5.25 10 18 10 18s10-12.75 10-18c0-5.5-4.5-10-10-10z" fill="#ffffff"/>
+          <!-- Cruz Médica en azul de S.I.R.E. -->
+          <path d="M15 8h2v3h3v2h-3v3h-2v-3h-3v-2h3V8z" fill="#0284C7"/>
         </svg>
       </div>
       

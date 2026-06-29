@@ -2,7 +2,10 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Sobre la Plataforma - S.I.R.E.">
+<Layout 
+  title="Sobre la Plataforma y Privacidad - S.I.R.E."
+  description="Conoce el origen, propósito y políticas de privacidad de S.I.R.E. centralizando el registro de afectados por el sismo de Venezuela del 24 de junio de 2026."
+>
   <div class="max-w-2xl mx-auto space-y-8 animate-fade-in">
     <!-- Título de la sección -->
     <div class="text-center space-y-2">
@@ -62,13 +65,27 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </section>
 
-      <section class="space-y-3 pt-4 border-t border-border-subtle/50">
+      <section class="space-y-4 pt-4 border-t border-border-subtle/50">
         <h2 class="font-display font-bold text-xl text-vzla-blue">
-          Privacidad y Seguridad
+          Políticas de Privacidad y Manejo Seguro de Datos (E-E-A-T)
         </h2>
         <p class="font-sans text-text-dark/75 leading-relaxed">
-          La privacidad de los pacientes es un derecho fundamental. Por ello, S.I.R.E. no permite listados públicos abiertos de pacientes ni búsquedas por nombres genéricos. La única forma de consultar la información de un paciente es ingresando su <strong>número de cédula o pasaporte exacto</strong>, previniendo la exposición pública innecesaria de datos médicos.
+          La privacidad de los pacientes es un derecho humano y médico fundamental. Como plataforma de asistencia en crisis bajo lineamientos YMYL (Your Money or Your Life), S.I.R.E. implementa estrictos controles para evitar el uso indebido de la información:
         </p>
+        <ul class="list-disc pl-5 space-y-2 text-sm text-text-dark/75 font-sans leading-relaxed">
+          <li>
+            <strong>Búsqueda Restringida:</strong> No existen listados públicos abiertos de pacientes ni búsquedas por nombres genéricos. La única forma de consultar la información es ingresando el <strong>número de cédula o pasaporte exacto</strong> de la persona buscada.
+          </li>
+          <li>
+            <strong>Acceso Médico Verificado:</strong> Solo los profesionales de la salud debidamente identificados y habilitados por nuestro equipo administrativo pueden registrar o actualizar la ficha clínica y el estado de los pacientes.
+          </li>
+          <li>
+            <strong>Temporalidad de los Datos:</strong> La información recopilada se mantiene de forma transitoria para mitigar la emergencia de localización tras los terremotos. No se archivan historiales de forma permanente una vez superada la fase de crisis.
+          </li>
+          <li>
+            <strong>Derecho de Supresión:</strong> En concordancia con los derechos de privacidad, cualquier paciente, familiar directo o representante legal puede solicitar la remoción inmediata o rectificación de un registro a través de nuestro <a href="/contact" class="text-vzla-blue hover:underline">formulario de contacto</a>.
+          </li>
+        </ul>
       </section>
     </div>
 

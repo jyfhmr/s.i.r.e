@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /sire-admin-portal
+
+Sitemap: https://sire.gopharma.com.ve/sitemap-index.xml
