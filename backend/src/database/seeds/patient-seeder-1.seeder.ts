@@ -298,7 +298,7 @@ export default class PatientSeeder1 implements Seeder {
       },
       {
         dni: '6691779',
-        fullName: 'RIVERO LOPEZ DANIEL ANΝΤΟΝΙΟ',
+        fullName: 'RIVERO LOPEZ DANIEL ANTONIO',
         currentStatus: PatientStatus.NO_ESPECIFICADO,
         manualLocation: hospitalDomingoLuciani,
         registrationSource: RegistrationSource.PUBLIC_LIST,

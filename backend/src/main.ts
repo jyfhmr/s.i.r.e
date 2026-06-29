@@ -2,6 +2,16 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { config } from 'dotenv';
+
+// 🔥 POLYFILL PARA HOSTING COMPARTIDO (Evitar WebAssembly OOM) 🔥
+if (typeof global.fetch === 'undefined') {
+  const nodeFetch = require('node-fetch');
+  global.fetch = nodeFetch;
+  global.Headers = nodeFetch.Headers;
+  global.Request = nodeFetch.Request;
+  global.Response = nodeFetch.Response;
+}
+
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { json, urlencoded } from 'express';
