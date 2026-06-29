@@ -20,7 +20,7 @@ import SearchForm from '../components/SearchForm.astro';
       <p class="font-sans text-base md:text-lg text-text-dark/70 leading-relaxed max-w-2xl mx-auto">
         Tras los <strong class="text-text-dark">terremotos del 24 de junio de 2026</strong> en Venezuela, S.I.R.E. recopila 
         las listas de pacientes publicadas por los hospitales y las centraliza en un solo sitio. 
-        <strong class="text-text-dark"> Busca por cédula</strong> a tu allegado y entérate de su paradero.
+        <strong class="text-text-dark"> valorBusca por cédula</strong> a tu allegado y entérate de su paradero.
       </p>
 
       <!-- Formulario de Búsqueda - visible de inmediato -->
@@ -90,7 +90,7 @@ import SearchForm from '../components/SearchForm.astro';
           </div>
           <h3 class="font-display font-bold text-xl text-text-dark">Sin resultados en este momento</h3>
           <p id="not-found-message" class="font-sans text-base text-text-dark/70 max-w-lg mx-auto leading-relaxed">
-            No hemos encontrado información sobre esta persona en nuestros registros hasta el momento.
+            No se encontraron registros de esta persona en el sistema. El equipo de S.I.R.E. revisa e inserta diariamente las listas publicadas por los hospitales, por lo que los datos se actualizan de forma constante. Si creas una cuenta gratuita y configuras una alerta, te notificaremos automáticamente por correo electrónico en cuanto esta persona sea registrada en el sistema.
           </p>
           
           <!-- CTA: Configurar alerta -->
@@ -344,6 +344,7 @@ Busca el paradero de un ser querido por su cédula o crea una Alerta de Seguimie
         const messageEl = document.getElementById('not-found-message');
         if (messageEl) messageEl.textContent = response.message;
         notFoundDiv.classList.remove('hidden');
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
 
@@ -387,6 +388,7 @@ Busca el paradero de un ser querido por su cédula o crea una Alerta de Seguimie
             </div>
           </div>
         `;
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } catch (error) {
       // Manejar errores

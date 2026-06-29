@@ -93,14 +93,14 @@ const isDevDocsActive = pathname.startsWith('/dev-docs');
 
 
 					<!-- Enlaces públicos de sesión (se ocultan si está logueado) -->
-					<div id="nav-guest-container" class="flex items-center gap-2 sm:gap-3">
-						<a href="/login" id="nav-login-link" class="px-3 sm:px-4 py-2 border border-vzla-blue/20 hover:border-vzla-blue/40 text-vzla-blue bg-vzla-blue/5 hover:bg-vzla-blue/10 rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs whitespace-nowrap">
-							Iniciar Sesión
-						</a>
-						<a href="/register" id="nav-register-btn" class="px-3 sm:px-4 py-2 bg-vzla-blue hover:bg-vzla-blue-hover text-white rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs whitespace-nowrap">
-							Registrarse
-						</a>
-					</div>
+				<div id="nav-guest-container" class="flex items-center gap-1.5 sm:gap-3">
+					<a href="/login" id="nav-login-link" class="px-2.5 sm:px-4 py-2 border border-vzla-blue/20 hover:border-vzla-blue/40 text-vzla-blue bg-vzla-blue/5 hover:bg-vzla-blue/10 rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs whitespace-nowrap">
+						<span class="sm:hidden">Ingresar</span><span class="hidden sm:inline">Iniciar Sesión</span>
+					</a>
+					<a href="/register" id="nav-register-btn" class="px-2.5 sm:px-4 py-2 bg-vzla-blue hover:bg-vzla-blue-hover text-white rounded-xl text-xs md:text-sm font-bold no-underline transition-all shadow-3xs whitespace-nowrap">
+						<span class="sm:hidden">Registrar</span><span class="hidden sm:inline">Registrarse</span>
+					</a>
+				</div>
 
 					<!-- Contenedor dinámico para usuario logueado (Con separación mejorada y estilo Premium) -->
 					<div id="nav-user-container" class="hidden flex items-center gap-3 sm:gap-4 font-sans text-xs md:text-sm">
