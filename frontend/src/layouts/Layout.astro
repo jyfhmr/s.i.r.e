@@ -3,9 +3,22 @@ import '../styles/global.css';
 
 interface Props {
 	title?: string;
+	description?: string;
+	noindex?: boolean;
+	canonicalURL?: string;
+	ogImage?: string;
 }
 
-const { title = "S.I.R.E. - Sistema de Información y Registro de Emergencias" } = Astro.props;
+const { 
+	title = "S.I.R.E. - Sistema de Información y Registro de Emergencias",
+	description = "Sistema de Información y Registro de Emergencias (S.I.R.E.). Buscador centralizado de pacientes hospitalizados en Venezuela tras los terremotos del 24 de junio de 2026. Localiza a tus allegados por su cédula.",
+	noindex = false,
+	canonicalURL = new URL(Astro.url.pathname, Astro.site || "https://sire.gopharma.com.ve").href,
+	ogImage = "/og-image.png"
+} = Astro.props;
+
+const absoluteOGImage = new URL(ogImage, Astro.site || "https://sire.gopharma.com.ve").href;
+
 const pathname = Astro.url.pathname;
 const isBuscarActive = pathname === '/' || pathname === '/index.html';
 const isInfoActive = pathname.startsWith('/info');
@@ -20,6 +33,29 @@ const isDevDocsActive = pathname.startsWith('/dev-docs');
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		
+		<!-- SEO Meta Tags -->
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalURL} />
+		{noindex ? (
+			<meta name="robots" content="noindex, nofollow" />
+		) : (
+			<meta name="robots" content="index, follow" />
+		)}
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={absoluteOGImage} />
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={canonicalURL} />
+		<meta property="twitter:title" content={title} />
+		<meta property="twitter:description" content={description} />
+		<meta property="twitter:image" content={absoluteOGImage} />
+		
 		<!-- Optimización de carga de fuentes de Google Fonts -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -28,8 +64,7 @@ const isDevDocsActive = pathname.startsWith('/dev-docs');
 			rel="stylesheet" 
 		/>
 		
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
+		<link rel="icon" type="image/svg+xml" href="/sire-white.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
@@ -53,8 +88,9 @@ const isDevDocsActive = pathname.startsWith('/dev-docs');
 						</svg>
 					</button>
 
-					<!-- Logo de solo texto -->
-					<a href="/" class="flex items-center gap-2 group no-underline text-inherit">
+					<!-- Logo con icono y texto -->
+					<a href="/" class="flex items-center gap-2 md:gap-2.5 group no-underline text-inherit">
+						<img src="/sire-white.svg" alt="Icono SIRE" class="w-6 h-6 md:w-7 md:h-7" />
 						<span class="font-display font-bold text-xl md:text-2xl tracking-tight text-vzla-blue hover:text-vzla-blue-hover transition-colors">
 							S.I.R.E.
 						</span>
@@ -136,7 +172,7 @@ const isDevDocsActive = pathname.startsWith('/dev-docs');
 					<!-- Cabecera panel -->
 					<div class="h-16 border-b border-border-subtle flex items-center justify-between px-6">
 						<a href="/" class="flex items-center gap-2 group no-underline text-inherit">
-							<span class="w-2 h-2 rounded-full bg-vzla-blue animate-pulse"></span>
+							<img src="/sire-white.svg" alt="Icono SIRE" class="w-5 h-5" />
 							<span class="font-display font-bold text-xl text-text-dark">S.I.R.E.</span>
 						</a>
 						<button 
