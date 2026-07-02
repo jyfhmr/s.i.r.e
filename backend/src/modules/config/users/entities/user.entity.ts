@@ -41,7 +41,7 @@ export class User implements IUser {
   @Column()
   fullName: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   dni: string;
 
   //campos para reiniciar password

@@ -49,7 +49,7 @@ export class RegisterCitizenUseCase {
         email: dto.email,
         password: hashedPassword,
         profile: citizenProfile,
-        dni: '', // Los ciudadanos no requieren DNI
+        dni: null, // Los ciudadanos no requieren DNI
         isActive: true,
       });
 

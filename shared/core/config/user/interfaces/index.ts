@@ -7,7 +7,7 @@ export interface IUser {
   fullName: string;
   email: string;
   password: string;
-  dni: string;
+  dni: string | null;
   isActive: boolean;
   resetToken?: string;
   resetTokenExpiration?: Date;
